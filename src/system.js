@@ -24,7 +24,10 @@ export function createSystem(onEvent){
  function addFlare(x,z,dx,dz,power,id=0){if(flares.length>=3)flares.shift();const len=Math.hypot(dx,dz)||1;flares.push({x,z,dx:dx/len,dz:dz/len,power,id,age:0,travel:0,hit:null});}
  function birth(x,z,hold,ids){const extras=bodies.filter(b=>b.extra);if(extras.length>=4){const old=extras[0];emit('dissolve',old.x,old.z,old.id,old.id2,old.r*2);bodies.splice(bodies.indexOf(old),1);}const roots=['Cal','Thal','Ari','Iri','Ner','Oph','Eli','Vel'],ends=['ion','essa','ara','une','ora','is','anthe'];const n=serial,b=make(roots[n%8]+ends[(n*3)%7],'Ink-born world',x,z,.17+.34*clamp((hold-.6)/2.4,0,1),ids[0],6);b.id2=ids[1]??ids[0];b.id3=ids[2]??b.id2;b.extra=b.key;b.hit=1;bodies.push(b);emit('birth',x,z,b.id,b.id2,b.r*2);return b;}
  function fling(b,vx,vz,tuning=0){b.vx=vx;b.vz=vz;b.tuning=tuning;b.comet=null;b.launched=0;emit('fling',b.x,b.z,b.id,b.id,b.r);}
- function gravity(b){const rr=Math.max(.5,b.x*b.x+b.z*b.z),u=-MU/(rr*Math.sqrt(rr));let ax=b.x*u,az=b.z*u;for(const o of bodies){if(o===b)continue;const x=o.x-b.x,z=o.z-b.z,d=x*x+z*z+.15,g=.055*o.r**3/(d*Math.sqrt(d));ax+=g*x;az+=g*z;}b.ax=ax;b.az=az;}
+ function gravity(b){const rr=Math.max(.5,b.x*b.x+b.z*b.z),u=-MU/(rr*Math.sqrt(rr));let ax=b.x*u,az=b.z*u;for(const o of bodies){if(o===b)continue;const x=o.x-b.x,z=o.z-b.z,d=x*x+z*z+.15,g=.055*o.r**3/(d*Math.sqrt(d));ax+=g*x;az+=g*z;}
+  const hole=s.blackHole?.hole;if(hole){const x=hole.x-b.x,z=hole.z-b.z,d=x*x+z*z+.17,g=.79/(d*Math.sqrt(d));ax+=g*x;az+=g*z;}
+  b.ax=ax;b.az=az;
+ }
  function substep(dt){for(const b of bodies){if(b.held||b.comet)continue;gravity(b);b.vx+=b.ax*dt*.5;b.vz+=b.az*dt*.5;const v=Math.hypot(b.vx,b.vz);if(v>9){b.vx*=9/v;b.vz*=9/v;}b.x+=dt*b.vx;b.z+=dt*b.vz;}
   for(const b of bodies){if(b.held)continue;let r=Math.hypot(b.x,b.z);if(b.comet){const c=b.comet;c.E+=dt*.48/(1-.54*Math.cos(c.E));const u=c.a*(Math.cos(c.E)-.54),v=c.a*Math.sqrt(1-.54**2)*Math.sin(c.E)*c.sign;const x=c.ca*u-c.sa*v,z=c.sa*u+c.ca*v;b.vx=(x-b.x)/dt;b.vz=(z-b.z)/dt;b.x=x;b.z=z;if(c.E>Math.PI*1.52){b.comet=null;b.launched=3;emit('return',x,z,b.id);}continue;}gravity(b);b.vx+=b.ax*dt*.5;b.vz+=b.az*dt*.5;
    if(b.tuning){

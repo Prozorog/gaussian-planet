@@ -16,13 +16,16 @@ const topics = {
 
 export const helpGroups = {
   Marble: [
-    ['1–6 · ink wells', 'Choose ink'], ['Click / drag', 'Drop ink / stir'],
+    ['1–7 · ink wells', 'Choose ink'], ['Click / drag', 'Drop ink / stir'],
     ['Shift + drag', 'Comb'], ['Hold still', 'Hold to birth'],
     ['Right drag / wheel', 'Orbit / zoom'], ['R', 'Reset the system'],
   ],
   Worlds: [
     ['Pull a planet', 'Fling a world'], ['Click a planet', 'Visit and ink its surface'],
     ['Hold the star', 'Aim a flare or hold for a supernova'], ['S', 'Solar print'],
+    ['7 / Void well', 'Hold empty ink for a second to form a black hole'],
+    ['Drag the black hole', 'Move it. Double-click with coloured ink to remove it.'],
+    ['Rekindle', 'Restore the star after a meal'],
   ],
   Drift: [
     ['D / double-click disc', 'Step inside'], ['Drag', 'Look around'], ['WASD / arrows', 'Float'],

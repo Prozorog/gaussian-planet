@@ -157,6 +157,10 @@ export function soundscape() {
       case 'escape':case 'return':case 'visit':tone(snap(action==='return'?52:64),.55,.16,'sine',0,snap(57));break;
       case 'dissolve':hiss(.65,1200,290,.34);break;
       case 'collapse':tone(snap(32),1,.42,'sine',0,snap(50));break;
+      case 'holeForm':tone(snap(31),1.3,.35,'sine',0,snap(50));hiss(.8,420,94,.27);break;
+      case 'stretch':hiss(.72,650,180,.34);tone(snap(38),.82,.23,'sine',0,snap(61));break;
+      case 'jets':hiss(1.15,1500,280,.26);break;
+      case 'evaporate':tone(snap(77),.68,.18,'sine',0,snap(55));break;
     }
   }
   function environment(heat, near=0, approach=0) {

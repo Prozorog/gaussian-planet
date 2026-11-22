@@ -1,5 +1,13 @@
 in vec3 local,world;uniform vec4 effect;uniform int eventType,first,second;uniform float age;out vec4 frag;
 void main(){vec2 p=local.xy;float r=length(p);if(r>1.35)discard;vec2 f=foldInk(p*3.6+effect.w,time*.27);float n=noise(f*2.),m=noise(f*5.7),a=atan(p.y,p.x);float v;int id=first;
+ if(eventType==4){
+   float filament=sin(p.x*41.+time*12.+.85*n+.49*m);
+   float shape=1.-abs(p.y-.18*n);
+   if(shape<.07+.18*p.x||p.x>1.)discard;
+   v=.30+.43*shape+.145*filament+.085*m;
+   vec3 col=engraved(v,filament>.5?id:second,.71*n+.24*m,1.);
+   frag=vec4(col,1.);return;
+ }
  if(eventType==3){float u=(r-effect.x)/(1.-effect.x);if(u<0.||u>1.)discard;
   float rim=max(1.-smoothstep(.0,fwidth(r)*1.4,abs(r-effect.x)),1.-smoothstep(.0,fwidth(r)*1.4,abs(r-1.)));
   float rib=lineAt(u*5.+.08*n,1.25);frag=vec4(ink(2,4.+floor(2.*sin(u*3.14159))+2.*rim),.16+.10*floor(2.9*sin(u*3.14159))+.43*max(rib,rim));return;}

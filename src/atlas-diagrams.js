@@ -137,9 +137,39 @@ export function diagram(canvas,id,s,c,a) {
     path(p,[[54,41],[64,31],[71,34],[75,42],[65,47],[61,52]],mint,1,'#469f76');
     dot(p,195,43,22,'#8cbae9');dot(p,195,43,16,'#d5f6fc');dot(p,195,43,22,'#fff1d0',false);
     type(p,73,82,'Earth',mint,'center');type(p,195,82,'White dwarf',gold,'center');
+  }else if(id===20){
+    const x=87,y=45,r=24;dot(p,x,y,r+2,gold,false);dot(p,x,y,r,'#020103');
+    path(p,[[x+2,y+9],[x+16,y+1],[x+21,y-9],[x+15,y-17]],rose,1.3);
+    path(p,[[x+15,y-12],[x+15,y-17],[x+20,y-15]],rose);
+    path(p,[[x+23,y+8],[135,56],[151,56]],faint);type(p,157,59,'Event horizon',gold);
+    type(p,154,31,'Escape path',rose);
+  }else if(id===21){
+    dot(p,141,45,18,'#030005');dot(p,141,45,23,gold,false);
+    for(const side of [-1,1]){
+      const ray=Array.from({length:45},(_,i)=>[14+i*5.7,45+side*(8+23*Math.exp(-(((i-22)/9)**2)))]);
+      path(p,ray,mint,1.2);
+    }
+    type(p,228,13,'Bent rays',mint,'center');type(p,141,84,'Einstein ring',gold,'center');
+  }else if(id===22){
+    const x=136,y=46,pulse=2*Math.sin(s.t*2);
+    for(let i=0;i<6;i++){
+      p.beginPath();p.ellipse(x,y,26+i*7,3+i*.55,0,0,TAU);
+      p.strokeStyle=[rose,'#ef9650',gold][i%3];p.stroke();
+    }
+    dot(p,x,y,16,'#030006');dot(p,x,y,17,gold,false);
+    for(const dir of [-1,1])path(p,[[x-3,y+dir*16],[x-5,y+dir*(36+pulse)],[x+4,y+dir*(37+pulse)],[x+3,y+dir*16]],mint,1,'#415278');
+    type(p,224,51,'Disc',gold);type(p,157,18,'Jet',mint);
+  }else if(id===23){
+    dot(p,229,44,20,'#030005');dot(p,229,44,22,gold,false);
+    const r=15+3*Math.sin(s.t*.65);
+    p.beginPath();p.ellipse(90,44,r+9,13,0,0,TAU);p.strokeStyle=mint;p.stroke();
+    for(const [x,w] of [[68,14],[91,29],[111,43]]){
+      path(p,[[x,44],[x+w,44],[x+w-4,41]],rose);path(p,[[x+w,44],[x+w-4,47]],rose);
+    }
+    type(p,45,73,'Far side',mint);type(p,128,73,'Near side',rose);
   }
 }
-export const illustrated=new Set([1,2,3,4,6,8,11,12,14,15,16,17,18,19]);
+export const illustrated=new Set([1,2,3,4,6,8,11,12,14,15,16,17,18,19,20,21,22,23]);
 
 function chimeLines(p,s,xy) {
   const note=s.spheres, dx=Math.cos(note.angle),dz=Math.sin(note.angle);
@@ -183,7 +213,7 @@ function chimeLines(p,s,xy) {
 export function chartOnSky(canvas,s,c,a,id,preview) {
   const wedges=(a.wedges||id===1)&&c.mode==='overview';
   const chimes=s.spheres?.on&&c.mode!=='poster';
-  const active=a.labels||wedges||id===6&&a.roche||preview||chimes;
+  const active=!s.blackHole?.fall&&(a.labels||wedges||id===6&&a.roche||preview||chimes);
   if(!active&&canvas.hidden)return;
   canvas.hidden=!active;if(!active)return;
   const w=canvas.clientWidth,h=canvas.clientHeight,dpr=Math.min(devicePixelRatio,2);
@@ -213,5 +243,13 @@ export function chartOnSky(canvas,s,c,a,id,preview) {
     path(p,[[axis(g.circular),sy-5],[axis(g.circular),sy+5]],mint);
     path(p,[[axis(g.escape),sy-5],[axis(g.escape),sy+5]],gold);
     type(p,sx,sy-11,'Launch',gold);type(p,sx,sy+20,'│ circular   │ escape',mint);
+  }
+  const hole=s.blackHole?.hole;
+  if(hole){
+    const [x,y,d]=xy(hole.x,hole.y,hole.z);
+    if(d>.05){
+      p.save();p.globalCompositeOperation='destination-out';
+      p.beginPath();p.arc(x,y,hole.r*h/(.6498394*d),0,TAU);p.fill();p.restore();
+    }
   }
 }
