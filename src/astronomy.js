@@ -27,14 +27,14 @@ function overlap(r,R,d){
 }
 export function transit(s,c) {
   const [u,v,depth]=c.project(0,0,0),dist=Math.hypot(...c.eye);
-  const radius=Math.asin(1/Math.max(1.001,dist));
+  const radius=Math.asin(Math.min(.999,(s.life?.starRadius??1)/Math.max(1.001,dist)));
   if(s.nova>=0||depth<=0||Math.abs(u)>1+1.74/depth||Math.abs(v)>1+3.08/depth)
     return {light:1,body:null,visible:false};
   let blocked=0,body=null;const silhouettes=[];
   const star=c.eye.map(x=>-x/dist);
   const azimuth=Math.atan2(star[0],star[2]),right=[Math.cos(azimuth),0,-Math.sin(azimuth)];
   const up=[-star[1]*Math.sin(azimuth),Math.hypot(star[0],star[2]),-star[1]*Math.cos(azimuth)];
-  for(const b of s.bodies){
+  for(const b of (s.sceneBodies??s.bodies)){
     const d=[b.x-c.eye[0],b.y-c.eye[1],b.z-c.eye[2]],len=Math.hypot(...d);
     if(len>=dist||len<=b.r)continue;
     const separation=Math.acos(clamp(d.reduce((a,k,i)=>a+k*star[i],0)/len,-1,1));
@@ -67,7 +67,7 @@ export function createAstronomy(s,c,discover) {
   let sampleAt=-1,flybys=new Map(),ellipseTime=new Map(),mean=0;
   const a={zone:false,labels:false,wedges:false,orbit:null,orbitBody:null,
     illustrative:true,mean:0,gauge:null,assist:null,roche:null,rider:null,vortex:null,
-    curve:[],lastDip:[],light:1,transiting:null,zoneRadii:()=>habitableZone(s.hue)};
+    curve:[],lastDip:[],light:1,transiting:null,zoneRadii:()=>habitableZone(s.hue).map(r=>r*(1+1.25*(s.life?.red??0)))};
   function selectOrbit(b,model=false) {
     a.orbitBody=b;
     const o=b&&elements(b);
@@ -100,7 +100,7 @@ export function createAstronomy(s,c,discover) {
     }
   }
   function updateFlybys(dt) {
-    for(const b of s.bodies){
+    for(const b of (s.sceneBodies??s.bodies)){
       if(b.launched<0||b.held||b.comet||b.launched>2.2){flybys.delete(b);ellipseTime.delete(b);continue;}
       const orbit=elements(b);
       if(orbit.e>.18&&orbit.e<.84&&orbit.a*(1-orbit.e)>1+b.r&&orbit.a*(1+orbit.e)<9.3){

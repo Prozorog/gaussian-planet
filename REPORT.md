@@ -354,3 +354,20 @@ The production build passed with `heavy npm run build`. The project’s existing
 - "Lightless Dawn" Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By Attribution 4.0. https://creativecommons.org/licenses/by/4.0/
 - "Echoes of Time v2" Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By Attribution 4.0. https://creativecommons.org/licenses/by/4.0/
 - "Ossuary 6 - Air" Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By Attribution 4.0. https://creativecommons.org/licenses/by/4.0/
+
+### Stage 2 · The life of the star
+
+- **Timeline** or **T** reveals five chapters and a continuous scrubber. **Play life** traversed the full range in 90.02 seconds in Chrome. The chapter buttons jump to each representative age. **Nebula print** shares the solar print shortcut. Chapter changes route the soundtrack and gate the three Today-only verbs, with a reason on each unavailable chip.
+- The young disc prints broken rings and gaps. Clumps condense while scrubbing toward Today. The red giant swells, moves whole bands of colour and injects outward velocity into the existing fluid. Ember and Verdance get separate swallowing events. I projected the other chapters from the live main-sequence bodies so scrubbing back restores their Today orbits. The nebula ray pass intersects four engraved shells at their own depths, with a different ink for each shell. The white dwarf leaves a small blue-white core and thin shell fragments.
+- Chrome exercised the button, **T**, the chapter buttons, a pointer scrub, a drop outside Today, the poster control, Drift, return and the full autoplay. Notes 17–19 were discovered and both swallowing events fired. The production build passed with zero page errors.
+
+| 1080p frame | Vivid among lit | Dark | Cream |
+|---|---:|---:|---:|
+| Young disc | 78.98% | 35.61% | 2.92% |
+| Today | 79.77% | 43.73% | 1.01% |
+| Red giant | 88.29% | 34.40% | 0.22% |
+| Planetary nebula, print | 69.44% | 33.49% | 2.02% |
+| White dwarf | 92.71% | 69.84% | 0.30% |
+
+- The red giant had 52.08% warm red and orange by the RGB check. The poster had 10.27% teal, 9.39% rose, 10.37% gold and 30.42% violet among lit pixels by the saturated-family checks. The white dwarf film frame had 0.21% cream after the disc had evolved through the other chapters.
+- [Young disc](output/playwright/phase4/s2-young.png) · [Today](output/playwright/phase4/s2-today.png) · [Red giant](output/playwright/phase4/s2-red.png) · [Swallowing Ember](output/playwright/phase4/s2-swallow.png) · [Nebula overview](output/playwright/phase4/s2-nebula.png) · [Nebula print](output/playwright/phase4/s2-poster.png) · [Nebula in Drift](output/playwright/phase4/s2-nebula-drift.png) · [White dwarf](output/playwright/phase4/s2-white.png) · [Six-frame film strip](output/playwright/phase4/s2-film-strip.png) · [Colour readings](output/playwright/phase4/s2-colour.json).

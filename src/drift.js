@@ -40,7 +40,7 @@ function dawnAngle(s,planet){
   if(!planet)return -.85;
   const phase=Math.atan2(planet.z,planet.x),sign=Math.sign(planet.x*planet.vz-planet.z*planet.vx)||1;
   const objects=clouds.slice(0,activeClouds(s.low)).map(b=>[b.pos,b.size]);
-  for(const b of s.bodies)objects.push([[b.x+2*b.vx,b.y,b.z+2*b.vz],[b.r,b.r,b.r]]);
+  for(const b of (s.sceneBodies??s.bodies))objects.push([[b.x+2*b.vx,b.y,b.z+2*b.vz],[b.r,b.r,b.r]]);
   let best=phase,minimum=Infinity;
   // Reserve an open sightline to the photosphere, even after the orbits evolve.
   for(const offset of [-.13,-.33,.52,-.60,.78,-.97,1.22,-1.58,2.22]){
@@ -86,7 +86,7 @@ export function createDrift(s,onMoment) {
     if(hide)d.hintUntil=0;
   }
   function enter(point) {
-    const b=s.bodies.find(b=>b.kind===3)??s.bodies[0];
+    const bodies=s.sceneBodies??s.bodies,b=bodies.find(b=>b.kind===3)??bodies[0];
     // Arrive on the trailing side. The planet continues along its orbit during the dive.
     const angle=dawnAngle(s,b);
     eye.splice(0,3,...(point?[point[0],.16,point[1]]:[5.55*Math.cos(angle),.16,5.55*Math.sin(angle)]));
@@ -119,7 +119,7 @@ export function createDrift(s,onMoment) {
   }
   function nearest() {
     let candidate=null,dist=Infinity;
-    for(const b of s.bodies){
+    for(const b of (s.sceneBodies??s.bodies)){
       const delta=Math.hypot(eye[0]-b.x,eye[1]-b.y,eye[2]-b.z)-b.r;
       if(delta<dist){candidate=b;dist=delta;}
     }
@@ -137,7 +137,7 @@ export function createDrift(s,onMoment) {
     }
     autoTime+=dt;
     const b=route.planet,rad=b?unit([b.x,0,b.z]):[0,0,1];
-    const pass=b&&s.bodies.includes(b)?[b.x+rad[0]*b.r*2.7,b.y+b.r*.9,b.z+rad[2]*b.r*2.7]:route.start;
+    const pass=b&&(s.sceneBodies??s.bodies).includes(b)?[b.x+rad[0]*b.r*2.7,b.y+b.r*.9,b.z+rad[2]*b.r*2.7]:route.start;
     const pts=[route.start,pass,route.island.pos,route.gate,route.sky],stage=autoTime/7;
     const i=Math.floor(stage)%pts.length,u=stage%1;
     const p=spline(pts[(i+4)%5],pts[i],pts[(i+1)%5],pts[(i+2)%5],u);
@@ -193,13 +193,13 @@ export function createDrift(s,onMoment) {
     nearest();
     if(flying){oldY=eye[1];return;}
     if(keys.size)d.lastInput=s.t;
-    if(d.ride&&!s.bodies.includes(d.ride))d.ride=null;
+    if(d.ride&&!(s.sceneBodies??s.bodies).includes(d.ride))d.ride=(s.sceneBodies??s.bodies).find(b=>b.key===d.ride.key)??null;
     if(keys.has('KeyF')&&!d.ride&&d.near&&d.nearestDistance<Math.max(1.55,d.near.r*3.2)){
       d.ride=d.near;rideAngle=.80;ridePan=[0,0];rideStart=[...eye];rideEntry=s.t;
       onMoment('ride',d.ride);
     }
     if(d.ride)ride(dt);else if(s.t-d.lastInput>=8)scenic(dt);else free(dt);
-    soften([0,0,0],1.70,dt,true);
+    const star=s.life?.starRadius??1;soften([0,0,0],star+.70,dt,true);
     if(d.near&&!d.ride)soften([d.near.x,d.near.y,d.near.z],d.near.r*1.23,dt,false);
     const r=Math.hypot(eye[0],eye[2]);
     if(r>14.8){eye[0]*=14.8/r;eye[2]*=14.8/r;}
@@ -214,8 +214,8 @@ export function createDrift(s,onMoment) {
       }
     }
     oldY=eye[1];const dist=Math.hypot(...eye);
-    d.heat=clamp((3.25-dist)/1.78,0,1);
-    if(dist<2.75&&!nearSun){nearSun=true;onMoment('nearSun');}else if(dist>3.2)nearSun=false;
+    d.heat=clamp((star+2.25-dist)/1.78,0,1);
+    if(dist<2.75&&!nearSun&&(!s.life||s.life.chapter===1)){nearSun=true;onMoment('nearSun');}else if(dist>3.2)nearSun=false;
     if(d.near&&d.nearestDistance<d.near.r*2.35&&currentPass!==d.near){
       currentPass=d.near;onMoment('pass',currentPass);
     }else if(d.nearestDistance>1.75)currentPass=null;

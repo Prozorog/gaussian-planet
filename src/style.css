@@ -8,3 +8,21 @@
 #credits ul{padding-left:14px;margin:8px 0 4px;overflow-wrap:anywhere;color:#d8cdd1;font-size:11px;line-height:1.5}
 #credits li+li{margin-top:6px}
 #credits a{color:#eec997}
+.chip.chapter-disabled{background:#1d1921;color:#b4a5ac;border-style:dashed;pointer-events:auto}
+.chip.chapter-disabled:before{background:#796e78;box-shadow:none}
+#timeline{position:absolute;z-index:3;top:3%;left:3%;width:min(58%,720px);padding:10px 14px 8px;border-radius:5px;border:1px solid #8b7069;background:#140f1af5;color:#efdcc3}
+.life-header{display:flex;align-items:center;gap:9px;font-size:11px}
+.life-header strong{font:italic 18px/1 Georgia,serif;color:#ffe8bb}
+.life-header span{color:#cdbab2}
+#timeline input{display:block;width:100%;height:13px;margin:6px 0}
+#timeline button{background:transparent;border:1px solid #8b70696e;border-radius:12px;padding:3px 7px;color:#efdcc3;font:11px system-ui,sans-serif;cursor:pointer}
+#timeline button:hover,#life-chapters button[aria-pressed=true]{border-color:#d5ac83;background:#39262c;color:#fff0d2}
+#life-chapters{display:grid;grid-template-columns:repeat(5,1fr);gap:4px}
+#life-chapters button{white-space:nowrap;border-color:transparent;text-align:center}
+#stage:has(#timeline:not([hidden])) #news{top:calc(3% + 99px)}
+@media(max-width:850px){
+  #timeline{top:calc(3% + 39px);width:94%;padding:6px 7px}
+  #timeline button,.life-header span{font-size:9px}
+  .life-header strong{font-size:14px}
+  #stage:has(#timeline:not([hidden])) #news{top:calc(3% + 116px)}
+}

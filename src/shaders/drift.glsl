@@ -104,13 +104,15 @@ void main(){
   float band=floor(clamp(v,0.,.999)*9.);
   float reveal=cloud?min(inside,clamp((dist-.026)/.091,0.,1.)):inside;
   float streamline=lineAt(thread,1.24*viewport.y/1080.);
-  if(coverage<.084||band>=ceil(9.*reveal))discard;
+  float openSpace=.084+life.z*.19+life.w*.26;
+  if(coverage<openSpace||band>=ceil(9.*reveal))discard;
   if(picking){
     float n=floor(min(dist,63.999)*262144.);
     frag=vec4(floor(n/65536.),mod(floor(n/256.),256.),mod(n,256.),float(surfaceID))/255.;return;
   }
   float steps=step(3.3,dist)+step(6.8,dist)+step(10.4,dist);
-  v=clamp(v-steps/9.-(!cloud&&abs(L)>1.5?.10:0.),.019,.969);
+  if(life.y>.49&&sin(p.x*.59+p.y*.18+poolPhase*.33-time*.23)>.02)id=0;
+  v=clamp(v-steps/9.-(!cloud&&abs(L)>1.5?.10:0.)-floor(life.w*4.)/9.,.019,.969);
   vec3 engravedInk=engraved(v,id,comb,1.);
   engravedInk=mix(engravedInk,ink(id,floor(v*9.)+2.),max(.70*streamline*near,seam*.58));
   vec3 col=pooled(engravedInk,id,poolPhase,cloud?.128:.124);

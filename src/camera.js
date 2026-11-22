@@ -6,7 +6,11 @@ export function createCamera(){
  function visit(mode,b=null){transition={start:now,eye:[...c.eye],aim:[...c.aim],shift:c.shift,inside:c.inside,duration:mode==='drift'||c.inside>0?2:1.2};c.flying=true;c.mode=mode;c.focus=b;c.portraitYaw=0;if(b){c.baseYaw=Math.atan2(b.x,b.z)+.93;c.arrival=now;}}
  function tick(t,dt,aspect,shake){now=t;c.aspect=aspect;const k=1-Math.exp(-dt*9);c.yaw+=(c.targetYaw-c.yaw)*k;c.pitch+=(c.targetPitch-c.pitch)*k;let pitch=c.pitch*DEG,yaw=c.yaw+.1745*Math.sin(t*Math.PI/20),dist=16/c.zoom,ax=0,ay=-.08,az=0,shift=-.07;
   if(c.mode==='planet'&&c.focus){const b=c.focus;yaw=c.baseYaw+c.portraitYaw+.023*(t-c.arrival);pitch=(c.pitch-22)*DEG;dist=b.r*5.14/c.zoom;ax=b.x;ay=b.y;az=b.z;shift=.085;}
-  if(c.mode==='poster'){yaw=.05;pitch=20*DEG;dist=3.24;ay=0;shift=-.99;}
+  if(c.mode==='poster'){
+    yaw=.05;pitch=20*DEG;ay=0;
+    if(c.nebulaPrint){yaw=.23;pitch=40*DEG;dist=18.1;shift=0;}
+    else{dist=3.24;shift=-.99;}
+  }
   const cp=Math.cos(pitch),bx=Math.sin(yaw)*cp,by=Math.sin(pitch),bz=Math.cos(yaw)*cp;let ex=ax+bx*dist,ey=ay+by*dist,ez=az+bz*dist;
   c.inside=c.mode==='drift'?1:0;
   if(c.mode==='drift'){[ex,ey,ez]=c.drift.position;const f=c.drift.forward;ax=ex+f[0]*3;ay=ey+f[1]*3;az=ez+f[2]*3;shift=0;}

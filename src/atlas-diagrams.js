@@ -117,9 +117,29 @@ export function diagram(canvas,id,s,c,a) {
       path(p,[[x+3,y],[x+3,y-11]],gold);dot(p,x,y,3.7,pigments[body.id]??mint);
       type(p,x,84,body.name.slice(0,10),gold,'center');
     });
+  }else if(id===17){
+    const x=83,y=44,r=6+Math.max(0,s.life.starRadius-1)*7.1;
+    for(const [i,rr] of [20,34,48].entries()){
+      p.setLineDash([3,2]);dot(p,x,y,rr,i===2?mint:faint,false);p.setLineDash([]);
+    }
+    sun(p,x,y,r,s.t);
+    type(p,151,31,'Swelling outer layers',gold);
+    type(p,151,57,'Inner orbits',rose);
+    path(p,[[x+r*.65,y-r*.65],[133,28],[147,28]],gold);
+  }else if(id===18){
+    const x=87,y=45;
+    p.save();p.translate(x,y);p.rotate(-.3);p.scale(1.45,.85);
+    for(const [i,col] of [mint,rose,gold,'#c599ed'].entries())dot(p,0,0,14+i*9+1.3*Math.sin(s.t*.45-i),col,false);
+    p.restore();dot(p,x,y,3,'#edfaff');
+    path(p,[[x+4,y],[137,36],[151,36]],faint);type(p,159,38,'Hot bare core',gold);type(p,159,59,'Expanding shells');
+  }else if(id===19){
+    dot(p,73,43,22,'#12677f');dot(p,73,43,22,mint,false);
+    path(p,[[54,41],[64,31],[71,34],[75,42],[65,47],[61,52]],mint,1,'#469f76');
+    dot(p,195,43,22,'#8cbae9');dot(p,195,43,16,'#d5f6fc');dot(p,195,43,22,'#fff1d0',false);
+    type(p,73,82,'Earth',mint,'center');type(p,195,82,'White dwarf',gold,'center');
   }
 }
-export const illustrated=new Set([1,2,3,4,6,8,11,12,14,15,16]);
+export const illustrated=new Set([1,2,3,4,6,8,11,12,14,15,16,17,18,19]);
 
 function chimeLines(p,s,xy) {
   const note=s.spheres, dx=Math.cos(note.angle),dz=Math.sin(note.angle);
@@ -128,7 +148,7 @@ function chimeLines(p,s,xy) {
     p.moveTo(a[0],a[1]);p.lineTo(b[0],b[1]);return true;
   }
   p.lineWidth=1.25;p.strokeStyle='#ffe4b5a6';p.beginPath();
-  for(let r=1.03;r<15.4;r+=.38){
+  for(let r=(s.life?.starRadius??1)+.04;r<15.4;r+=.38){
     segment(xy(dx*r,-.19,dz*r),xy(dx*(r+.38),-.19,dz*(r+.38)));
   }
   p.stroke();

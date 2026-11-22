@@ -3,6 +3,7 @@ uniform bool finePaper;
 uniform vec2 viewport;
 uniform float time,density;
 uniform vec4 sun;
+uniform vec4 life;
 const float TAU=6.28318530718;
 vec2 screen(){return (uv-.5)*vec2(viewport.x/viewport.y,1);}
 mat2 rot(float a){float c=cos(a),s=sin(a);return mat2(c,s,-s,c);}
