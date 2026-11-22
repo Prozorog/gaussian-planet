@@ -1,0 +1,9 @@
+in vec3 local,world;uniform vec4 effect;uniform int eventType,first,second;uniform float age;out vec4 frag;
+void main(){vec2 p=local.xy;float r=length(p);if(r>1.35)discard;vec2 f=foldInk(p*3.6+effect.w,time*.27);float n=noise(f*2.),m=noise(f*5.7),a=atan(p.y,p.x);float v;int id=first;
+ if(eventType==3){float u=(r-effect.x)/(1.-effect.x);if(u<0.||u>1.)discard;
+  float rim=max(1.-smoothstep(.0,fwidth(r)*1.4,abs(r-effect.x)),1.-smoothstep(.0,fwidth(r)*1.4,abs(r-1.)));
+  float rib=lineAt(u*5.+.08*n,1.25);frag=vec4(ink(2,4.+floor(2.*sin(u*3.14159))+2.*rim),.16+.10*floor(2.9*sin(u*3.14159))+.43*max(rib,rim));return;}
+ if(eventType==0){vec2 dir=effect.xy;float along=dot(p,dir),lat=dot(p,vec2(-dir.y,dir.x));float t=.5+.5*along;float w=effect.z*(.26+.85*t)+.018*n;lat+=w*.55*sin(t*12.-time*3.6)+w*n*.54;v=1.07-abs(lat)/max(.004,w)-max(0.,along-.53)*4.-max(0.,-along-.69)*3.+.15*m;if(v<.04)discard;}
+ else if(eventType==2){float edge=.72+.062*n+.035*m;float delta=abs(r-edge);v=1.-delta/.19+.14*sin(a*13.+r*18.)+.10*m;if(v<.05)discard;if(sin(a*5.+n*3.+age*1.7)>.25)id=second;}
+ else{float arms=.14*sin(a*9.+n*3.)+.10*sin(a*17.+m*2.);float shell=.54+arms+.13*n;v=.92-abs(r-shell)*4.+.20*m+.13*sin(r*41.+a*3.);if(v<.02)discard;if(sin(a*3.+r*12.+n*4.)>.10)id=second;}
+ vec3 col=engraved(v,id,.51*m+.4*n,1.);if(eventType==0&&v>1.)col=vec3(1.,.96,.75);frag=vec4(col,1.-smoothstep(eventType==2?4.:1.35,eventType==2?5.1:2.35,age));}

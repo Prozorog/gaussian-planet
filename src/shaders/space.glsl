@@ -1,0 +1,2 @@
+uniform vec3 right,up,back;uniform vec2 shift;out vec4 frag;
+void main(){vec2 p=uv*2.-1.-shift;vec3 d=normalize(-back+.32492*(right*p.x*viewport.x/viewport.y+up*p.y));vec2 q=d.xz*3.6+d.y*vec2(6.,-3.);vec2 f=q+.48*noise2(q*1.42);float v=noise(f*.92)+.31*noise(f*3.7)+.10*noise(f*10.);float l=lineAt(v*8.,1.);vec3 c=v<-.29?vec3(.020,.014,.039):v<.22?vec3(.033,.019,.047):vec3(.050,.021,.045);frag=vec4(c+l*vec3(.034,.015,.031),1.);}
