@@ -1,7 +1,16 @@
 in vec3 local,world;uniform sampler2D plate;uniform vec4 bodies[10],bodyInk[10];uniform int count,layer,starHue;uniform float epoch,guides,vortexAge;uniform vec2 vortex;uniform bool probe;out vec4 frag;
 uniform float inside;
+uniform vec3 eye;
 int family(float n){float u=fract(n);return u<.24?4:u<.49?5:u<.75?3:u<.968?2:6;}
-void main(){vec2 p=world.xz;float rr=length(p);if(rr>15.5)discard;vec2 coord=p/32.+.5;vec4 paint=texture(plate,coord),d=texture(dye,coord);vec2 flow=texture(velocity,coord).rg;vec2 w=p+paint.rg-d.ba*24.-flow*.61;float L=float(layer),t=time*.10;w+=L*vec2(.22,-.26);w=rot(.17*epoch+.032*sin(t*.22))*w;
+void main(){vec2 p=world.xz;float rr=length(p);if(rr>15.5||(!probe&&swimmerOpening(world)))discard;
+ if(!probe){
+   float angle=abs(world.y-eye.y)/max(.01,distance(world,eye));
+   if(angle<.10){
+     vec2 coast=p*1.7+.65*noise2(p*.73+float(layer));
+     float tongue=.5+.25*sin(coast.x*3.8)+.25*sin(coast.y*4.3+.73*noise(coast));
+     if(tongue<.98*(1.-smoothstep(.018,.10,angle)))discard;
+   }
+ }vec2 coord=p/32.+.5;vec4 paint=texture(plate,coord),d=texture(dye,coord);vec2 flow=texture(velocity,coord).rg;vec2 w=p+paint.rg-d.ba*24.-flow*.61;float L=float(layer),t=time*.10;w+=L*vec2(.22,-.26);w=rot(.17*epoch+.032*sin(t*.22))*w;
  if(vortexAge>0.){vec2 delta=p-vortex;float h=exp(-dot(delta,delta)/(.36+vortexAge*.32));w+=rot(h*(vortexAge*3.3+1.2))*delta-delta;}
  vec2 q=w*.65+.42*noise2(w*.47+vec2(t*.028,epoch));q=roll(q+vec2(1.22,-.47),3.8);vec2 f=foldInk(q*.92+vec2(epoch*.62,t*.036),t);float a=atan(w.y,w.x),r=length(w);float spiral=a*2.+r*.91+1.16*noise(f*.68)+.46*noise(f*1.8)+L*.69;float ridge=.52+.37*sin(spiral)+.16*sin(spiral*2.1+.63*noise(f*2.));float island=noise(roll(f*4.6+.45*noise2(f*8.),4.));float val=ridge+.27*noise(f*1.77)+.116*island+.045*noise(f*14.)-.23-max(0.,r-9.2)*.18;float hue=a/TAU+r*.097+.115*noise(f*1.2)+L*.064+epoch*.13;int id=r<2.45+.56*noise(f)?0:family(hue);float comb=.54*noise(f*3.)+.23*island+.33*noise(q*8.5-d.ba*18.);
  val-=.07+max(0.,r-8.3)*.085+.45*(1.-smoothstep(1.85,3.1,rr));

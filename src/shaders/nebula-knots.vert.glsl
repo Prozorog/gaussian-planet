@@ -21,8 +21,8 @@ void main(){
   vec3 across=normalize(cross(direction,eye-root)+vec3(.00001));
   float lift=.24+.94*pow(rand(serial*.81),2.0);
   vec3 p=root+direction*(uv.x-.25)*lift;
-  p+=across*(uv.y-.5)*(.031+.084*rand(serial*4.2))*(1.-.19*uv.x);
+  p+=across*(uv.y-.5)*(.019+.049*rand(serial*4.2))*(1.-.19*uv.x);
   p+=across*.012*sin(time*.7+serial+uv.x*3.2);
-  pigment=layer<.5?3:layer<1.5?6:layer<2.5?4:5;
+  pigment=layer<.5?3:layer<1.5?4:layer<2.5?6:5;
   gl_Position=vp*vec4(p,1.);
 }

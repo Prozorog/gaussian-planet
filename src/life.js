@@ -24,7 +24,7 @@ export function createLife(s, discover, change) {
     life.expansion=1+.43*smooth(1,2.97,value)+.10*life.white;
     life.starRadius=value<1?mix(.42,1,smooth(.1,1,value))
       : value<2?mix(1,3.64,smooth(1,2,value))
-      : value<3?mix(3.64,.19,smooth(2.04,2.9,value)):.19+.035*life.white;
+      : value<3?mix(3.64,.19,smooth(2.04,2.9,value)):mix(.19,.017,life.white);
   }
   function set(value, announce=true) {
     const old=life.value, previous=life.chapter;

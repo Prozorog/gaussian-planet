@@ -661,3 +661,44 @@ Chrome checked all three mode buttons and help panels, the camera during a switc
 
 [Picker after Begin](output/playwright/phase42/s2-picker.png) · [Drift](output/playwright/phase42/s2-drift.png) · [Bench](output/playwright/phase42/s2-bench.png) · [Top right](output/playwright/phase42/s2-top.png) · [Mid-flight](output/playwright/phase42/s2-switch.png) · [Completed film](output/playwright/phase42/s2-completed.png) · [Control checks](output/playwright/phase42/s2-controls.json).
 
+### Stage 3 · Shells, sheets and silhouettes
+
+The old nebula’s changing mesh radius and independent tilts made its edges curl into overlapping ribbons. Four smooth concentric ellipsoids now carry the colour, from teal through rose and gold to violet. Each membrane has a bright grazing rim, a translucent engraved face and open gaps. The renderer orders the near and far walls according to which shells contain the eye. The radial knots remain visible between layers. In the white-dwarf chapter the shells disperse into sparse wisps.
+
+The 1920 × 1080 nebula print measured **62.49% vivid among lit pixels, 34.08% dark and 1.36% cream**. Teal, rose, gold and violet accounted for 10.14%, 13.05%, 11.88% and 18.58% of lit pixels. All poster colour targets passed. The side camera was 0.13 units above the disc at a distance of 21.2 units. The inside camera was between the inner shells. [Above](output/playwright/phase42/s3-nebula-above.png) · [Side](output/playwright/phase42/s3-nebula-side.png) · [Inside](output/playwright/phase42/s3-nebula-inside.png) · [Colour and camera readings](output/playwright/phase42/s3-looks.json).
+
+| Repair | Result at 1920 × 1080 |
+| --- | --- |
+| Near-sheet detail | World-space curls and smaller islands now alter both the pigment steps and the engraved lines. At eye height −0.02 above the −0.32 sheet, the longest horizontal run of lit pixels without a 10-level RGB edge was **173 px**. The 99th percentile was 16 px. [Native-resolution frame](output/playwright/phase42/s3-near-sheet.png) |
+| Edge-on sheets | A folded coastline breaks the distant ink into tongues. In the eye-level test, a shader tag identified 1,961 visible sheet pixels at angles under 3°. Their longest unbroken horizontal run was **138 px**, against a 640 px ceiling. The overview plates also lose their hard edge at grazing angles. [Eye level](output/playwright/phase42/s3-eye-level.png) · [Tagged-fragment reading](output/playwright/phase42/s3-grazing.json) |
+| White dwarf | The cooling core shrinks in world units, with a screen-height cap and thin crossed rays. The bright central feature measured **6 px**, or 0.56% of the frame height, in the chapter capture. [White dwarf](output/playwright/phase42/s3-dwarf.png) · [Pixel readings](output/playwright/phase42/s3-detail.json) |
+| Leviathans | I widened the outer fins and extended the travelling tail. The ink opens around the swimmer’s body and wing tips. Sable, Opal and Cinder each show both wings and their tapering tails in the overhead portraits. [Three overhead views](output/playwright/phase42/s3-swimmers.png) |
+
+The look captures use controlled viewpoints in the live renderer. The three swimmer portraits share one simulation instant. A second Sun Dive frame check after the Drift shading changes measured 21.97–49.59% dark pixels, minimum subject visibility 82.42%, minimum sheet clearance 0.50, median turn 2.29°/s and 95th percentile 9.10°/s. There were zero stopped frames or crossings. [Final film strip](output/playwright/phase42/s3-film-sun-strip.png) · [Frame measurements](output/playwright/phase42/s3-film-sun.json).
+
+Pausing the film now freezes the simulation clock. An Ember pause held both the camera and projected world positions stationary while the transport faded after three seconds. The 90-second idle timer includes Bench portraits and interior or riding views in Drift. Chrome verified idle playback from the solar print. The Stage 3 production build passed. [Pause and idle check](output/playwright/phase42/s3-pause.json).
+
+### 1080p performance
+
+Each reading counts application frames over approximately 2.1 seconds. I measured the released picker first, then enabled the withheld Grand Tour only in the benchmark tab to measure the **C hero pass** at 5.35 Ember radii. The nebula reading uses manual Drift between the shells.
+
+| Scene | RTX 4070 Laptop · High | Iris Xe · Low |
+| --- | ---: | ---: |
+| Ember hero pass | 144.47 fps | 56.15 fps |
+| Voyage picker over the live system | 144.21 fps | 65.33 fps |
+| Inside the nebula | 144.30 fps | 80.92 fps |
+
+High reported `ANGLE (NVIDIA, NVIDIA GeForce RTX 4070 Laptop GPU (0x00002860) Direct3D11 vs_5_0 ps_5_0, D3D11)`. Low reported `ANGLE (Intel, Intel(R) Iris(R) Xe Graphics (0x000046A6) Direct3D11 vs_5_0 ps_5_0, D3D11)`. Both ran with the reduced-motion preference enabled. [High readings](output/playwright/phase42/s3-perf-high.json) · [Low readings](output/playwright/phase42/s3-perf-low.json).
+
+### Five minutes from Begin
+
+The final playthrough ran for 300.021 seconds in real time with zero page errors. It started at Begin, watched Sun Dive through the return to the picker, took the helm on the next film, and visited Drift, Bench and Voyage. It also exercised ink, contextual help, Atlas, the nebula and white dwarf chapters, Postcard, the picker timeout and the keyboard helm. [Timestamped play log](output/playwright/phase42/s3-play.json).
+
+### NOT done / still weak
+
+- **Six cuts were removed.** Only Sun Dive met the release gate. The picker and the 10-second and 90-second starts therefore play a finite film. The requested random, continuous Endless voyage did not ship.
+- Grand Tour reached the requested height on all five worlds, but lost its subject at 27 seconds. Ring Run’s storm pass fell below the dark-share and visibility thresholds. The Life of a Star still lost the core behind the gas. Leviathan Song’s 95th-percentile turn was 18.1°/s. Into the Dark lost much of its horizon on the transfer to the rise. Endless lost a subject off screen.
+- The film begins at its authored opening pose. The mode buttons interpolate the camera, and taking the helm preserves its pose. The startup pose can still differ from the one a player occupied immediately before starting a film.
+- The caption gate checks projected framing and a short settling time. It does not measure occlusion every animation frame. The instrumented audit measures obscuration at three-second intervals, and orbital alignments vary in a system the player has edited.
+- The face lace remains visible most clearly from inside. Its exact open-area fraction was not measured. The horizontal edge and streak readings cover the recorded viewpoints. The near-sheet reading is a one-dimensional contrast measure, and it excludes unlit sky.
+

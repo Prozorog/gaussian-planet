@@ -43,6 +43,23 @@ vec3 engraved(float v,int id,float comb,float richness){
  float etch=lineAt(v*9.*(k<3.?4.:3.)*density+comb,1.18);float hair=lineAt((v*32.+comb*.65)*density+.41,.98);
  return mix(base,light,max(contour,max(etch*.84,hair*.48*richness)));
 }
+uniform vec4 swimmersInInk[3];
+uniform vec2 swimmerHeading[3];
+// The surface opens around a swimmer's lifted fins and closes behind its tail.
+bool swimmerOpening(vec3 world){
+  for(int i=0;i<3;i++){
+    vec4 b=swimmersInInk[i];
+    if(b.w<=0.||abs(world.y-b.y)>1.05)continue;
+    vec2 d=(world.xz-b.xz)/b.w;
+    if(dot(d,d)>3.8)continue;
+    vec2 f=swimmerHeading[i];
+    float z=dot(d,f),x=abs(dot(d,vec2(f.y,-f.x)));
+    float spread=1.56*exp(-pow((z+.29)/.63,2.));
+    float tail=.20*(1.-smoothstep(1.3,1.80,-z));
+    if(z> -1.82&&z<.77&&x<max(spread,tail)+.035*noise(d*7.))return true;
+  }
+  return false;
+}
 float hash(vec2 p){vec3 a=fract(p.xyx*vec3(.1031,.1030,.0973));a+=dot(a,a.yzx+33.33);return fract((a.x+a.y)*a.z);}
 // Dark ink collects alongside a folded contour. Drop this family when the
 // projected trough is too narrow to resolve, just as for the engraved lines.

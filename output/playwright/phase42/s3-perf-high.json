@@ -1,0 +1,59 @@
+{
+  "picker": {
+    "fps": 144.21,
+    "seconds": 2.1011,
+    "frames": 303,
+    "eye": [
+      1.5836645162498801,
+      9.312430437273493,
+      15.181427124160134
+    ],
+    "mode": "voyage",
+    "move": null,
+    "gpu": "ANGLE (NVIDIA, NVIDIA GeForce RTX 4070 Laptop GPU (0x00002860) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "low": false,
+    "size": [
+      1920,
+      1080
+    ]
+  },
+  "hero": {
+    "fps": 144.47,
+    "seconds": 2.104299999988078,
+    "frames": 304,
+    "eye": [
+      2.265576340758385,
+      0.18,
+      -0.5370938548727993
+    ],
+    "mode": "voyage",
+    "move": 2,
+    "gpu": "ANGLE (NVIDIA, NVIDIA GeForce RTX 4070 Laptop GPU (0x00002860) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "low": false,
+    "size": [
+      1920,
+      1080
+    ],
+    "subject": "Ember",
+    "radii": 5.345892166720069
+  },
+  "nebula": {
+    "fps": 144.3,
+    "seconds": 2.106699999988079,
+    "frames": 304,
+    "eye": [
+      4.823461259998541,
+      0.16702048143043835,
+      -2.884393021003638
+    ],
+    "mode": "drift",
+    "move": null,
+    "gpu": "ANGLE (NVIDIA, NVIDIA GeForce RTX 4070 Laptop GPU (0x00002860) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "low": false,
+    "size": [
+      1920,
+      1080
+    ]
+  },
+  "errors": []
+}

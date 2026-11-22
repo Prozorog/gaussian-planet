@@ -15,6 +15,7 @@ export function bindVoyage(s,c,{begin,helm,picker,canIdle}) {
   const idle=$('voyage-idle'),cinema=$('voyage-cinema'),pause=$('voyage-pause');
   const title=document.createElement('strong'),fact=document.createElement('span');caption.replaceChildren(title,fact);
   let highlight=defaultVoyage;
+  let lastActivity=performance.now();
   let flight=null,lastInput=s.t,markUntil=0,captionStart=-10;
   idle.checked=saved.idle!==false;cinema.checked=saved.cinema!==false;
   function save() {
@@ -25,7 +26,7 @@ export function bindVoyage(s,c,{begin,helm,picker,canIdle}) {
   cinema.onchange=()=>{syncBars();save();};
   idle.onchange=save;
   function activity(){
-    lastInput=s.t;
+    lastInput=s.t;lastActivity=performance.now();
     stage.classList.remove('voyage-quiet');
   }
   function close(){
@@ -96,9 +97,7 @@ export function bindVoyage(s,c,{begin,helm,picker,canIdle}) {
     if(flight||!canIdle())return;
     if(!list.hidden){if(s.t-lastInput>=10)start(highlight);return;}
     if(!idle.checked)return;
-    if(c.mode==='overview'&&!c.flying&&s.t-lastInput>=90)start(defaultVoyage);
-    if(c.mode==='drift'&&!c.flying&&!c.drift.ride&&!s.worlds.body&&
-      s.t-Math.max(c.drift.lastInput,lastInput)>=90)start(defaultVoyage);
+    if(!c.flying&&['bench','drift'].includes(stage.dataset.mode)&&s.t-lastInput>=90)start(defaultVoyage);
   }
   button.onclick=toggle;$('voyage-prev').onclick=()=>skip(-1);
   $('voyage-next').onclick=()=>skip(1);pause.onclick=togglePause;
@@ -108,7 +107,7 @@ export function bindVoyage(s,c,{begin,helm,picker,canIdle}) {
     updateAge(dt){flight?.updateAge(dt);},
     tick(dt){
       if(!flight)return;
-      stage.classList.toggle('voyage-quiet',s.t-lastInput>3&&list.hidden&&canIdle());
+      stage.classList.toggle('voyage-quiet',performance.now()-lastActivity>3000&&list.hidden&&canIdle());
       const subject=subjectOf(s,flight.shot.subject);
       if(captionStart<0&&subject&&flight.shotTime>1.1){
         const [x,y,z]=c.project(subject.x,subject.y,subject.z);
@@ -126,7 +125,7 @@ export function bindVoyage(s,c,{begin,helm,picker,canIdle}) {
     look(dx,dy){flight?.look(dx,dy);activity();},
     endLook(){flight?.endLook();},
     discovered(){markUntil=s.t+2.8;},
-    get active(){return !!flight;},get open(){return !list.hidden;},
+    get paused(){return flight?.paused??false;},get active(){return !!flight;},get open(){return !list.hidden;},
     get shot(){return flight?.shot;},
     state(){return {name:flight?.definition.name??null,id:flight?.definition.id??null,shot:flight?.index??null,
       elapsed:flight?.elapsed??0,paused:flight?.paused??false,caption:caption.classList.contains('visible')?caption.textContent:'',

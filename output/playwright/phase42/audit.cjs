@@ -1,9 +1,13 @@
 const {browser,pageFor,png,write}=require('./lab.cjs');
+const prefix=process.env.GP42_EVIDENCE_PREFIX||'s1';
 const durations={grand:120,sun:70,rings:70,life:150,song:70,dark:60,endless:150};
 (async()=>{const b=await browser(false);try{
  for(const id of process.argv.slice(2).length?process.argv.slice(2):Object.keys(durations)){
  const {page,errors}=await pageFor(b,true,{width:960,height:540});
  const result=await page.evaluate(async([id,duration])=>{
+ const imported=performance.getEntriesByType('resource').find(x=>/\/src\/voyage\.js(?:\?|$)/.test(x.name));
+ const programme=await import(imported.name);
+ if(!programme.voyages.some(v=>v.id===id))programme.voyages.push(programme.directors.find(v=>v.id===id));
  const {s,c,voyage}=lab, canvas=document.querySelector('#sky');
  const {subjectOf}=await import('/src/voyage.js');
  const {clouds,sheetHeights,activeClouds}=await import('/src/drift.js');
@@ -54,9 +58,9 @@ const durations={grand:120,sun:70,rings:70,life:150,song:70,dark:60,endless:150}
  Math.random=old;turn.sort((a,b)=>a-b);
  return {samples,zero,crossings,minSheet,hero,median:turn[Math.floor(turn.length*.5)],p95:turn[Math.floor(turn.length*.95)],strip:strip.toDataURL(),still,captures};
  },[id,durations[id]]);
- const {strip,still,...data}=result;png('s1-'+id+'-strip',strip);
+ const {strip,still,...data}=result;png(prefix+'-'+id+'-strip',strip);
  require('fs').writeFileSync(require('path').join(__dirname,id+'.webp'),Buffer.from(still.split(',')[1],'base64'));
- write('s1-'+id,{...data,errors});console.log(id,'dark',Math.min(...data.samples.map(x=>x.dark)).toFixed(2),Math.max(...data.samples.map(x=>x.dark)).toFixed(2),'vis',Math.min(...data.samples.map(x=>x.vis)).toFixed(2),'sheet',data.minSheet.toFixed(2),'turn',data.median.toFixed(2),data.p95.toFixed(2),'zero',data.zero,'crossings',data.crossings,JSON.stringify(data.hero),errors);
+ write(prefix+'-'+id,{...data,errors});console.log(id,'dark',Math.min(...data.samples.map(x=>x.dark)).toFixed(2),Math.max(...data.samples.map(x=>x.dark)).toFixed(2),'vis',Math.min(...data.samples.map(x=>x.vis)).toFixed(2),'sheet',data.minSheet.toFixed(2),'turn',data.median.toFixed(2),data.p95.toFixed(2),'zero',data.zero,'crossings',data.crossings,JSON.stringify(data.hero),errors);
  await page.close();
  }
 }finally{await b.close()}})().catch(e=>{console.error(e);process.exitCode=1});

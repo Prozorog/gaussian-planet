@@ -16,7 +16,7 @@ export function createCamera(){
   if(c.mode==='planet'&&c.focus){const b=c.focus;yaw=c.baseYaw+c.portraitYaw+.023*(t-c.arrival);pitch=(c.pitch-22)*DEG;dist=b.r*5.14/c.zoom;ax=b.x;ay=b.y;az=b.z;shift=.085;}
   if(c.mode==='poster'){
     yaw=.05;pitch=20*DEG;ay=0;
-    if(c.nebulaPrint){yaw=.25;pitch=58*DEG;dist=21.6;shift=0;}
+    if(c.nebulaPrint){yaw=.25;pitch=58*DEG;dist=18.0;shift=0;}
     else{dist=3.24;shift=-.99;}
   }
   const cp=Math.cos(pitch),bx=Math.sin(yaw)*cp,by=Math.sin(pitch),bz=Math.cos(yaw)*cp;let ex=ax+bx*dist,ey=ay+by*dist,ez=az+bz*dist;

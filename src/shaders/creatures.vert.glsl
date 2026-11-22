@@ -26,6 +26,8 @@ void main(){
     vec3 p=rest;
     p.y+=sin(pulse-span*2.5)*(.22*pow(span,1.7)+.085*aft);
     p.x+=sin(pulse+span*1.8)*(.039+.155*aft*aft);
+    p.x*=1.12+.12*step(.38,span);
+    p.z-=.17*aft;
     p.y+=rest.z*m.w*.24;
     float bank=m.w+.104*sin(time*.42+float(j)*1.9);
     p.xy=mat2(cos(bank),sin(bank),-sin(bank),cos(bank))*p.xy;

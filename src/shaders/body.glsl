@@ -2,6 +2,12 @@ in vec3 world,local;uniform vec3 eye,center;uniform int kind,pass,ids[3],starHue
 float volume(vec3 p){float z=floor(p.z),f=fract(p.z);return mix(noise(p.xy+z*vec2(19,37)),noise(p.xy+(z+1.)*vec2(19,37)),f*f*(3.-2.*f));}
 vec3 marble(vec3 p){p+=.69*vec3(volume(p),volume(p+13.),volume(p+37.));p+=.29*vec3(volume(p*2.1+7.),volume(p*2.1-19.),volume(p*2.1+31.));return p+.096*vec3(volume(p*6.1),volume(p*6.1+16.),volume(p*6.1+26.));}
 void main(){vec3 n=normalize(local),view=normalize(eye-world),light=normalize(-world);float facing=max(0.,dot(n,view)),lit=dot(n,light);int id=ids[0];vec3 col;
+ if(pass==6){
+   vec2 q=rot(.28)*local.xy,aa=max(fwidth(q),vec2(.001));
+   float arm=min(abs(q.x)/aa.x,abs(q.y)/aa.y);
+   if(length(q)>1.||arm>.73*(1.-.59*length(q)))discard;
+   frag=vec4(length(q)<.5?vec3(.90,.98,1.):vec3(.49,.76,.89),1.);return;
+ }
  if(pass==3){
   float r=length(local.xy)*2.15,a=atan(local.y,local.x);if(r<1.22||r>1.97)discard;
   float strands=clamp(radius*viewport.y/max(1.,length(eye-center))*.19,8.,47.);float phase=(r-1.22)*strands+.19*sin(a*4.+r*6.+time*.15);float line=lineAt(phase,1.38);if(line<.16)discard;

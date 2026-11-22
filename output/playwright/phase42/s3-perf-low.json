@@ -1,0 +1,59 @@
+{
+  "picker": {
+    "fps": 65.33,
+    "seconds": 2.1124999999761584,
+    "frames": 138,
+    "eye": [
+      1.622893852686354,
+      9.312430437273493,
+      15.177283629461725
+    ],
+    "mode": "voyage",
+    "move": null,
+    "gpu": "ANGLE (Intel, Intel(R) Iris(R) Xe Graphics (0x000046A6) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "low": true,
+    "size": [
+      1920,
+      1080
+    ]
+  },
+  "hero": {
+    "fps": 56.15,
+    "seconds": 2.1015999999642374,
+    "frames": 118,
+    "eye": [
+      2.326648689495278,
+      0.18,
+      -0.4688702187566536
+    ],
+    "mode": "voyage",
+    "move": 2,
+    "gpu": "ANGLE (Intel, Intel(R) Iris(R) Xe Graphics (0x000046A6) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "low": true,
+    "size": [
+      1920,
+      1080
+    ],
+    "subject": "Ember",
+    "radii": 5.345936282413302
+  },
+  "nebula": {
+    "fps": 80.92,
+    "seconds": 2.1131999999761573,
+    "frames": 171,
+    "eye": [
+      4.664003333680228,
+      0.170963053367109,
+      -2.8866379584422526
+    ],
+    "mode": "drift",
+    "move": null,
+    "gpu": "ANGLE (Intel, Intel(R) Iris(R) Xe Graphics (0x000046A6) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "low": true,
+    "size": [
+      1920,
+      1080
+    ]
+  },
+  "errors": []
+}

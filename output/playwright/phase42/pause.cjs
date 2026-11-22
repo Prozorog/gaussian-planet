@@ -1,0 +1,10 @@
+const {browser,pageFor,write}=require('./lab.cjs'),assert=require('node:assert/strict');
+(async()=>{const b=await browser();try{const {page,read,errors}=await pageFor(b,true);
+ await page.locator('[data-voyage="sun"]').click();await page.keyboard.press('ArrowRight');
+ await page.evaluate(()=>lab.drive(150));await page.keyboard.press('Space');const a=await read();
+ await page.evaluate(()=>lab.drive(30));const q=await read();assert.equal(q.t,a.t);assert.deepEqual(q.drift.eye,a.drift.eye);assert.deepEqual(q.bodies.map(b=>b.xy),a.bodies.map(b=>b.xy));
+ await page.waitForTimeout(3200);await page.evaluate(()=>lab.drive(1));assert((await read()).voyage.quiet);
+ await page.keyboard.press('Space');await page.evaluate(()=>lab.drive(2));assert((await read()).t>a.t);
+ await page.keyboard.press('Escape');await page.keyboard.press('s');await page.evaluate(()=>lab.drive(91*60));assert.equal((await read()).voyage.id,'sun');
+ write('s3-pause',{pausedTimeDelta:q.t-a.t,stationaryCamera:true,stationarySubjects:true,transportHidden:true,posterIdle:true,errors});assert.deepEqual(errors,[]);
+}finally{await b.close()}})().catch(e=>{console.error(e);process.exitCode=1});

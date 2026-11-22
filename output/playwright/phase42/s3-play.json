@@ -1,0 +1,92 @@
+{
+  "seconds": 300.021,
+  "route": "Begin, whole Sun Dive, helm, all three modes",
+  "gpu": "ANGLE (NVIDIA, NVIDIA GeForce RTX 4070 Laptop GPU (0x00002860) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+  "steps": [
+    {
+      "at": 1.58,
+      "name": "Begin and reveal",
+      "mode": "voyage",
+      "film": null,
+      "chapter": 1
+    },
+    {
+      "at": 1.64,
+      "name": "Sun Dive started",
+      "mode": "voyage",
+      "film": "sun",
+      "chapter": 1
+    },
+    {
+      "at": 71.68,
+      "name": "Whole Sun Dive, back at the picker",
+      "mode": "voyage",
+      "film": null,
+      "chapter": 1
+    },
+    {
+      "at": 76.03,
+      "name": "Took the helm",
+      "mode": "drift",
+      "film": null,
+      "chapter": 1
+    },
+    {
+      "at": 107.26,
+      "name": "Bench",
+      "mode": "bench",
+      "film": null,
+      "chapter": 1
+    },
+    {
+      "at": 148.08,
+      "name": "Nebula chapter",
+      "mode": "bench",
+      "film": null,
+      "chapter": 3
+    },
+    {
+      "at": 170.28,
+      "name": "Drift inside the nebula",
+      "mode": "drift",
+      "film": null,
+      "chapter": 3
+    },
+    {
+      "at": 195.07,
+      "name": "White dwarf",
+      "mode": "bench",
+      "film": null,
+      "chapter": 4
+    },
+    {
+      "at": 217.06,
+      "name": "Voyage picker revisited",
+      "mode": "voyage",
+      "film": null,
+      "chapter": 1
+    },
+    {
+      "at": 227.06,
+      "name": "Idle picker started a film",
+      "mode": "voyage",
+      "film": "sun",
+      "chapter": 1
+    },
+    {
+      "at": 267.05,
+      "name": "Keyboard helm",
+      "mode": "drift",
+      "film": null,
+      "chapter": 1
+    },
+    {
+      "at": 300.01,
+      "name": "Five minutes complete",
+      "mode": "drift",
+      "film": null,
+      "chapter": 1
+    }
+  ],
+  "errors": []
+}

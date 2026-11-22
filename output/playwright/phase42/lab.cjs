@@ -5,7 +5,7 @@ const url='http://localhost:4106/';
 const browser=low=>chromium.launch({channel:'chrome',headless:true,args:[low?'--force_low_power_gpu':'--force_high_performance_gpu','--use-angle=d3d11','--disable-background-timer-throttling','--disable-renderer-backgrounding']});
 const write=(name,data)=>fs.writeFileSync(path.join(dir,name+'.json'),JSON.stringify(data,null,2));
 const png=(name,data)=>fs.writeFileSync(path.join(dir,name+'.png'),Buffer.from(data.split(',')[1],'base64'));
-async function pageFor(instance,manual=false,size={width:1920,height:1080}){
+async function pageFor(instance,manual=false,size={width:1920,height:1080},prepare){
  const page=await instance.newPage({viewport:size,reducedMotion:'reduce'}),errors=[];
  page.on('pageerror',e=>errors.push(e.message));
  page.on('console',m=>{if(m.type()==='error'||/GL_INVALID|shader error/i.test(m.text()))errors.push(m.text())});
@@ -32,7 +32,10 @@ async function pageFor(instance,manual=false,size={width:1920,height:1080}){
      function shader(type, src) {`);await route.fulfill({response:res,body:code});
    });
  }
+ if(prepare)await prepare(page);
  await page.goto(url,{waitUntil:'domcontentloaded'});
+ await page.waitForFunction(()=>!document.querySelector('#light-begin').hidden||document.querySelector('#error').textContent.trim(),{},{timeout:45000}).catch(async e=>{throw Error([await page.locator('#light-tip').textContent(),errors,e.message].join(' | '))});
+ const startup=await page.locator('#error').textContent();if(startup)throw Error(startup);
  await page.locator('#light-begin').click();await page.locator('#first-light').waitFor({state:'hidden'});
  await page.evaluate(async()=>{const entry=document.querySelector('script[src*="main.js"]').src;const app=await import(entry);window.readScene=app.observation;});
  if(manual)await page.evaluate(()=>lab.drive(1));

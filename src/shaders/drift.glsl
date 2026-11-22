@@ -25,7 +25,7 @@ int seaPigment(float f){
 void main(){
   bool cloud=surfaceID>5;
   float L=float(surfaceID-3),dist=length(world-eye),t=time*.10;
-  if(dist<.027)discard;
+  if(dist<.027||(!cloud&&swimmerOpening(world)))discard;
   float v,comb,coverage,poolPhase,seam=0.,thread=0.,near=1.-smoothstep(.23,1.35,dist);
   int id=pigment;
   vec2 p=world.xz;
@@ -42,7 +42,14 @@ void main(){
     veins+=.22*curls;
     v=.56+.22*sin(veins)+.14*a+.085*b+.041*c;
     v+=(dot(n,normalize(-world))>.18?.085:-.065);
-    comb=.43*b+.19*c+.36*sin(veins*2.);coverage=1.;
+    float skin=0.;
+    if(near>.01){
+      vec2 detailUV=q*12.+.53*noise2(q*5.2);
+      vec2 spiral=roll(detailUV,4.3);
+      skin=sin(detailUV.y*1.8+2.35*noise(spiral*1.3)+.48*noise(spiral*4.));
+      v+=.14*near*skin;
+    }
+    comb=.43*b+.19*c+.36*sin(veins*2.)+.82*near*skin;coverage=1.;
     poolPhase=veins*.91+.66*b+.22*c;
     thread=veins*4.1+1.85*b+.63*c+.7*curls;
     if(radius<.99&&a+.30*b<-.12)discard;
@@ -84,6 +91,30 @@ void main(){
     comb=.53*b+.24*c+.25*sin(phase+.42*a);
     poolPhase=phase*1.29+1.53*b+.42*c;
     thread=phase*3.4+1.85*b+1.4*c+.75*islands;
+    if(near>.002){
+      // Fixed physical lengths retain broad pigment folds while finer curls
+      // resolve as the eye approaches within a fraction of a world unit.
+      vec2 localInk=p*16.+L*7.31+vec2(.023*t,-.018*t);
+      localInk+=.57*noise2(localInk*.52)+.18*noise2(localInk*1.9);
+      vec2 vortex=roll(localInk,4.7);
+      float middleInk=noise(vortex*1.25);
+      float tinyInk=noise(vortex*4.8+.41*noise2(vortex*2.3));
+      float contour=localInk.y*.38+localInk.x*.19+1.53*middleInk+.35*tinyInk;
+      float closeBand=sin(contour*4.1);
+      v+=near*(.126*closeBand+.082*middleInk+.052*tinyInk);
+      comb+=near*(.84*middleInk+.37*tinyInk);
+      thread+=near*(2.48*contour+.78*tinyInk);
+      poolPhase+=near*(.59*middleInk+.32*tinyInk);
+    }
+    float grazing=abs(world.y-eye.y)/dist;
+    if(grazing<.25||dist>6.){
+      vec2 coast=rot(.63*L+.28)*(p*1.28);
+      coast+=.65*noise2(coast*.61+L*4.);
+      float tongue=.5+.25*sin(coast.x*3.8+1.28*noise(coast*1.7))
+                        +.25*sin(coast.y*4.3+.73*noise(coast*2.3));
+      float fray=max(1.-smoothstep(.018,.25,grazing),.67*smoothstep(6.,13.,dist));
+      if(tongue<.97*fray||floor(9.*v)>=ceil(9.*(1.-fray*(1.-tongue))))discard;
+    }
     seam=max(max(lineAt(hue-.24,1.2),lineAt(hue-.43,1.2)),max(lineAt(hue-.66,1.2),lineAt(hue-.92,1.2)));
   }
   for(int i=0;i<12;i++){
