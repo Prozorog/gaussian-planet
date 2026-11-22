@@ -40,7 +40,8 @@ function dawnAngle(s,planet){
   if(!planet)return -.85;
   const phase=Math.atan2(planet.z,planet.x),sign=Math.sign(planet.x*planet.vz-planet.z*planet.vx)||1;
   const objects=clouds.slice(0,activeClouds(s.low)).map(b=>[b.pos,b.size]);
-  for(const b of (s.sceneBodies??s.bodies))objects.push([[b.x+2*b.vx,b.y,b.z+2*b.vz],[b.r,b.r,b.r]]);
+  for(const b of [...(s.sceneBodies??s.bodies),...(s.creatures?.rideables??[])])
+    objects.push([[b.x+2*b.vx,b.y,b.z+2*b.vz],[b.r,b.r,b.r]]);
   let best=phase,minimum=Infinity;
   // Reserve an open sightline to the photosphere, even after the orbits evolve.
   for(const offset of [-.13,-.33,.52,-.60,.78,-.97,1.22,-1.58,2.22]){
@@ -76,7 +77,7 @@ export function createDrift(s,onMoment) {
   const keys=new Set();
   const d={position:[0,0,5.55],forward:[0,0,-1],velocity:[0,0,0],current:[0,0],
     yaw:0,pitch:0,ride:null,auto:false,cloud:null,heat:0,ripples:[],lastInput:0,
-    hintUntil:0,near:null,nearestDistance:Infinity,crossedAt:-10,crossedInk:3};
+    hintUntil:0,enteredAt:-20,near:null,nearestDistance:Infinity,crossedAt:-10,crossedInk:3};
   let lookYaw=0,lookPitch=0,rideAngle=0,ridePan=[0,0],autoTime=0,route,oldY=0;
   let currentPass=null,lastSplash=-10,nearSun=false,rideEntry=0,rideStart,pinned=false;
   const eye=d.position;
@@ -95,7 +96,7 @@ export function createDrift(s,onMoment) {
     setLook(toward(eye,[0,.10,0]));lookYaw+=.087;
     d.yaw=lookYaw;d.pitch=lookPitch;d.velocity.fill(0);d.current.fill(0);
     keys.clear();d.ride=null;d.cloud=null;d.heat=0;nearSun=false;currentPass=null;
-    oldY=eye[1];activity(false);d.hintUntil=s.t+8;d.lastInput=s.t+2;
+    oldY=eye[1];activity(false);d.enteredAt=s.t;d.hintUntil=s.t+8;d.lastInput=s.t+2;
     updateDirection();
   }
   function leave(){keys.clear();d.ride=null;d.auto=false;d.heat=0;d.hintUntil=0;}
@@ -164,12 +165,13 @@ export function createDrift(s,onMoment) {
       (side[i]*.34+(i===1?.94:0))*Math.sin(a));
     const center=[b.x,b.y,b.z];
     let dest=center.map((v,i)=>v+offset[i]*b.r*1.66);
+    let climb=0;
     if(b.creature){
-      const length=Math.hypot(b.vx,b.vz)||1,sideX=b.vz/length,sideZ=-b.vx/length;
-      const above=sheetHeights.find(y=>y>b.y)??3.4;
-      const shelf=sheetHeights.findLast(y=>y<b.y)??-3.3;
-      const lift=above-b.y>.22?Math.min(.60,(above-b.y)*.76):-Math.min(.64,(b.y-shelf)*.78);
-      dest=[b.x+(sideX*2.5-b.vx/length*.68)*b.r,b.y+lift,b.z+(sideZ*2.5-b.vz/length*.68)*b.r];
+      const length=Math.hypot(b.vx,b.vz)||1;
+      const ceiling=sheetHeights.find(h=>h>b.y+.29*b.r)??4;
+      const height=Math.min(.505*b.r,ceiling-b.y-.038);
+      climb=(.505-height/b.r)*.42;
+      dest=[b.x-1.29*b.r*b.vx/length,b.y+height,b.z-1.29*b.r*b.vz/length];
     }
     const f=clamp((s.t-rideEntry)/.88,0,1),k=f*f*(3-2*f);
     for(let i=0;i<3;i++)eye[i]=mix(rideStart[i],dest[i],k);
@@ -178,7 +180,7 @@ export function createDrift(s,onMoment) {
     const horizon=rad.map((x,i)=>-x*.83+side[i]*.50+(i===1?-.19:0));
     const weight=clamp((Math.cos(a)+.10)*1.3,0,1);
     setLook(unit(star.map((n,i)=>weight*(n*.80+ground[i]*.20)+(1-weight)*(ground[i]*.72+horizon[i]*.28))));
-    if(b.creature)setLook(ground);
+    if(b.creature)setLook(unit([b.vx,(climb-.014)*Math.hypot(b.vx,b.vz),b.vz]));
     lookYaw+=ridePan[0];lookPitch=clamp(lookPitch+ridePan[1],-Math.PI*4/9,Math.PI*4/9);
   }
   function free(dt) {

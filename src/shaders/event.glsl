@@ -1,5 +1,15 @@
 in vec3 local,world;uniform vec4 effect;uniform int eventType,first,second;uniform float age;out vec4 frag;
 void main(){vec2 p=local.xy;float r=length(p);if(r>1.35)discard;vec2 f=foldInk(p*3.6+effect.w,time*.27);float n=noise(f*2.),m=noise(f*5.7),a=atan(p.y,p.x);float v;int id=first;
+ if(eventType==6){
+   float aft=.31-dot(p,effect.xy),across=dot(p,vec2(-effect.y,effect.x));
+   if(aft<.06||aft>1.14)discard;
+   float wave=abs(across)-.41*aft+.019*sin(aft*13.-time*2.)+.013*n;
+   float lines=max(lineAt(wave-.036,1.2),lineAt(wave+.035,1.)*.66);
+   if(abs(wave)>.075||lines<.04)discard;
+   float tail=smoothstep(.06,.24,aft)*(1.-smoothstep(.69,1.14,aft));
+   vec3 wash=mix(ink(id,6.),vec3(.96,.90,.73),.60);
+   frag=vec4(wash,lines*tail*effect.z*.84);return;
+ }
  if(eventType==5){
    float crest=r+.035*n;
    float ring=max(lineAt(crest-.79,1.32),lineAt(crest-.68,1.3)*.57);

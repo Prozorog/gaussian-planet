@@ -37,4 +37,3 @@
 #settings input[type=checkbox]{width:16px;height:16px}
 @media(max-width:850px){#discovery{width:32%;padding:12px 14px;top:14%}#discovery h2{font-size:21px}#discovery p{font-size:11px}#atlas{width:min(420px,54%)}.atlas-slot{min-height:44px;padding:5px 1px}#drift-hint{font-size:10px}}
 @media(max-height:580px){#discovery{top:13%;max-height:70%}#atlas{max-height:74%}.atlas-slot{min-height:40px}#atlas header{padding-bottom:5px}}
-@media(prefers-reduced-motion:reduce){#atlas,#discovery{animation:none}}

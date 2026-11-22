@@ -501,3 +501,13 @@ Chrome triggered all 25 one-shots against the streaming Frozen Star at the defau
 | Supernova | 0.0999 | 0.0720 | −2.8 dB |
 
 [Mix screenshot](output/playwright/phase41/s1-mix.png) · [All 25 effects](output/playwright/phase41/s1-audio.json).
+
+### Stage 2 · Creatures
+
+I replaced the flat silhouettes with three cross-sectioned bodies, thick-rooted wing-fins and tapered tails with two streamers. Nose-to-streamer lengths are 1.66–1.91 times Tide’s diameter. The fin wave, tail and bank deform the mesh. Each body carries its own engraved ink and takes discrete light from the star. The sheets keep their normal depth tests. Swimmers intersect them, write a V-shaped wake, inject velocity and ink behind it, and send a ring out on a breach.
+
+The fish school follows one moving ribbon. The fish retain their eaten ink, split around a 1.43-unit camera bubble and are capped at 38 pixels in Drift. The initial dive gives the star three seconds of clear sight, measured from the end of the camera transition. Young-disc pages have no creatures. I left the five other story behaviours in the shared simulation.
+
+Chrome checked **Creatures**, **D**, **F**, three-colour feeding and the calf, comb scatter, the young disc, red giant, white dwarf and a supernova dive and return. The recaptured ride leaves the head below the upper two-thirds of the frame. The production build passed. The side-on silhouette reads more like a narrow fish during the neutral wing pose. In Drift, a sheet or cloud can still briefly hide the swimmer.
+
+[Silhouette sheet](output/playwright/phase41/s2-silhouette.png) · [Wake](output/playwright/phase41/s2-wake.png) · [First Drift frame](output/playwright/phase41/s2-first-drift.png) · [School](output/playwright/phase41/s2-school.png) · [Ride](output/playwright/phase41/s2-ride.png) · [Skin at 100%](output/playwright/phase41/s2-skin.png) · [Calf](output/playwright/phase41/s2-calf.png) · [Control results](output/playwright/phase41/s2-controls.json).

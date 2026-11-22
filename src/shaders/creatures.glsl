@@ -1,42 +1,46 @@
 uniform int typeOfInk;
-in float lift;
+uniform vec3 eye;
+in vec3 surface,position;
 flat in int pigment;
+flat in float seed;
 out vec4 frag;
 
 void main(){
-  vec2 p=uv*2.-1.;
-  float width=abs(p.x),sinus=sin(p.y*4.+time*1.30),edge;
-  if(typeOfInk==0){
-    float leading=.81-.87*pow(width,1.86)+.038*sin(p.x*4.+time*.64);
-    float trailing=-.29+.39*width-.078*sin(width*6.3);
-    float membrane=min(leading-p.y,p.y-trailing);
-    float body=1.-length((p-vec2(0.,.10))/vec2(.23,.70));
-    float tailX=.083*sin(p.y*8.4+time*1.2);
-    float filament=min(.072*(p.y+1.07)/.76+.016-abs(p.x-tailX),min(-.22-p.y,p.y+.99));
-    edge=min(.98-width,max(max(membrane,body*.61),filament*1.6));
-  }else{
-    float body=(1.-length((p-vec2(.0,.19))/vec2(.54,.66)))*.64;
-    float tail=min(p.y+.96,-.16-p.y);
-    tail=min(tail,.68*pow(max(0.,-p.y),1.36)-abs(p.x-.19*sin(time*11.+lift*45.)));
-    edge=max(body,tail);
-  }
-  float outline=1.-smoothstep(.45,1.38,edge/max(.001,length(vec2(dFdx(edge),dFdy(edge)))));
-  if(edge<0.)discard;
   if(typeOfInk==1){
-    float value=fract(lift*8.)*.17+.44+.19*sin(p.y*7.+p.x*2.);
-    vec3 col=ink(pigment,4.+floor(value*3.)+2.*outline);
-    frag=vec4(col,1.);return;
+    vec2 p=uv;
+    float bend=.15*sin(p.y*3.2-time*6.4+seed);
+    p.x-=bend*smoothstep(.34,.93,-p.y);
+    float leaf=.62*(1.-length((p-vec2(0.,.17))/vec2(.51,.72)));
+    float tail=min(p.y+.93,min(-.17-p.y,.56*pow(max(0.,-p.y),1.85)-abs(p.x)));
+    float edge=max(leaf,tail);
+    if(edge<0.)discard;
+    float outline=1.-smoothstep(.40,1.18,edge/max(.001,fwidth(edge)));
+    float wash=p.x*.78+p.y*.55+.23*sin(p.y*4.3+seed*.21)+.12*sin(p.y*8.-p.x*5.);
+    vec3 col=ink(pigment,3.+floor(clamp(.55+wash,.01,.99)*3.));
+    frag=vec4(mix(col,ink(pigment,1.),outline*.90),1.);
+    return;
   }
-  vec2 f=foldInk(roll(p*vec2(2.6,3.9)+vec2(lift*.16,0.),4.6),time*.32);
-  float a=noise(f*.90),b=noise(f*2.71),c=noise(f*9.98);
-  float phase=6.7*p.y+2.1*abs(p.x)+3.3*a+.81*b+.19*c;
-  float v=.33+.195*sin(phase)+.114*a+.16*b+.048*c+.19*lift;
+  vec3 n=normalize(cross(dFdx(position),dFdy(position)));
+  vec3 view=normalize(eye-position);
+  float facing=max(0.,dot(n,view)),light=dot(n,normalize(-position));
+  float rim=1.-smoothstep(.075,.25,facing);
+  vec3 p=surface;
+  vec2 coord=vec2(p.x*6.+p.y*5.,p.z*2.9);
+  coord=turn(coord,vec2(-.80,-.53),1.0,3.4);
+  coord=turn(coord,vec2(1.16,.37),1.15,-3.0);
+  vec2 f=foldInk(roll(coord,3.3),seed*9.+time*.12);
+  float broad=noise(f*.91),curl=noise(f*2.9),grain=noise(f*10.4);
+  float flow=f.x*.80+f.y*.26+1.02*broad+.29*curl+.065*grain;
+  float bands=.42+.23*sin(flow*3.3)+.12*curl+.085*grain;
+  float sunStep=light>.55?.18:light>.07?.02:-.23;
   if(life.w>.64){
-    float ribbon=max(outline,lineAt(phase*1.74+.35*b,1.2));
-    if(ribbon<.53)discard;
-    frag=vec4(ink(pigment,floor(3.+ribbon*2.))*.72,1.);return;
+    float line=max(rim,lineAt(flow*2.71,1.05));
+    if(line<.62)discard;
+    frag=vec4(ink(pigment,5.)*.62,1.);
+    return;
   }
-  vec3 col=engraved(v,pigment,.73*b+.34*c+.20*sinus,1.);
-  col=mix(col,ink(pigment,8.),outline*.84);
+  vec3 col=engraved(bands+sunStep,pigment,.83*curl+.44*grain,1.);
+  col=pooled(col,pigment,flow*1.51,.10);
+  col=mix(col,ink(pigment,light>-.24?8.:4.),rim*.80);
   frag=vec4(col,1.);
 }
