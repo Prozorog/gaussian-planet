@@ -379,3 +379,19 @@ The production build passed with `heavy npm run build`. The project’s existing
 - Chrome formed one hole, stretched Aurelia, swallowed part of the star, launched jets twice, rekindled, fell through from Drift and removed the hole. Notes 20–23 were discovered. An initial feedback-loop error came from an offscreen depth texture binding on the dust sampler unit. The final control run recorded zero page or WebGL errors. The production build passed.
 - The lens overview measured 80.69% vivid among lit pixels, 43.01% dark and 1.09% cream. The Drift view measured 83.17%, 27.51% and 1.60%. The native crop shows thin rim and disc lines without a blur filter.
 - [Lens](output/playwright/phase4/s3-lens.png) · [Native lens crop](output/playwright/phase4/s3-lens-native.png) · [Low angle](output/playwright/phase4/s3-low-disc.png) · [Planet thread](output/playwright/phase4/s3-thread.png) · [Jets](output/playwright/phase4/s3-jets.png) · [Star stream](output/playwright/phase4/s3-star-stream.png) · [Drift](output/playwright/phase4/s3-drift.png) · [Falling](output/playwright/phase4/s3-fall.png) · [Control run](output/playwright/phase4/stage3.json).
+
+### Stage 4 · Worlds to dive into
+
+- In Drift, **F** or **Ride** attaches to a nearby world. **Enter** or **Dive** sinks through its cloud deck in roughly two seconds. **Esc** or **Rise to orbit** returns to the ride. Inside, the existing movement keys carry the view on a current, and right-drag looks around.
+- Aurelia has opposing cloud currents and rings overhead. Stirring leaves a moving oval storm. Tide’s moon moves by drag or slider, and two swells follow it. Ember’s crust opens into a fountain with new rivers. Changing Verdance’s tilt moves the ice and green bands. Vesper’s jets leave falling ice dust. I stored each toy on the original body, so it survives the trip back out and the timeline’s alternate views.
+- The interior views reuse the ink shader and camera controls with their own projected layers. The outer renderer reads the same storm, moon, cracks, cap and plume data. The production build passed. Chrome returned to the correct ride after each world, verified the remembered interaction and discovered notes 24–28 without page errors.
+
+| World | Arrival vivid / dark / cream | Toy vivid / dark / cream | Prints |
+|---|---|---|---|
+| Aurelia | 88.29% / 27.77% / 0.21% | 87.53% / 27.25% / 0.20% | [Arrival](output/playwright/phase4/s4-aurelia-arrival.png) · [Storm](output/playwright/phase4/s4-aurelia-toy.png) · [Storm from the overview](output/playwright/phase4/s4-aurelia-outside.png) |
+| Tide | 81.15% / 41.35% / 2.16% | 80.62% / 41.23% / 2.51% | [Arrival](output/playwright/phase4/s4-tide-arrival.png) · [Moon and tides](output/playwright/phase4/s4-tide-toy.png) |
+| Ember | 84.20% / 43.74% / 0.10% | 78.51% / 42.00% / 0.73% | [Arrival](output/playwright/phase4/s4-ember-arrival.png) · [Fountain](output/playwright/phase4/s4-ember-toy.png) |
+| Verdance | 81.17% / 29.59% / 0.45% | 46.86% / 24.84% / 1.78% | [Arrival](output/playwright/phase4/s4-verdance-arrival.png) · [Tilted axis](output/playwright/phase4/s4-verdance-toy.png) |
+| Vesper | 84.14% / 38.86% / 1.66% | 81.73% / 37.63% / 3.31% | [Arrival](output/playwright/phase4/s4-vesper-arrival.png) · [Geyser](output/playwright/phase4/s4-vesper-toy.png) |
+
+[Colour readings](output/playwright/phase4/s4-colour.json) · [World controls](output/playwright/phase4/stage4.json).

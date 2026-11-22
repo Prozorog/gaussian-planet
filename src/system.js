@@ -12,7 +12,7 @@ export const palettes=[
  '202747 384878 4968bf 528eea 5db6f4 7dddf8 acf4ff d2f7ff f3fdff'
 ];
 export function inks(){return Uint8Array.from(palettes.flatMap(row=>row.split(' ').flatMap(h=>[parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4),16),255])));}
-const originals=[['Ember','Lava world',2.30,.24,-2.62,1],['Verdance','Emerald world',3.65,.38,1.89,2],['Tide','Ice giant',4.85,.49,-1.05,3],['Aurelia','Gas giant',6.25,.63,.36,4],['Vesper','Amethyst world',7.65,.35,3.38,5]];
+const originals=[['Ember','Lava world',2.30,.24,-2.62,1],['Verdance','Living world',3.65,.38,1.89,2],['Tide','Ocean world',4.85,.49,-1.05,3],['Aurelia','Gas giant',6.25,.63,.36,4],['Vesper','Ice world',7.65,.35,3.38,5]];
 export const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
 export function circular(x,z){const r=Math.hypot(x,z)||1,v=Math.sqrt(MU/r)/r;return [-z*v,x*v];}
 export function createSystem(onEvent){

@@ -213,7 +213,7 @@ function chimeLines(p,s,xy) {
 export function chartOnSky(canvas,s,c,a,id,preview) {
   const wedges=(a.wedges||id===1)&&c.mode==='overview';
   const chimes=s.spheres?.on&&c.mode!=='poster';
-  const active=!s.blackHole?.fall&&(a.labels||wedges||id===6&&a.roche||preview||chimes);
+  const active=!s.blackHole?.fall&&!s.worlds?.body&&(a.labels||wedges||id===6&&a.roche||preview||chimes);
   if(!active&&canvas.hidden)return;
   canvas.hidden=!active;if(!active)return;
   const w=canvas.clientWidth,h=canvas.clientHeight,dpr=Math.min(devicePixelRatio,2);

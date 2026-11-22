@@ -74,7 +74,7 @@ export function createBlackHole(s, c, discover, say, ascend) {
       starLatch=true;s.emit('stretch',0,0,7);say('The black hole reaches the star');
     }
     if(state.starStream&&s.t-state.starStream.at>2.45){state.starStream=null;jet(hole);}
-    if(c.mode==='drift'&&!c.flying&&state.fallAt===null){
+    if(c.mode==='drift'&&!c.flying&&!s.worlds?.body&&state.fallAt===null){
       const eye=c.drift.position,d=[hole.x-eye[0],hole.y-eye[1],hole.z-eye[2]],length=Math.hypot(...d);
       if(length<.61){state.fallAt=s.t;state.fall=.001;s.emit('fall',hole.x,hole.z,hole.ink);}
       else if(length<3.2)for(let i=0;i<3;i++)eye[i]+=d[i]/length*(3.2-length)**2*dt*.080;

@@ -29,7 +29,9 @@ export const helpGroups = {
   ],
   Drift: [
     ['D / double-click disc', 'Step inside'], ['Drag', 'Look around'], ['WASD / arrows', 'Float'],
-    ['Space / C', 'Rise / sink'], ['Shift', 'Glide faster'], ['F', 'Ride a nearby world'], ['Esc', 'Rise out'],
+    ['Space / C', 'Rise / sink'], ['Shift', 'Glide faster'], ['F / Ride', 'Ride a nearby world'],
+    ['Enter / Dive', 'Sink into the world you are riding'], ['Esc / Rise to orbit', 'Leave the interior or rise out of Drift'],
+    ['Inside a world', 'Use the world’s toy or drag with the right button to look'],
   ],
   Time: [['T / Timeline', 'Scrub five chapters or play the life of the star'],
     ['Space', 'Pause or resume orbits in the overview'], ['[ / ]', 'Change orbit speed']],
@@ -174,7 +176,7 @@ export function createAtlas(s, c) {
       lastDraw = s.t;
     }
     chartOnSky($('sky-chart'), s, c, science, current, preview);
-    $('drift-hint').hidden = !(c.mode === 'drift' && !c.flying && c.drift.hintUntil > s.t);
+    $('drift-hint').hidden = !(c.mode === 'drift' && !s.worlds?.body && !c.flying && c.drift.hintUntil > s.t);
   }
   mode();
   drawBook();

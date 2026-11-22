@@ -29,3 +29,9 @@
 .void i{border:1px solid #ffe2a6;border-radius:50%;transform:none}
 .void i:after{inset:1px;border:0;border-left:1px solid #ffc575}
 #rekindle{position:absolute;z-index:3;top:calc(3% + 42px);right:2.2%;color:#ffe6b8;border-color:#deb978}
+#world-controls{position:absolute;z-index:3;bottom:12.3%;left:3%;max-width:90%;display:flex;flex-wrap:wrap;align-items:center;gap:7px;background:#140e1af4;border:1px solid #856c66;border-radius:5px;padding:8px 11px;color:#f1d7aa}
+#world-controls strong{font:italic 19px/1 Georgia,serif}
+#world-controls small{font:11px/1.2 system-ui,sans-serif;color:#dfcbc2}
+#world-controls strong:empty,#world-controls small:empty{display:none}
+#world-controls button:disabled{opacity:.48;cursor:default}
+#world-dial{width:83px}

@@ -1,4 +1,4 @@
-in vec3 world,local;uniform vec3 eye,center;uniform int kind,pass,ids[3],starHue;uniform float spin,impact,radius,hasRing,charge,chime;uniform vec4 marks[12];uniform vec4 markInfo[12];uniform int markCount;out vec4 frag;
+in vec3 world,local;uniform vec3 eye,center;uniform int kind,pass,ids[3],starHue;uniform float spin,impact,radius,hasRing,charge,chime;uniform vec4 worldToy;uniform vec4 marks[12];uniform vec4 markInfo[12];uniform int markCount;out vec4 frag;
 float volume(vec3 p){float z=floor(p.z),f=fract(p.z);return mix(noise(p.xy+z*vec2(19,37)),noise(p.xy+(z+1.)*vec2(19,37)),f*f*(3.-2.*f));}
 vec3 marble(vec3 p){p+=.69*vec3(volume(p),volume(p+13.),volume(p+37.));p+=.29*vec3(volume(p*2.1+7.),volume(p*2.1-19.),volume(p*2.1+31.));return p+.096*vec3(volume(p*6.1),volume(p*6.1+16.),volume(p*6.1+26.));}
 void main(){vec3 n=normalize(local),view=normalize(eye-world),light=normalize(-world);float facing=max(0.,dot(n,view)),lit=dot(n,light);int id=ids[0];vec3 col;
@@ -32,7 +32,22 @@ void main(){vec3 n=normalize(local),view=normalize(eye-world),light=normalize(-w
  }
  else{for(int i=0;i<12;i++){if(i>=markCount)break;vec4 m=marks[i],info=markInfo[i];if(info.y>0.){float d=distance(surf,m.xyz);float push=exp(-d*d/(m.w*m.w));f+=vec3(info.z,0.,info.w)*push*2.4;big=volume(f*1.4);mid=volume(f*4.3);}}if(kind==1)v=.28+.67*exp(-abs(big+.25*mid)*5.)+.14*mid;else if(kind==4){vec2 st=turn(surf.xy,vec2(.24,-.12),.37,6.2);float lat=st.y*11.+2.25*big+.54*mid+.14*tiny;v=.54+.19*sin(lat)+.12*sin(lat*2.4)+.15*big;}else if(kind==2)v=.56+.30*big+.18*mid+.16*exp(-abs(big+.25*mid)*9.);else v=.56+.20*sin(surf.y*(kind==3?12.:8.)+4.1*big+.9*mid)+.21*big+.11*mid+.046*tiny;
   if(ids[1]!=id&&sin(v*14.+big*3.)>.10)id=ids[1];else if(ids[2]!=id&&big<-.24)id=ids[2];for(int i=0;i<12;i++){if(i>=markCount)break;vec4 m=marks[i];float d=distance(surf,m.xyz)/m.w;if(markInfo[i].y==0.&&d<1.){id=int(markInfo[i].x);v=.58+.20*cos(d*16.)+.09*mid;}}
-  vec3 rn=normalize(cross(vec3(.966,.259,0.),vec3(-.094,.351,.932)));vec3 off=world-center;float t=-dot(off,rn)/dot(light,rn);float rr=length(off+t*light)/radius;float shadow=hasRing>.5&&t>0.&&rr>1.24&&rr<1.94?2.:0.;float stepLight=lit<-.53?-3.:lit<-.08?-2.:lit<.14?0.:lit<.54?1.:2.;v=clamp(v+(stepLight-shadow+chime)/9.,.014,.985);col=engraved(v,id,comb,1.);float term=1.-smoothstep(.003,.009+fwidth(lit),abs(lit+.08));col=mix(col,ink(id,floor(v*9.)+2.),term*.9);if(starHue==8&&lit>.4&&v>.69)col=mix(col,vec3(.58,1.,1.),.21);if(starHue==0&&lit>.4)col*=vec3(1.,.79,.87);float limb=1.-smoothstep(.06,.17+impact*.13,facing);col=mix(col,mix(ink(id,8.),vec3(1.,.96,.8),.74),limb*max(step(.05,lit),impact));}
+  float spotAge=sin(time*.046),stormR=0.;
+  if(kind==4&&worldToy.x>0.&&surf.z<-.19){
+    vec2 spot=(surf.xy-vec2(-.42+.093*spotAge,.12+worldToy.z*.14))*vec2(2.25,4.28);
+    stormR=length(spot)+.078*mid;
+    if(stormR<1.){
+      float turn=atan(spot.y,spot.x)+10.5*stormR;
+      v=.64+.19*sin(turn+big*2.2)+.08*mid;
+      id=stormR>.81?6:4;
+    }
+  }
+  if(kind==2&&worldToy.x>0.){
+    float season=sin(time*.085)*worldToy.w;
+    float cap=abs(dot(surf,normalize(vec3(worldToy.w*.52,1.,.12))))-.16*season*sign(surf.y);
+    if(cap>.78+.10*abs(worldToy.w)+.093*mid){id=8;v=.60+.12*big+.06*mid;}
+  }
+  vec3 rn=normalize(cross(vec3(.966,.259,0.),vec3(-.094,.351,.932)));vec3 off=world-center;float t=-dot(off,rn)/dot(light,rn);float rr=length(off+t*light)/radius;float shadow=hasRing>.5&&t>0.&&rr>1.24&&rr<1.94?2.:0.;float stepLight=lit<-.53?-3.:lit<-.08?-2.:lit<.14?0.:lit<.54?1.:2.;v=clamp(v+(stepLight-shadow+chime)/9.,.014,.985);if(kind==1&&worldToy.x>0.&&abs(big+.25*mid)<.066&&lit<.24){v=.61+.22*mid+.17*abs(tiny);id=1;}col=engraved(v,id,comb,1.);float term=1.-smoothstep(.003,.009+fwidth(lit),abs(lit+.08));col=mix(col,ink(id,floor(v*9.)+2.),term*.9);if(starHue==8&&lit>.4&&v>.69)col=mix(col,vec3(.58,1.,1.),.21);if(starHue==0&&lit>.4)col*=vec3(1.,.79,.87);float limb=1.-smoothstep(.06,.17+impact*.13,facing);col=mix(col,mix(ink(id,8.),vec3(1.,.96,.8),.74),limb*max(step(.05,lit),impact));}
  if(finePaper&&kind!=0)col=mix(col,pooled(col,id,v*5.8+comb*.73,.095),smoothstep(.08,.20,facing));
  if(kind!=0&&life.w>.12)col*=1.-.79*ceil(life.w*5.)/5.;
  frag=vec4(col,1.);

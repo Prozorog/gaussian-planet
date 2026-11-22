@@ -78,7 +78,7 @@ export function createDrift(s,onMoment) {
     yaw:0,pitch:0,ride:null,auto:false,cloud:null,heat:0,ripples:[],lastInput:0,
     hintUntil:0,near:null,nearestDistance:Infinity,crossedAt:-10,crossedInk:3};
   let lookYaw=0,lookPitch=0,rideAngle=0,ridePan=[0,0],autoTime=0,route,oldY=0;
-  let currentPass=null,lastSplash=-10,nearSun=false,rideEntry=0,rideStart;
+  let currentPass=null,lastSplash=-10,nearSun=false,rideEntry=0,rideStart,pinned=false;
   const eye=d.position;
   const setLook=v=>{lookYaw=Math.atan2(-v[0],-v[2]);lookPitch=Math.asin(clamp(v[1],-1,1));};
   function activity(hide=true) {
@@ -106,7 +106,16 @@ export function createDrift(s,onMoment) {
   }
   function key(code,down) {
     if(down){activity();keys.add(code);}else keys.delete(code);
-    if(code==='KeyF'&&!down&&d.ride){d.velocity=[d.ride.vx*.55,0,d.ride.vz*.55];d.ride=null;activity();}
+    if(code==='KeyF'&&!down&&d.ride&&!pinned)releaseRide();
+  }
+  function releaseRide(){
+    if(!d.ride)return;
+    d.velocity=[d.ride.vx*.55,0,d.ride.vz*.55];d.ride=null;pinned=false;activity();
+  }
+  function attachRide(body,stay=false,notify=true){
+    d.ride=body;pinned=stay;rideAngle=.80;ridePan=[0,0];rideStart=[...eye];rideEntry=s.t;
+    activity();
+    if(notify)onMoment('ride',body);
   }
   function updateDirection() {
     const cp=Math.cos(d.pitch);
@@ -195,8 +204,7 @@ export function createDrift(s,onMoment) {
     if(keys.size)d.lastInput=s.t;
     if(d.ride&&!(s.sceneBodies??s.bodies).includes(d.ride))d.ride=(s.sceneBodies??s.bodies).find(b=>b.key===d.ride.key)??null;
     if(keys.has('KeyF')&&!d.ride&&d.near&&d.nearestDistance<Math.max(1.55,d.near.r*3.2)){
-      d.ride=d.near;rideAngle=.80;ridePan=[0,0];rideStart=[...eye];rideEntry=s.t;
-      onMoment('ride',d.ride);
+      attachRide(d.near);
     }
     if(d.ride)ride(dt);else if(s.t-d.lastInput>=8)scenic(dt);else free(dt);
     const star=s.life?.starRadius??1;soften([0,0,0],star+.70,dt,true);
@@ -222,5 +230,5 @@ export function createDrift(s,onMoment) {
     d.cloud=null;
     for(let i=0;i<activeClouds(s.low);i++)if(cloudDistance(eye,clouds[i])<1){d.cloud=clouds[i];break;}
   }
-  return Object.assign(d,{enter,leave,look,key,tick,activity,ripple,clearKeys(){keys.clear();d.ride=null;}});
+  return Object.assign(d,{enter,leave,look,key,tick,activity,ripple,attachRide,releaseRide,clearKeys(){keys.clear();d.ride=null;pinned=false;}});
 }
