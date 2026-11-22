@@ -1,0 +1,26 @@
+const {browser,pageFor,write,dir}=require('./lab.cjs'),assert=require('node:assert/strict'),path=require('node:path');
+(async()=>{const b=await browser();try{
+const {page,snap,read,errors}=await pageFor(b,true);
+const drive=n=>page.evaluate(n=>{lab.drive(Math.round(n*60));lab.paint();},n),press=k=>page.keyboard.press(k);
+const mode=async name=>assert.equal((await read()).uiMode,name),visible=id=>page.locator(id).isVisible();
+await mode('voyage');assert(await visible('#voyage-list'));assert(!(await visible('footer')));await snap('s2-picker');
+await page.locator('#sky-tools').screenshot({path:path.join(dir,'s2-top.png')});
+assert.equal(await page.locator('#sky-tools').getByRole('button').filter({visible:true}).count(),2);
+await press('h');assert.match(await page.locator('#help-title').textContent(),/Voyage/);await page.locator('#help-close').click();
+await page.locator('#step-inside').click();await drive(.68);assert((await read()).flying);await snap('s2-switch');await drive(1.6);await mode('drift');
+assert(await visible('#inks'));assert(await visible('#ride-world'));assert(await visible('#dive-world'));assert(!(await visible('#verbs')));await snap('s2-drift');
+await press('h');assert.match(await page.locator('#help-title').textContent(),/Drift/);await press('Escape');
+await page.locator('#bench-mode').click();await drive(2.2);await mode('bench');assert(await visible('#verbs'));assert(await visible('#timeline-toggle'));await snap('s2-bench');
+await page.locator('#timeline-toggle').click();assert(await visible('#timeline'));await press('t');
+await page.locator('#chime-toggle').click();await page.locator('#inks button').nth(2).click();
+await page.locator('#book-toggle').click();assert(await visible('#atlas'));await page.locator('#atlas-close').click();
+await page.locator('#postcard-toggle').click();assert(await visible('#postcard'));await press('Escape');
+await page.locator('#settings > summary').click();await page.locator('#help-toggle').click();assert.match(await page.locator('#help-title').textContent(),/Bench/);await press('Escape');
+await press('v');await mode('voyage');assert.equal(await page.locator('#mode-hint').textContent(),'');
+await drive(9.8);assert(!(await read()).voyage.id);await drive(.5);assert.equal((await read()).voyage.id,'sun');
+await drive(70.2);assert(await visible('#voyage-list'));assert.match(await page.locator('#voyage-list').textContent(),/Completed/);await snap('s2-completed');
+await page.locator('[data-voyage="sun"]').click();await drive(4);await page.mouse.move(860,360);await page.locator('#voyage-helm').click();await mode('drift');
+await drive(89);assert(!(await read()).voyage.id);await drive(1.2);assert.equal((await read()).voyage.id,'sun');await press('Escape');await mode('bench');await drive(90.2);assert.equal((await read()).voyage.id,'sun');
+await press('Escape');await page.locator('#settings > summary').click();await page.locator('#voyage-idle').uncheck();await page.locator('#settings > summary').click();await drive(91);assert(!(await read()).voyage.id);
+write('s2-controls',{pickerSeconds:10,idleSeconds:90,modes:['Voyage','Drift','Bench'],completed:true,onceOnlyHint:true,settingsIdleOff:true,top:['Atlas','Postcard','Settings'],errors});assert.deepEqual(errors,[]);
+}finally{await b.close()}})().catch(e=>{console.error(e);process.exitCode=1});

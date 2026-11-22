@@ -651,3 +651,13 @@ The film hides the bench, chips, discovery UI and top toolbar. The caption uses 
 
 [Caption](output/playwright/phase42/s1-caption.png) · [Transport](output/playwright/phase42/s1-transport.png) · [Audit table](output/playwright/phase42/s1-table.png) · [Control measurements](output/playwright/phase42/s1-controls.json).
 
+### Stage 2 · Voyage, Drift and Bench
+
+Begin now opens the film picker as the last band of the First Light reveal clears. The picker uses a 520 × 293 WebP captured during the live Sun Dive. Its card shows the title, running time, description and completion status. The selected film starts after ten seconds without input. Completion returns to the picker. With a single accepted cut, the next selection is Sun Dive again.
+
+The bottom bar selects Voyage, Drift and Bench. Drift shows ink, Ride and Dive. Bench shows the marbling verbs, timeline and chime controls. Atlas, Postcard and Settings share the upper right. H opens help for the current mode, and the three introductory hints use local storage to appear once per browser profile. The 90-second idle setting applies in both manual modes.
+
+Chrome checked all three mode buttons and help panels, the camera during a switch, picker and idle timeouts, the completion mark, the helm, timeline, ink, chime, Atlas, postcard, and disabling idle playback. The checks recorded zero page or WebGL errors. The production build passed. The previous server stopped answering during this stage. The machine helper restarted this workspace at the same address.
+
+[Picker after Begin](output/playwright/phase42/s2-picker.png) · [Drift](output/playwright/phase42/s2-drift.png) · [Bench](output/playwright/phase42/s2-bench.png) · [Top right](output/playwright/phase42/s2-top.png) · [Mid-flight](output/playwright/phase42/s2-switch.png) · [Completed film](output/playwright/phase42/s2-completed.png) · [Control checks](output/playwright/phase42/s2-controls.json).
+

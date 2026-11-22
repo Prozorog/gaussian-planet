@@ -6,7 +6,7 @@ const $=id=>document.getElementById(id);
 const defaultVoyage=voyages[0].id;
 const duration=seconds=>seconds?Math.floor(seconds/60)+':'+String(seconds%60).padStart(2,'0'):'Continuous';
 
-export function bindVoyage(s,c,{begin,helm,canIdle}) {
+export function bindVoyage(s,c,{begin,helm,picker,canIdle}) {
   let saved={};
   try { saved=JSON.parse(localStorage.getItem(storage))??{}; } catch {}
   const completed=new Set(Array.isArray(saved.completed)?saved.completed:[]);
@@ -14,6 +14,7 @@ export function bindVoyage(s,c,{begin,helm,canIdle}) {
   const controls=$('voyage-controls'),caption=$('voyage-log'),mark=$('voyage-discovery');
   const idle=$('voyage-idle'),cinema=$('voyage-cinema'),pause=$('voyage-pause');
   const title=document.createElement('strong'),fact=document.createElement('span');caption.replaceChildren(title,fact);
+  let highlight=defaultVoyage;
   let flight=null,lastInput=s.t,markUntil=0,captionStart=-10;
   idle.checked=saved.idle!==false;cinema.checked=saved.cinema!==false;
   function save() {
@@ -36,15 +37,18 @@ export function bindVoyage(s,c,{begin,helm,canIdle}) {
     list.querySelector('div').replaceChildren(...choices.map(v=>{
       const item=document.createElement('button'),name=document.createElement('span'),time=document.createElement('small');
       item.type='button';item.dataset.voyage=v.id;name.textContent=v.name;
-      time.textContent=(completed.has(v.id)?'✓ Completed · ':'')+duration(v.seconds);
-      item.append(name,time);item.onclick=()=>start(v.id);
+      const still=document.createElement('img'),copy=document.createElement('span'),line=document.createElement('span');
+      still.src='/voyages/'+v.id+'.webp';still.alt='';still.width=520;still.height=293;
+      time.textContent=duration(v.seconds)+(completed.has(v.id)?'  ·  ✓ Completed':'');
+      name.className='film-title';copy.className='film-copy';line.textContent=v.line;line.className='film-description';
+      item.classList.toggle('highlight',v.id===highlight);copy.append(time,name,line);item.append(still,copy);item.onclick=()=>start(v.id);
       return item;
     }));
   }
   function toggle(){
     activity();
-    if(!list.hidden){close();return;}
-    refresh();list.hidden=false;button.setAttribute('aria-expanded','true');
+    if(flight)stop();
+    picker();refresh();list.hidden=false;button.setAttribute('aria-expanded','true');
     $('settings').open=false;
   }
   function start(id) {
@@ -66,13 +70,14 @@ export function bindVoyage(s,c,{begin,helm,canIdle}) {
   function take(complete=false){
     if(!flight)return;
     if(complete){
-
+      const choices=voyages.filter(v=>v.id!=='dark'||s.blackHole.hole);
+      highlight=choices[(choices.indexOf(flight.definition)+1)%choices.length].id;
       completed.add(flight.definition.id);
       save();
     }
     const {pose,velocity}=flight;
     stop();
-    helm(pose,velocity);
+    if(complete)toggle();else helm(pose,velocity);
   }
   function stop(){
     if(flight?.definition.id==='life')s.life.seek(1);
@@ -88,10 +93,12 @@ export function bindVoyage(s,c,{begin,helm,canIdle}) {
   }
   function skip(offset){if(flight){flight.skip(offset);activity();}}
   function auto(){
-    if(!idle.checked||!canIdle()||!list.hidden)return;
+    if(flight||!canIdle())return;
+    if(!list.hidden){if(s.t-lastInput>=10)start(highlight);return;}
+    if(!idle.checked)return;
     if(c.mode==='overview'&&!c.flying&&s.t-lastInput>=90)start(defaultVoyage);
     if(c.mode==='drift'&&!c.flying&&!c.drift.ride&&!s.worlds.body&&
-      s.t-Math.max(c.drift.lastInput,lastInput)>=8)start(defaultVoyage);
+      s.t-Math.max(c.drift.lastInput,lastInput)>=90)start(defaultVoyage);
   }
   button.onclick=toggle;$('voyage-prev').onclick=()=>skip(-1);
   $('voyage-next').onclick=()=>skip(1);pause.onclick=togglePause;

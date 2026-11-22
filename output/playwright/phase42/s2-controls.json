@@ -1,0 +1,18 @@
+{
+  "pickerSeconds": 10,
+  "idleSeconds": 90,
+  "modes": [
+    "Voyage",
+    "Drift",
+    "Bench"
+  ],
+  "completed": true,
+  "onceOnlyHint": true,
+  "settingsIdleOff": true,
+  "top": [
+    "Atlas",
+    "Postcard",
+    "Settings"
+  ],
+  "errors": []
+}

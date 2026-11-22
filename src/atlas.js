@@ -167,10 +167,7 @@ export function createAtlas(s, c) {
   function mode() {
     const drift = c.mode === 'drift'||c.mode==='voyage';
     $('stage').classList.toggle('drifting', drift);
-    const button = $('step-inside');
-    button.querySelector('span').textContent = drift ? 'Rise out' : 'Step inside';
-    button.querySelector('kbd').textContent = drift ? 'Esc' : 'D';
-    button.title = drift ? 'Rise out (Esc)' : 'Step inside (D)';
+
   }
   toggle.onchange = () => {
     enabled = toggle.checked;
@@ -206,9 +203,15 @@ export function createAtlas(s, c) {
       transiting: science.transiting?.name ?? null, wedges: science.wedges }; } };
 }
 
-export function drawHelp() {
+export function drawHelp(mode='bench', playing=false) {
   const contents = $('help-groups');
-  for (const [name, rows] of Object.entries(helpGroups)) {
+  const groups=mode==='voyage'?{Film:playing?[
+    ['Drag','Look around'],['Click / 1–7','Drop ink / choose ink'],['Space','Pause or resume'],
+    ['← / →','Previous or next shot'],['WASD','Take the helm'],['P','Postcard'],['Esc','Return to Bench']
+  ]:[['Select a film','Start watching'],['D','Fly in Drift'],['Esc','Return to Bench']]}:
+    mode==='drift'?{Drift:helpGroups.Drift.slice(0,-2)}:Object.fromEntries(Object.entries(helpGroups).filter(([name])=>name!=='Drift'));
+  contents.replaceChildren();
+  for (const [name, rows] of Object.entries(groups)) {
     const heading = document.createElement('h3'), list = document.createElement('dl');
     heading.textContent = name;
     for (const [key, description] of rows) {

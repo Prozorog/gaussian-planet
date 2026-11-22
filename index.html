@@ -106,7 +106,7 @@
           ink.strokeStyle='#fff';ink.lineWidth=sealWidth*(.038+i*.007)*Math.sin(Math.PI*reveal);
           if(ink.lineWidth>.08)ink.stroke();
         }
-        if(reveal===1){finished=true;screen.hidden=true;clear();performance.mark('first-light-revealed');return;}
+        if(reveal===1){finished=true;screen.hidden=true;clear();performance.mark('first-light-revealed');window.dispatchEvent(new Event('first-light-revealed'));return;}
       }
       requestAnimationFrame(paint);
     }
@@ -131,11 +131,9 @@
     paint(start);performance.mark('first-light-first-frame');
   })();
 </script>
-<main id="stage" inert aria-label="The marbler’s orrery"><canvas id="sky" aria-label="Marbled star system. Use the ink bench below or press H for controls." tabindex="0"></canvas><canvas id="gesture" aria-hidden="true"></canvas><div id="cursor" aria-hidden="true"></div>
+<main id="stage" data-mode="voyage" inert aria-label="The marbler’s orrery"><canvas id="sky" aria-label="Marbled star system. Use the ink bench below or press H for controls." tabindex="0"></canvas><canvas id="gesture" aria-hidden="true"></canvas><div id="cursor" aria-hidden="true"></div>
 <nav id="sky-tools" aria-label="Sky tools">
-  <button id="step-inside" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="16" rx="9" ry="3.1"/><path d="M12 2v11m-3.2-3.3L12 13l3.2-3.3"/></svg><span>Step inside</span><kbd>D</kbd></button>
-  <button id="voyage-toggle" type="button" aria-expanded="false" aria-controls="voyage-list" title="Voyage (V)">Voyage <kbd>V</kbd></button>
-  <button id="timeline-toggle" type="button" aria-expanded="false" aria-controls="timeline" title="Timeline (T)">Timeline</button>
+
   <button id="book-toggle" type="button" aria-controls="atlas" aria-expanded="false" aria-label="Sky Atlas" title="Sky Atlas (B)">Atlas</button>
   <button id="postcard-toggle" type="button" aria-haspopup="dialog" aria-controls="postcard" title="Postcard (P)">Postcard</button>
   <details id="settings"><summary title="Settings and controls (H)">Settings</summary><section>
@@ -150,9 +148,16 @@
     <label>Start voyages when idle<input id="voyage-idle" type="checkbox" checked></label>
     <label>Voyage cinema bars<input id="voyage-cinema" type="checkbox" checked></label>
     <details id="credits"><summary>Credits</summary><ul></ul></details>
-    <div id="help-groups"></div>
+    <button id="help-toggle" class="chip control-chip" type="button">Controls <kbd>H</kbd></button>
   </section></details>
 </nav>
+<nav id="mode-bar" aria-label="Mode">
+  <button id="voyage-toggle" data-select="voyage" aria-expanded="false" aria-controls="voyage-list">Voyage</button>
+  <button id="step-inside" data-select="drift" title="Drift (D)">Drift</button>
+  <button id="bench-mode" data-select="bench" title="Bench (Esc)">Bench</button>
+</nav>
+<aside id="mode-help" hidden aria-labelledby="help-title"><button id="help-close" aria-label="Close controls">×</button><h2 id="help-title"></h2><div id="help-groups"></div></aside>
+<p id="mode-hint" role="status"></p>
 <section id="voyage-list" aria-labelledby="voyage-title" hidden><h2 id="voyage-title">Voyages</h2><div></div></section>
 <div id="voyage-bands" aria-hidden="true"></div>
 <div id="voyage-log" aria-live="polite"></div>
@@ -187,7 +192,7 @@
   <input id="world-dial" type="range" min="-1" max="1" step=".01" value="0" hidden>
   <button id="leave-world" type="button" class="chip control-chip" hidden>Rise to orbit <kbd>Esc</kbd></button>
 </div>
-<footer><div class="bench" role="group" aria-label="Marbling inks"><div class="legend"><svg viewBox="0 0 22 25" aria-hidden="true" fill="none" stroke="currentColor"><path d="M11 2C9 7 4 12 4 16a7 7 0 0 0 14 0c0-4-5-9-7-14Z"/><path d="M6.7 15.9a4.6 4.6 0 0 0 7.5 3.7"/></svg><span>Ink bench</span></div><div id="inks"></div><button id="chime-toggle" class="chip control-chip" type="button" aria-pressed="true" title="Chime line (G)">Chime line <kbd>G</kbd></button></div><div id="verbs" aria-label="Gestures to try"></div></footer>
+<footer><div class="bench" role="group" aria-label="Marbling inks"><div class="legend"><svg viewBox="0 0 22 25" aria-hidden="true" fill="none" stroke="currentColor"><path d="M11 2C9 7 4 12 4 16a7 7 0 0 0 14 0c0-4-5-9-7-14Z"/><path d="M6.7 15.9a4.6 4.6 0 0 0 7.5 3.7"/></svg><span>Ink bench</span></div><div id="inks"></div><button id="timeline-toggle" class="chip control-chip" type="button" aria-expanded="false" aria-controls="timeline" title="Timeline (T)">Timeline <kbd>T</kbd></button><button id="chime-toggle" class="chip control-chip" type="button" aria-pressed="true" title="Chime line (G)">Chime line <kbd>G</kbd></button></div><div id="verbs" aria-label="Gestures to try"></div></footer>
 <p id="error" role="alert" hidden></p></main>
 <dialog id="postcard" aria-labelledby="postcard-title">
   <header><h2 id="postcard-title">Postcard</h2><button id="postcard-close" type="button" aria-label="Close postcard">×</button></header>

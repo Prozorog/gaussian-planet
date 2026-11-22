@@ -12,6 +12,7 @@ export function createCamera(){
   carry={inside:pose.inside,shift:pose.shift,bank:pose.bank,first:true};
  }
  function tick(t,dt,aspect,shake){now=t;c.aspect=aspect;const k=1-Math.exp(-dt*9);c.yaw+=(c.targetYaw-c.yaw)*k;c.pitch+=(c.targetPitch-c.pitch)*k;let pitch=c.pitch*DEG,yaw=c.yaw+.1745*Math.sin(t*Math.PI/20),dist=16/c.zoom,ax=0,ay=-.08,az=0,shift=-.07;
+  if(c.mode==='overview'&&c.picker){dist=18.2/c.zoom;pitch=33*DEG;ay=-.60;shift=0;}
   if(c.mode==='planet'&&c.focus){const b=c.focus;yaw=c.baseYaw+c.portraitYaw+.023*(t-c.arrival);pitch=(c.pitch-22)*DEG;dist=b.r*5.14/c.zoom;ax=b.x;ay=b.y;az=b.z;shift=.085;}
   if(c.mode==='poster'){
     yaw=.05;pitch=20*DEG;ay=0;

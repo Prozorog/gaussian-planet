@@ -99,9 +99,9 @@ export function createInteriors(s, drift, audio, discover) {
     const candidate=w.body||riding||(nearby?drift.near:null);
     const active=!!w.body;
     const eligible=candidate&&interiors[candidate.kind]&&!candidate.creature;
-    panel.hidden=!(active||riding||nearby);
-    ride.hidden=active||!(riding||nearby);
-    dive.hidden=active||!riding||!eligible;
+    panel.hidden=!inDrift;
+    ride.hidden=active;ride.disabled=!(riding||nearby);
+    dive.hidden=active;dive.disabled=!riding||!eligible;
     exit.hidden=!active;action.hidden=!active;
     dial.hidden=!(active&&interiors[candidate.kind].dial);
     action.disabled=active&&(w.inside<.80||w.leaving);
