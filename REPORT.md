@@ -622,3 +622,32 @@ The automatic cards that appeared were How planets are born, Equal areas, Habita
 - **Stage 5.** A few background lines still widen beyond two pixels under the strongest magnification.
 - **Stage 6.** The poster missed the dark ceiling and gold floor by the margins above. Shell patches sometimes cover the core.
 - **Stage 7.** The rosette’s fine trace can be hard to pick out over a bright band.
+
+## Phase 4.2 · The Director's Cut
+
+### Stage 1 · The film programme
+
+The waypoint controller could spend a whole shot turning toward a world it never reached. The director now evaluates seven parameterised camera moves around live subjects. It overlaps the moves through a travelling two-subject composition, scouts approach angles against neighbouring bodies and withdraws cloud islands in pigment bands. A film uses the 36° lens and a level horizon. Orbital dynamics advance at 14% of the selected rate during a film so that the moving subjects remain recognisable. The helm inherits the camera position and heading. The measured handoff position error was zero.
+
+At 36°, the diameter of a sphere 2.2 radii from the eye spans about 157% of the height. I used screen height to set the hero distance, about 5.2 radii for a 60% portrait. The first trial showed foreground occlusions and a blank frame on the way to Ember. I adjusted the approach-angle selection, how the incoming and outgoing paths meet, the exposure of the solar corona and the amount of clear space around a cloud.
+
+**Sun Dive ships.** Grand Tour, Ring Run, The Life of a Star, Leviathan Song, Into the Dark and Endless voyage missed a gate on the second audit. The programme omits them. Sun Dive supplies the default and idle film. The original timelines and the black hole remain available in manual play.
+
+| Voyage and strip | Dark range | Min visible | Off screen | Sheet gap | Crossings | Hero heights | Turn °/s median / p95 | Stopped | Decision |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| [Grand Tour](output/playwright/phase42/s1-grand-strip.png) | 24.5–51.0% | 0.2% | 0 | 0.50 | 0 | 60.5%, 60.5%, 61.2%, 61.3%, 61.5% | 6.1 / 16.7 | 0 | Remove |
+| [Sun Dive](output/playwright/phase42/s1-sun-strip.png) | 22.0–42.1% | 83.4% | 0 | 0.50 | 0 | — | 2.3 / 9.1 | 0 | Ship |
+| [Ring Run](output/playwright/phase42/s1-rings-strip.png) | 5.8–43.0% | 51.8% | 0 | 0.18 | 1 | 61.1% | 3.6 / 25.5 | 0 | Remove |
+| [The Life of a Star](output/playwright/phase42/s1-life-strip.png) | 16.6–61.5% | 0.0% | 0 | 0.08 | 1 | 35.0% | 1.2 / 10.3 | 0 | Remove |
+| [Leviathan Song](output/playwright/phase42/s1-song-strip.png) | 25.7–50.2% | 94.2% | 0 | 0.67 | 0 | — | 3.4 / 18.1 | 0 | Remove |
+| [Into the Dark](output/playwright/phase42/s1-dark-strip.png) | 16.1–39.9% | 36.2% | 0 | 0.67 | 0 | 54.6% | 3.3 / 6.2 | 0 | Remove |
+| [Endless voyage](output/playwright/phase42/s1-endless-strip.png) | 18.7–47.3% | 0.0% | 1 | 0.50 | 0 | 61.5%, 61.5%, 61.5%, 61.5% | 3.6 / 17.6 | 0 | Remove |
+
+The page advanced the moving system at 60 Hz and read the actual rendered frame at three-second intervals, with additional opening and closing samples. The dark share uses a 160 × 90 canvas and Rec. 709 luma below 25. Subject visibility compares a tagged scene render with the same isolated geometry at 320 × 180. For the hole it measures the black horizon disc. Limb shots evaluate the visible limb. A wide shot uses the star as its anchor. The sheet distance includes the finite edge at radius 15.5. A cloud whose bounding surface comes within 0.34 of the eye-to-subject segment dissolves completely. The JSON retains the more conservative distance to the unculled cloud bounds. Camera turns and stops use all simulated frames. Endless was sampled for 150 seconds with a fixed seed. Hero heights follow the shot order. Samples and strips are evidence for those runs only.
+
+I inspected all eight frames of each strip at the stored 480 × 270 size. Sun Dive keeps the star, Ember or the disc legible at each stop. The rejected Life strip includes a featureless pale frame, Endless crosses a foreground body, and several swimmers disappear against the sea even when their pixels are visible. The worst turn in the 95th percentile was Ring Run’s 25.5°/s.
+
+The film hides the bench, chips, discovery UI and top toolbar. The caption uses a subject title and a separate fact line. The transport appears on activity and carries the progress ticks. Chrome exercised the three transport buttons, Take the helm, drag, ink selection and click, keyboard shot navigation, pause, postcard and Escape. The production build passed. The Browser plugin was unavailable, so these measurements use the installed Chrome through Playwright.
+
+[Caption](output/playwright/phase42/s1-caption.png) · [Transport](output/playwright/phase42/s1-transport.png) · [Audit table](output/playwright/phase42/s1-table.png) · [Control measurements](output/playwright/phase42/s1-controls.json).
+

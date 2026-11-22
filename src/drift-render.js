@@ -1,5 +1,6 @@
 import {program,texture,mapTexture,draw} from './gl.js';
 import {sheetHeights,clouds,activeClouds} from './drift.js';
+import {subjectOf} from './voyage.js';
 import common from './shaders/ink.glsl?raw';
 import vertex from './shaders/world.vert.glsl?raw';
 import surface from './shaders/drift.glsl?raw';
@@ -25,6 +26,8 @@ export function driftRenderer(gl,mesh,frame,at) {
   function surfaces(s,c,picking=false) {
     const l=frame(skin,s,c),d=c.drift;
     gl.uniform1f(l.inside,c.inside);gl.uniform1i(l.picking,picking?1:0);
+    const subject=c.mode==='voyage'&&s.voyage.shot?subjectOf(s,s.voyage.shot.subject):null;
+    gl.uniform4fv(l.filmSubject,subject?[subject.x,subject.y,subject.z,subject.r*(subject.creature?1.85:1)]:[0,0,0,-1]);
     const marks=d.ripples.filter(m=>!m.crossing||s.t-m.at<2.5);
     for(let i=0;i<marks.length;i++){
       const m=marks[i];positions.set(m.point,i*4);states.set([m.id,m.ink,m.at,Number(m.crossing)],i*4);

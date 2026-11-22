@@ -1,4 +1,5 @@
 in vec3 local,world;
+uniform vec4 filmSubject;
 uniform vec3 eye,center,cloudSize;
 uniform int surfaceID,pigment,markCount,starHue;
 uniform bool picking;
@@ -103,6 +104,22 @@ void main(){
   }
   float band=floor(clamp(v,0.,.999)*9.);
   float reveal=cloud?min(inside,clamp((dist-.026)/.091,0.,1.)):inside;
+  if(filmSubject.w>0.){
+    vec3 ray=filmSubject.xyz-eye;
+    float along=clamp(dot(world-eye,ray)/max(.001,dot(ray,ray)),0.,1.);
+    float clearance=length(world-eye-along*ray);
+    float aperture=mix(.48,filmSubject.w*1.33+.14,along);
+    // Withdraw successive pigment bands as an island enters the camera rail.
+    float keep=smoothstep(aperture,aperture+(cloud?.98:.65),clearance);
+    if(cloud){
+      float size=max(cloudSize.x,max(cloudSize.y,cloudSize.z))*1.17;
+      float u=clamp(dot(center-eye,ray)/max(.001,dot(ray,ray)),0.,1.);
+      float gap=length(center-eye-u*ray)-size;
+      keep=smoothstep(.34+u*filmSubject.w,1.65+u*filmSubject.w,gap);
+    }
+    else if(world.y>eye.y)keep*=smoothstep(4.,10.,dist)*.43;
+    if(band>=ceil(9.*keep))discard;
+  }
   float streamline=lineAt(thread,1.24);
   float openSpace=.084+life.z*(cloud?.74:.30)+life.w*.26;
   if(coverage<openSpace||band>=ceil(9.*reveal))discard;

@@ -55,6 +55,7 @@ const voyage=bindVoyage(s,camera,{
   canIdle:()=>!postcard.visible&&!help.open&&!atlas.open&&!gesture&&!document.hidden,
 });
 s.voyage=voyage;
+s.onFilmCross=position=>{drift.ripple(4,[position[0],.68,position[2]],4,true);audio.splash();};
 $('#creatures-toggle').checked=creatures.enabled;
 $('#creatures-toggle').onchange=e=>creatures.enable(e.target.checked);
 const postcard=createPostcard({

@@ -33,7 +33,7 @@ export function createRenderer(canvas){const gl=canvas.getContext('webgl2',{powe
  const remap=new Float32Array([0,0,1,0]),sun=new Float32Array([0,0,1/8.4,0]),core=new Float32Array([0,0,.03125,0]),positions=new Float32Array(48),forces=new Float32Array(48),orbits=new Float32Array(40),marks=new Float32Array(48),info=new Float32Array(48);let count=0,elapsed=0,w=1,h=1,pendingReset=false,lastEpoch=0;
  function source(x,z,r,id,vx,vz,d,twist){if(count>=12)return;const k=count++*4;positions[k]=x/SPAN;positions[k+1]=z/SPAN;positions[k+2]=r/SPAN;positions[k+3]=id;forces[k]=vx/SPAN;forces[k+1]=vz/SPAN;forces[k+2]=d;forces[k+3]=twist;}
  function bindWorld(){texture(gl,4,fiber);texture(gl,5,ramp);texture(gl,6,fluid.dye);texture(gl,7,fluid.velocity);texture(gl,8,plate.image);texture(gl,10,red);texture(gl,11,green);}
- function frame(prog,s,c){const l=prog.use();gl.uniform2f(l.viewport,w,h);gl.uniform1f(l.time,s.t);gl.uniform1f(l.density,s.density);gl.uniform1i(l.paper,4);gl.uniform1i(l.inks,5);gl.uniform1i(l.dye,6);gl.uniform1i(l.velocity,7);gl.uniform1i(l.plate,8);gl.uniform1i(l.redLattice,10);gl.uniform1i(l.greenLattice,11);gl.uniform1i(l.finePaper,c.inside>.01?1:0);gl.uniformMatrix4fv(l.vp,false,c.matrix);gl.uniform3fv(l.right,c.right);gl.uniform3fv(l.up,c.up);gl.uniform3fv(l.eye,c.eye);gl.uniform1i(l.starHue,s.hue);gl.uniform4f(l.life,s.life?.young??0,s.life?.red??0,s.life?.shells??0,s.life?.white??0);return l;}
+ function frame(prog,s,c){const l=prog.use();gl.uniform2f(l.viewport,w,h);gl.uniform1f(l.time,s.t);gl.uniform1f(l.density,s.density);gl.uniform1f(l.filmSky,c.mode==='voyage'?1:0);gl.uniform1i(l.paper,4);gl.uniform1i(l.inks,5);gl.uniform1i(l.dye,6);gl.uniform1i(l.velocity,7);gl.uniform1i(l.plate,8);gl.uniform1i(l.redLattice,10);gl.uniform1i(l.greenLattice,11);gl.uniform1i(l.finePaper,c.inside>.01?1:0);gl.uniformMatrix4fv(l.vp,false,c.matrix);gl.uniform3fv(l.right,c.right);gl.uniform3fv(l.up,c.up);gl.uniform3fv(l.eye,c.eye);gl.uniform1i(l.starHue,s.hue);gl.uniform4f(l.life,s.life?.young??0,s.life?.red??0,s.life?.shells??0,s.life?.white??0);return l;}
  function at(l,shape,x,y,z,r){gl.uniform3f(l.center,x,y,z);gl.uniform1f(l.radius,r);gl.uniform1i(l.shape,shape);}
  const interior=driftRenderer(gl,mesh,frame,at);
  const horizon=horizonRenderer(gl,frame);
@@ -100,7 +100,7 @@ export function createRenderer(canvas){const gl=canvas.getContext('webgl2',{powe
   globe(0,0,0,rs,0,s.hue,s.hue,s.hue,s.t*.018,0,false);gl.uniform1iv(l.ids,[s.hue===8?8:0,0,0]);gl.uniform1i(l.pass,4);at(l,4,0,0,0,rs);if(rs>.30)for(let j=0;j<7;j++){gl.uniform1f(l.param,j+.67);mesh.ribbon();}
   for(const e of s.events){const a=s.t-e.at;if(e.type==="engulf"&&a<.75)globe(...engulfPoint(e,a,rs),e.size*.25*(1-a/.76),6,e.id,e.id,e.id,s.t*.1,1,false);}
   if(!poster){for(const b of (s.sceneBodies??s.bodies)){
-    const weather=b.kind===4&&c.inside>.96&&Math.hypot(c.eye[0]-b.x,c.eye[1]-b.y,c.eye[2]-b.z)<b.r*3.55;
+    const weather=b.kind===4&&(c.mode!=='voyage'||s.voyage?.shot?.bands)&&c.inside>.96&&Math.hypot(c.eye[0]-b.x,c.eye[1]-b.y,c.eye[2]-b.z)<b.r*3.55;
     if(weather){
       gl.uniform1i(l.pass,5);gl.uniform1iv(l.ids,[b.id,b.id,b.id]);
       for(const [height,current] of [[1.77,-.53],[1.28,1.83]]){
@@ -138,7 +138,7 @@ export function createRenderer(canvas){const gl=canvas.getContext('webgl2',{powe
   if(!poster){for(const b of (s.sceneBodies??s.bodies)){const toy=b.original?.toy??b.toy;if(b.kind===5&&toy?.power){effect(0,2,b.x+b.r*.50,b.y+b.r*1.14,b.z,b.r*.66,8,3,0,0,1,.060,s.t*.16);}}for(const b of (s.sceneBodies??s.bodies))if(b.comet){const v=Math.hypot(b.vx,b.vz),dx=b.vx/v,dz=b.vz/v;effect(0,1,b.x-dx*.94,b.y,b.z-dz*.94,1.4,b.id,b.id,0,dx,dz,b.r*.29);}const comet=(s.t+4)%49;if(comet<5){effect(0,1,comet*3.3-9,.9,-4+comet*.5,1.1,6,6,0,.99,.15,.07);}}
   for(const e of s.events){const a=s.t-e.at;if(e.type==='engulf'&&a<1.22)effect(1,2,...engulfPoint(e,a*.6,rs),e.size*(.4+a*1.2),e.id,0,a,0,0,.17,e.seed);else if(e.type==='shock'&&a<5.1)effect(2,2,0,.15,0,(.6+a*5.3),s.hue===8?8:0,4,a,0,0,.2,e.seed);else if(['collision','feed','birth','dissolve','impact','reignite','engulf','evaporate'].includes(e.type)&&a<2.35){effect(1,2,e.x,.26,e.z,e.size*(.40+1.35*Math.sqrt(a)),e.id,e.second,a,0,0,.2,e.seed);}}
   if((s.zone||s.zoneNote)&&!poster){const zone=s.zoneRadii();gl.depthMask(false);effect(3,1,0,-.135,0,zone[1],3,2,0,zone[0]/zone[1],0);gl.depthMask(true);}
-  gl.disable(gl.BLEND);for(const e of s.events)if(s.t-e.at<2.3&&['collision','feed','birth','shock','impact','reignite','flare','engulf','evaporate'].includes(e.type))dust.draw(s,c,2,e);gl.disable(gl.DEPTH_TEST);gl.bindVertexArray(null);if(c.mode==='drift')interior.veil(s,c);if(bent)horizon.end(s,c);if(s.worlds?.inside>0)printInterior(s,c);
+  gl.disable(gl.BLEND);for(const e of s.events)if(s.t-e.at<2.3&&['collision','feed','birth','shock','impact','reignite','flare','engulf','evaporate'].includes(e.type))dust.draw(s,c,2,e);gl.disable(gl.DEPTH_TEST);gl.bindVertexArray(null);if(c.mode==='drift'||s.voyage?.shot?.bands)interior.veil(s,c);if(bent)horizon.end(s,c);if(s.worlds?.inside>0)printInterior(s,c);
  }
  return {gl,render,sample,pickDrift(s,c,q){bindWorld();return interior.pick(s,c,q);},reset(){pendingReset=true;lastEpoch=-1;}};
 }

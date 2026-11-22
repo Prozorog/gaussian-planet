@@ -34,6 +34,15 @@
 #voyage-controls[hidden] { display:none }
 .voyaging :is(#sky-tools,footer,#timeline,#news,#voyage-controls,#rekindle) { transition:opacity .6s ease }
 .voyage-quiet :is(#sky-tools,footer,#timeline,#news,#voyage-controls,#rekindle) { opacity:0; visibility:hidden; transition:opacity .6s ease,visibility 0s .6s }
+.voyaging :is(#sky-tools,footer,#timeline,#news,#discovery,#sky-chart,#drift-hint,#world-controls,#plate,#rekindle,#cursor,#voyage-discovery){display:none!important}
+.voyaging #voyage-log{left:5.5%;bottom:12%;transform:none;text-align:left;max-width:min(36em,82vw);padding:0;background:transparent;text-shadow:0 2px 5px #100910,0 0 12px #100910}
+#voyage-log strong,#voyage-log span{display:block}
+#voyage-log strong{font:italic normal clamp(24px,2.2vw,34px)/1.2 Georgia,serif}
+#voyage-log span{font:normal clamp(14px,1.1vw,17px)/1.55 Georgia,serif}
+#voyage-controls{left:50%;bottom:5.25%;transform:translateX(-50%);align-items:center;justify-content:center;width:max-content;max-width:96%;padding:5px 9px;gap:6px;background:#140e18ed;border:1px solid #81675d;border-radius:4px}
+#film-name{font:italic 14px Georgia,serif;padding:0 5px;color:#f1dec4}
+#film-progress{width:clamp(36px,9vw,150px);height:3px;display:flex;gap:2px}
+#film-progress i{background:linear-gradient(to right,#efcb94 var(--played,0%),#645762 var(--played,0%))}
 .voyaging #sky:not(:focus-visible) { cursor:crosshair }
 .voyage-quiet #sky { cursor:none!important }
 @media(max-width:820px){ #voyage-controls{bottom:10.6%} #voyage-list button{padding:6px 2px} }

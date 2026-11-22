@@ -1,0 +1,22 @@
+const assert=require('node:assert/strict');
+const {browser,pageFor,write}=require('./lab.cjs');
+(async()=>{const b=await browser(false);try{
+ const {page,errors,snap,read}=await pageFor(b,true);
+ const drive=n=>page.evaluate(n=>{lab.drive(Math.round(n*60));lab.paint()},n),press=k=>page.keyboard.press(k);
+ await press('v');await page.locator('[data-voyage="sun"]').click();await drive(2);
+ await page.mouse.move(600,550);await page.waitForTimeout(800);await snap('s1-caption');await snap('s1-transport');
+ await page.locator('#voyage-next').click();assert.equal((await read()).voyage.shot,1);
+ await page.locator('#voyage-prev').click();assert.equal((await read()).voyage.shot,0);
+ await page.locator('#voyage-pause').click();await drive(.6);assert((await read()).voyage.paused);
+ await press('Space');assert(!(await read()).voyage.paused);
+ await press('ArrowRight');await press('ArrowLeft');
+ await page.mouse.move(800,530);await page.mouse.down();await page.mouse.move(895,540,{steps:5});await page.mouse.up();
+ await press('Digit3');await page.mouse.click(1120,760);await drive(.1);
+ await press('p');assert(await page.locator('#postcard').isVisible());await press('Escape');
+ await page.mouse.move(960,740);await page.locator('#voyage-helm').click();
+ assert.equal((await read()).mode,'drift');await press('Escape');await drive(2.1);assert.equal((await read()).mode,'overview');
+ await press('v');await page.locator('[data-voyage="sun"]').click();await drive(1);const origin=(await read()).drift;
+ await press('w');await drive(.017);const after=(await read()).drift;
+ const difference=Math.hypot(...origin.eye.map((x,i)=>x-after.eye[i]));assert(difference<.0001);
+ write('s1-controls',{positionError:difference,keys:['Space','ArrowRight','ArrowLeft','Digit3','P','Esc','W'],buttons:['Previous shot','Pause','Next shot','Take the helm'],errors});assert.equal(errors.length,0);
+}finally{await b.close()}})().catch(e=>{console.error(e);process.exitCode=1});

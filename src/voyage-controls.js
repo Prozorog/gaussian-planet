@@ -1,8 +1,9 @@
 import './voyage.css';
-import { createVoyageFlight, voyages } from './voyage.js';
+import { createVoyageFlight, subjectOf, voyages } from './voyage.js';
 
 const storage='gaussian-planet.voyage.v1';
 const $=id=>document.getElementById(id);
+const defaultVoyage=voyages[0].id;
 const duration=seconds=>seconds?Math.floor(seconds/60)+':'+String(seconds%60).padStart(2,'0'):'Continuous';
 
 export function bindVoyage(s,c,{begin,helm,canIdle}) {
@@ -12,6 +13,7 @@ export function bindVoyage(s,c,{begin,helm,canIdle}) {
   const stage=$('stage'),list=$('voyage-list'),button=$('voyage-toggle');
   const controls=$('voyage-controls'),caption=$('voyage-log'),mark=$('voyage-discovery');
   const idle=$('voyage-idle'),cinema=$('voyage-cinema'),pause=$('voyage-pause');
+  const title=document.createElement('strong'),fact=document.createElement('span');caption.replaceChildren(title,fact);
   let flight=null,lastInput=s.t,markUntil=0,captionStart=-10;
   idle.checked=saved.idle!==false;cinema.checked=saved.cinema!==false;
   function save() {
@@ -54,15 +56,17 @@ export function bindVoyage(s,c,{begin,helm,canIdle}) {
     stage.classList.add('voyaging');controls.hidden=false;
     pause.textContent='Pause';
     const transition=createVoyageFlight(s,initial,definition,shot=>{
-      caption.textContent=shot.caption;captionStart=s.t;caption.classList.add('visible');
+      title.textContent=shot.title;fact.textContent=shot.fact;captionStart=-1;caption.classList.remove('visible');
     });
     flight=transition;
+    $('film-name').textContent=definition.name;
+    $('film-progress').replaceChildren(...transition.seconds.map(seconds=>{const tick=document.createElement('i');tick.style.flexGrow=seconds;return tick;}));
     begin(transition.pose);
   }
   function take(complete=false){
     if(!flight)return;
     if(complete){
-      if(flight.definition.id==='life')s.life.seek(1);
+
       completed.add(flight.definition.id);
       save();
     }
@@ -71,6 +75,7 @@ export function bindVoyage(s,c,{begin,helm,canIdle}) {
     helm(pose,velocity);
   }
   function stop(){
+    if(flight?.definition.id==='life')s.life.seek(1);
     flight=null;
     caption.classList.remove('visible');mark.classList.remove('visible');
     controls.hidden=true;
@@ -84,9 +89,9 @@ export function bindVoyage(s,c,{begin,helm,canIdle}) {
   function skip(offset){if(flight){flight.skip(offset);activity();}}
   function auto(){
     if(!idle.checked||!canIdle()||!list.hidden)return;
-    if(c.mode==='overview'&&!c.flying&&s.t-lastInput>=90)start('endless');
+    if(c.mode==='overview'&&!c.flying&&s.t-lastInput>=90)start(defaultVoyage);
     if(c.mode==='drift'&&!c.flying&&!c.drift.ride&&!s.worlds.body&&
-      s.t-Math.max(c.drift.lastInput,lastInput)>=8)start('endless');
+      s.t-Math.max(c.drift.lastInput,lastInput)>=8)start(defaultVoyage);
   }
   button.onclick=toggle;$('voyage-prev').onclick=()=>skip(-1);
   $('voyage-next').onclick=()=>skip(1);pause.onclick=togglePause;
@@ -97,9 +102,18 @@ export function bindVoyage(s,c,{begin,helm,canIdle}) {
     tick(dt){
       if(!flight)return;
       stage.classList.toggle('voyage-quiet',s.t-lastInput>3&&list.hidden&&canIdle());
-      caption.classList.toggle('visible',s.t-captionStart<5);
+      const subject=subjectOf(s,flight.shot.subject);
+      if(captionStart<0&&subject&&flight.shotTime>1.1){
+        const [x,y,z]=c.project(subject.x,subject.y,subject.z);
+        if(z>0&&Math.abs(x)<.87&&(Math.abs(y)<.95||flight.shot.move==='F'))captionStart=s.t;
+      }
+      caption.classList.toggle('visible',captionStart>=0&&s.t-captionStart<6);
+      const ticks=$('film-progress').children;
+      for(let i=0;i<ticks.length;i++)ticks[i].style.setProperty('--played',(i<flight.index?100:i===flight.index?100*flight.shotTime/flight.shot.seconds:0)+'%');
       mark.classList.toggle('visible',s.t<markUntil);
+      const oldHeight=flight.pose.position[1];
       c.voyagePose=flight.tick(dt);
+      if(flight.shot.bands&&oldHeight<.68&&flight.pose.position[1]>=.68)s.onFilmCross?.(flight.pose.position);
       if(flight.finished)take(true);
     },
     look(dx,dy){flight?.look(dx,dy);activity();},

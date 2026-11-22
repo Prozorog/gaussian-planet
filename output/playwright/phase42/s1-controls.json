@@ -1,0 +1,19 @@
+{
+  "positionError": 0,
+  "keys": [
+    "Space",
+    "ArrowRight",
+    "ArrowLeft",
+    "Digit3",
+    "P",
+    "Esc",
+    "W"
+  ],
+  "buttons": [
+    "Previous shot",
+    "Pause",
+    "Next shot",
+    "Take the helm"
+  ],
+  "errors": []
+}
