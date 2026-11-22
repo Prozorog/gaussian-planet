@@ -330,7 +330,7 @@ The production build passed with `heavy npm run build`. The project’s existing
 
 ## Phase 4 · The Whole Sky
 
-[Play First Light](http://localhost:4104/). This section records the seven stages in commit order. The Phase 1–3 notes above are historical.
+[Play First Light](http://localhost:4104/). The kept Vite server uses port 4104 because the old port was taken during this run. This section records the seven stages in commit order. The Phase 1–3 notes above are historical.
 
 ### Stage 0 · English and close-range engraving
 
@@ -402,3 +402,80 @@ The production build passed with `heavy npm run build`. The project’s existing
 - Fish flock in three instanced schools. They follow new ink, take its palette and leave local bites in the plate. Combing and flinging scatter them. Three distinct inks fed to a swimmer produce a calf that follows it. Swimmers dive during the supernova, circle clear of the black hole, migrate outward in the red giant chapter and leave two etched outlines in the white dwarf chapter. The overview runs 300 fish on High and 150 on Low, with 21 in the white dwarf chapter.
 - Chrome exercised the Settings switch, all three feed inks, the calf, fish bites, a comb scatter, **F** and the nova dive and return. It observed the breach and the chapter changes. The production build passed, and the control run recorded zero page errors.
 - The breach overview measured 80.59% vivid among lit pixels, 42.91% dark and 1.03% cream. The white dwarf frame measured 74.25% dark. [Breach](output/playwright/phase4/s5-breach.png) · [School feeding](output/playwright/phase4/s5-feeding.png) · [Riding Sable](output/playwright/phase4/s5-ride.png) · [White dwarf creatures](output/playwright/phase4/s5-white.png) · [Control run](output/playwright/phase4/stage5.json).
+
+### Stage 6 · Postcards
+
+- **Postcard** and **P** freeze the scene. Drag the preview to reframe, choose the aspect ratio, and edit the system name. The cream border prints the name in serif italic, followed by the current chapter, the local date and the Gaussian Planet mark. **Plain** removes the paper and lettering.
+- I render the frozen scene again at the picture’s pixel dimensions with a reframed projection and resolution-scaled ink lines. The full card measures exactly 3840 × 2160, 2160 × 3840, or 2880 × 2880. The postcard uses the live camera and works inside a world as well as from the overview and nebula print.
+- **Record 10 s clip** renders a live 1080 × 1920 view and includes the WebAudio mix. Chrome verified a 10.002-second file with VP8 video and Opus audio. The dialog displays the music credit beside the recording control. Chrome also verified a frozen scene clock, a drag, an edited name, all three PNG downloads, a plain download and return to the same view. The production build passed and the export run recorded zero page errors.
+- [Dialog](output/playwright/phase4/s6-dialog.png) · [16:9 First Light](output/playwright/phase4/s6-wide.png) · [9:16 planetary nebula](output/playwright/phase4/s6-nebula-vertical.png) · [1:1 Aurelia](output/playwright/phase4/s6-aurelia-square.png) · [Plain Aurelia](output/playwright/phase4/s6-plain.png) · [Vertical WebM](output/playwright/phase4/s6-clip.webm) · [Export measurements](output/playwright/phase4/stage6.json).
+
+### The 28 Atlas notes
+
+Discoveries persist under the existing save key. The full counter spans **Orbits**, **The star**, **Life of the star**, **Black hole**, **Worlds** and **Music**.
+
+| # | Note | Trigger |
+|---:|---|---|
+| 1 | Equal areas | Press K or sustain an elliptical orbit after a fling. |
+| 2 | Farther means slower | Increase orbital time with ]. |
+| 3 | Escape speed | Preview a fling or see a flung world go outbound. |
+| 4 | Gravity assist | A flung world gains speed and orbital energy passing a moving world. |
+| 5 | Giant impacts | Two similar worlds merge. |
+| 6 | The Roche limit | A smaller body breaks up into a ring. |
+| 7 | How planets are born | Start a birth vortex or finish forming a world. |
+| 8 | Colour is temperature | The star reignites. |
+| 9 | Supernova | The expanding shock begins. The note now points to the timeline. |
+| 10 | Flares and auroras | Stellar ejecta reach a planet. |
+| 11 | A planet in transit | A foreground world blocks part of the star. |
+| 12 | Habitable zone | Press Z or form or settle a world in the band. |
+| 13 | The Sun’s surface | Approach the photosphere in Drift or open the solar print. |
+| 14 | Day, night and sunrise | Attach to a planet in Drift. |
+| 15 | Orbital resonance | Two periods stay within the ratio tolerance for two outer orbits. |
+| 16 | The music of the spheres | Hear a fifth chime or press G. |
+| 17 | Red giant | Enter the Red giant chapter. |
+| 18 | Planetary nebula | Enter the Planetary nebula chapter. |
+| 19 | White dwarf | Enter the White dwarf chapter. |
+| 20 | Black holes and the event horizon | Form a black hole with Void. |
+| 21 | Gravity bends light | Move the black hole in front of the star or a planet. |
+| 22 | Accretion discs and jets | See the first jets after a meal. |
+| 23 | Stretched by tides | A planet starts stretching into a thread. |
+| 24 | Storms on gas giants | Stir a storm on Aurelia. |
+| 25 | Tides | Move the moon on Tide. |
+| 26 | Volcanoes powered by tides | Raise Ember’s first fountain. |
+| 27 | Why there are seasons | Change Verdance’s tilt. |
+| 28 | Geysers on an ice moon | Wake the first geyser on Vesper. |
+
+### Final performance
+
+These are 1920 × 1080 Chrome app-frame readings over approximately 1.75 seconds in each scene. The accretion disc spanned about 705 pixels on High and 702 on Low, roughly 37% of the frame width. All three fish schools fit in the fish test. High drew 300 fish and Low drew 150. Low reduced the fluid and crowd budgets while retaining the colour steps and line widths.
+
+| Case | RTX 4070 Laptop · High | Iris Xe · Low |
+|---|---:|---:|
+| Planetary nebula overview | 144.37 fps | 126.96 fps |
+| Black hole and accretion disc | 144.27 fps | 96.73 fps |
+| Inside Aurelia | 139.33 fps | 144.28 fps |
+| Ink fish | 144.31 fps | 107.34 fps |
+| Plain Drift | 138.68 fps | 99.48 fps |
+
+- High used `ANGLE (NVIDIA, NVIDIA GeForce RTX 4070 Laptop GPU (0x00002860) Direct3D11 vs_5_0 ps_5_0, D3D11)`.
+- Low used `ANGLE (Intel, Intel(R) Iris(R) Xe Graphics (0x000046A6) Direct3D11 vs_5_0 ps_5_0, D3D11)`.
+
+[High readings](output/playwright/phase4/performance-high.json) · [Low readings](output/playwright/phase4/performance-low.json).
+
+### Final play and language check
+
+- The 300.02-second Chrome session used the public controls for marbling, orbits, the solar print, Drift, Aurelia’s storm, the star’s five chapters, the black hole, feeding, the Atlas and postcards. It recorded zero page errors and zero failed actions. The Atlas count and the six tabs accounted for all 28 entries.
+- Twenty automatic notes appeared, in this order. How planets are born, The music of the spheres, Equal areas, Farther means slower, A planet in transit, Giant impacts, Habitable zone, Escape speed, The Sun’s surface, Orbital resonance, Day, night and sunrise, Storms on gas giants, Red giant, Planetary nebula, White dwarf, Black holes and the event horizon, Stretched by tides, Accretion discs and jets, Gravity bends light, and Colour is temperature.
+- A separate near-tail seek exercised the Frozen Star loop. Chrome measured both streaming decks playing the same track with live gain at the midpoint and a single deck playing from the start after the fade. The source and production bundle contained zero Cyrillic characters. The live page text passed the same check.
+- The final focused check started the full film from Red giant, paused and resumed it, then used **M** in the open postcard dialog. The final build passed again.
+- [Play session and note timestamps](output/playwright/phase4/natural-play.json) · [Atlas tabs](output/playwright/phase4/atlas-topics.json) · [Music loop](output/playwright/phase4/music-loop.json) · [Final controls](output/playwright/phase4/final-controls.json).
+
+### NOT done / still weak
+
+- **Stage 0.** Very shallow ring strands can still stairstep. The repaired cloud frame has 9.29% cream, mostly from Azure’s brightest bands. The broad Bayer screen-door pattern is gone.
+- **Stage 1.** The resonant lock is based on the toy’s settled mean periods and draws the actual motion. The demo verifies playback and chime controls in Chrome. Listening comfort over all five full tracks is unmeasured.
+- **Stage 2.** The white dwarf in the moving film missed the cream floor at 0.21%. The standalone white dwarf frame measured 0.30%. The nebula has hard ribs at a few shell tangencies in the poster.
+- **Stage 3.** The background mesh and sheet samples show some stair-stepping at strong bends. The procedural sky is evaluated at the deflected coordinates. The accretion arcs are an illustrative projection.
+- **Stage 4.** Tide’s dark share reached 41.35% on arrival and 41.23% in the toy view. Ember reached 43.74% and 42.00%. Those frames exceeded the 40% ceiling. Verdance at the maximum captured tilt reached 46.86% vivid among lit pixels against a 55% target. All five toys and their exterior state are present.
+- **Stage 5.** The rider passes close enough that the leviathan can fill the frame and overlap the near sheets. The ride print shows the close engraving and the active ride control. The white dwarf’s two large creatures draw as outlines, and its remaining small fish retain some bright ink.
+- **Stage 6.** PNGs and a WebM were verified in Chrome. Recording behaviour on other browsers is unmeasured.

@@ -103,7 +103,7 @@ void main(){
   }
   float band=floor(clamp(v,0.,.999)*9.);
   float reveal=cloud?min(inside,clamp((dist-.026)/.091,0.,1.)):inside;
-  float streamline=lineAt(thread,1.24*viewport.y/1080.);
+  float streamline=lineAt(thread,1.24);
   float openSpace=.084+life.z*.19+life.w*.26;
   if(coverage<openSpace||band>=ceil(9.*reveal))discard;
   if(picking){

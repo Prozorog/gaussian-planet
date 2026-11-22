@@ -171,13 +171,13 @@ export function diagram(canvas,id,s,c,a) {
 }
 export const illustrated=new Set([1,2,3,4,6,8,11,12,14,15,16,17,18,19,20,21,22,23]);
 
-function chimeLines(p,s,xy) {
+function chimeLines(p,s,xy,weight=1,labels=true) {
   const note=s.spheres, dx=Math.cos(note.angle),dz=Math.sin(note.angle);
   function segment(a,b){
     if(a[2]<=.07||b[2]<=.07)return false;
     p.moveTo(a[0],a[1]);p.lineTo(b[0],b[1]);return true;
   }
-  p.lineWidth=1.25;p.strokeStyle='#ffe4b5a6';p.beginPath();
+  p.lineWidth=1.25*weight;p.strokeStyle='#ffe4b5a6';p.beginPath();
   for(let r=(s.life?.starRadius??1)+.04;r<15.4;r+=.38){
     segment(xy(dx*r,-.19,dz*r),xy(dx*(r+.38),-.19,dz*(r+.38)));
   }
@@ -193,7 +193,7 @@ function chimeLines(p,s,xy) {
     p.stroke();
   }
   for(const pair of note.locks){
-    p.lineWidth=1;
+    p.lineWidth=weight;
     for(let band=0;band<5;band++){
       p.beginPath();p.strokeStyle=`rgba(255,226,184,${.10+band*.066})`;
       for(const line of pair.lines){
@@ -205,9 +205,23 @@ function chimeLines(p,s,xy) {
     const a=xy(pair.a.x,pair.a.y,pair.a.z),b=xy(pair.b.x,pair.b.y,pair.b.z);
     p.beginPath();p.strokeStyle='#ffe3b4da';
     if(segment(a,b)){
-      p.stroke();type(p,(a[0]+b[0])/2,(a[1]+b[1])/2-8,pair.ratio,'#ffebc5','center');
+      p.stroke();if(labels)type(p,(a[0]+b[0])/2,(a[1]+b[1])/2-8,pair.ratio,'#ffebc5','center');
     }
   }
+}
+
+export function printChimes(p,s,c,x,y,w,h){
+  if(!s.spheres?.on||c.mode==='poster'||s.worlds?.body||s.blackHole?.fall)return;
+  const xy=(x,y,z)=>{const q=c.project(x,y,z);return [(q[0]+1)*w/2,(1-q[1])*h/2,q[2]];};
+  p.save();p.translate(x,y);p.beginPath();p.rect(0,0,w,h);
+  const hole=s.blackHole?.hole;
+  if(hole){
+    const [x,y,d]=xy(hole.x,hole.y,hole.z);
+    if(d>.05){const r=hole.r*h/(.6498394*d);p.moveTo(x+r,y);p.arc(x,y,r,0,TAU);}
+  }
+  p.clip('evenodd');
+  chimeLines(p,s,xy,Math.max(.5,h/1080),false);
+  p.restore();
 }
 
 export function chartOnSky(canvas,s,c,a,id,preview) {

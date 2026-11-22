@@ -19,6 +19,7 @@ export const helpGroups = {
     ['1–7 · ink wells', 'Choose ink'], ['Click / drag', 'Drop ink / stir'],
     ['Shift + drag', 'Comb'], ['Hold still', 'Hold to birth'],
     ['Right drag / wheel', 'Orbit / zoom'], ['R', 'Reset the system'],
+    ['P / Postcard', 'Freeze, reframe, save a PNG or record a clip'],
   ],
   Worlds: [
     ['Pull a planet', 'Fling a world'], ['Click a planet', 'Visit and ink its surface'],

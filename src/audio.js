@@ -198,6 +198,11 @@ export function soundscape() {
     },
     setMusic(level){musicLevel=level;mix();},setEffects(level){effectsLevel=level;mix();},
     setPresence(level){sceneGain=level;},
+    capture(){
+      if(!ctx)return null;
+      const tap=ctx.createMediaStreamDestination();master.connect(tap);
+      return {tracks:tap.stream.getAudioTracks(),close(){master.disconnect(tap);}};
+    },
     get muted(){return muted;},mute(){muted=!muted;mix();return muted;},
     state(){return {track:track().name,requested:soundtrack[wanted].name,running:ctx?.state==='running',
       fading:!!transition,musicLevel,effectsLevel,

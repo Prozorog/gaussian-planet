@@ -35,3 +35,25 @@
 #world-controls strong:empty,#world-controls small:empty{display:none}
 #world-controls button:disabled{opacity:.48;cursor:default}
 #world-dial{width:83px}
+#postcard{width:min(1060px,94vw);max-height:94vh;padding:19px 22px 22px;border:1px solid #ad8a72;border-radius:7px;background:#15101b;color:#f4e1c7}
+#postcard::backdrop{background:#06040cdc}
+#postcard header{display:flex;justify-content:space-between;align-items:center;padding:0 0 11px;border-bottom:1px solid #746066}
+#postcard h2{margin:0;font-size:29px}
+#postcard-close{background:transparent;color:#f4dec5;border:0;font-size:24px;cursor:pointer}
+.postcard-layout{display:grid;grid-template-columns:minmax(0,1fr) 226px;gap:24px;padding-top:15px;align-items:start}
+.postcard-picture{display:grid;place-items:center;min-height:245px;padding:11px;background:#08060d;border:1px solid #685157}
+#postcard-preview{display:block;width:auto;height:auto;max-height:64vh;max-width:100%;cursor:grab;touch-action:none}
+#postcard-preview:active{cursor:grabbing}
+.postcard-tools label{gap:6px}
+.postcard-tools input[type=text],#postcard-name{width:135px;background:#231b26;color:#f3e0c6;border:1px solid #7c6265;border-radius:3px;padding:7px}
+.postcard-tools input[type=checkbox]{width:16px;height:16px;accent-color:#d68f58}
+#postcard-formats{display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
+#postcard button:where(:not(#postcard-close)){border:1px solid #8d716a;background:#211722;color:#f4e2c8;border-radius:5px;cursor:pointer;padding:7px;font:12px system-ui,sans-serif}
+#postcard button:hover,#postcard button[aria-pressed=true]{background:#46303b;border-color:#e4b492}
+#postcard button:disabled{opacity:.55;cursor:default}
+#postcard-formats small{display:block;margin-top:3px;font:8px ui-monospace,monospace;color:#cfb9aa;white-space:nowrap}
+#postcard #postcard-save{background:#f0d6aa;color:#271822;border-color:#ffe7bb;margin-bottom:6px}
+#postcard-save,#postcard-clip{display:block;width:100%}
+#postcard-credit,.postcard-hint,#postcard-status{font:11px/1.5 system-ui,sans-serif;color:#d3bfb7}
+#postcard-status{min-height:1.5em;color:#f5d695}
+@media(max-width:690px){.postcard-layout{grid-template-columns:1fr;gap:12px}.postcard-picture{min-height:0}#postcard-preview{max-height:43vh}.postcard-tools{display:grid;grid-template-columns:1fr 1fr;gap:5px 10px}#postcard-formats{grid-column:span 2}#postcard{padding:12px}}

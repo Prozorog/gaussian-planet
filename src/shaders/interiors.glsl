@@ -32,7 +32,7 @@ vec3 giant(vec2 p,float h,vec3 sky){
   float belt=q.y*1.9+q.x*.32+3.2*a+.84*b+.25*c;
   float darkSlot=.056*noise(foldInk(vec2(p.x*3.8+look.x,h*11.),time*.12))+.018*sin(p.x*10.+h*11.);
   float rings=h+.32-0.62*sqrt(max(0.,1.-pow((p.x+.08)*.86,2.)))+.026*p.x;
-  float ring=lineAt(rings*125.,1.20*viewport.y/1080.)*float(rings>0.&&rings<.074);
+  float ring=lineAt(rings*125.,1.20)*float(rings>0.&&rings<.074);
   if(ridge+darkSlot<0.)return mix(sky,ink(6,8.),ring*.84);
   float stream=sin(belt),tone=.47+.23*stream+.135*a+.16*b+.041*c;
   int id=sin(belt*.77+direction*.2+a*2.3)>.01?4:5;

@@ -13,7 +13,7 @@ const engulfAt = new Map([[1,1.56],[2,1.87]]);
 
 export function createLife(s, discover, change) {
   const life={value:1,chapter:1,playing:false,starRadius:1,young:0,red:0,shells:0,white:0,expansion:1};
-  let from=1, launched=0, viewTime=0;
+  let from=1, launched=0, viewTime=0, resume=false;
   const views=new Map(), bodies=[], pending=[];
   function values(value) {
     life.value=value;life.chapter=Math.round(value);
@@ -48,7 +48,7 @@ export function createLife(s, discover, change) {
   function update(dt) {
     if(life.playing){
       set(from+(s.t-launched)*4/90);
-      if(life.value===4)life.playing=false;
+      if(life.value===4){life.playing=false;resume=false;}
     }
     if(life.value===1){s.sceneBodies=s.bodies;viewTime=0;return;}
     if(!s.paused)viewTime+=dt*s.rate;
@@ -73,11 +73,11 @@ export function createLife(s, discover, change) {
       if(life.value>=1.56 && life.value<=2.25)s.emit('engulf',x,z,b.id,0,b.r*4,{name:b.name});
     }
   }
-  return Object.assign(life,{set,update,togglePlay(){
+  return Object.assign(life,{update,seek(value){life.playing=false;resume=false;set(value);},togglePlay(){
     if(life.playing){life.playing=false;return;}
-    if(life.value>=3.999) set(0,false);
-    from=life.value;launched=s.t;life.playing=true;
-  },reset(){life.playing=false;pending.length=0;views.clear();viewTime=0;set(1,false);s.sceneBodies=s.bodies;}});
+    if(!resume)set(0,false);
+    from=life.value;launched=s.t;life.playing=true;resume=true;
+  },reset(){life.playing=false;resume=false;pending.length=0;views.clear();viewTime=0;set(1,false);s.sceneBodies=s.bodies;}});
 }
 
 export function bindTimeline(life, openPrint) {
@@ -86,7 +86,7 @@ export function bindTimeline(life, openPrint) {
   const stamps=chapters.map(({name},i)=>{
     const tab=document.createElement('button');
     tab.type='button';tab.textContent=name;
-    tab.onclick=()=>{life.playing=false;life.set(i);update();};
+    tab.onclick=()=>{life.seek(i);update();};
     $('life-chapters').append(tab);
     return tab;
   });
@@ -108,7 +108,7 @@ export function bindTimeline(life, openPrint) {
     }
   }
   button.onclick=toggle;
-  range.oninput=()=>{life.playing=false;life.set(range.valueAsNumber);update();};
+  range.oninput=()=>{life.seek(range.valueAsNumber);update();};
   play.onclick=()=>{life.togglePlay();update();};
   $('nebula-print').onclick=openPrint;
   update();

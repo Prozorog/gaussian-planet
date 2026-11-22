@@ -5,6 +5,7 @@
   <button id="step-inside" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="16" rx="9" ry="3.1"/><path d="M12 2v11m-3.2-3.3L12 13l3.2-3.3"/></svg><span>Step inside</span><kbd>D</kbd></button>
   <button id="timeline-toggle" type="button" aria-expanded="false" aria-controls="timeline" title="Timeline (T)">Timeline</button>
   <button id="book-toggle" type="button" aria-controls="atlas" aria-expanded="false" aria-label="Sky Atlas" title="Sky Atlas (B)">Atlas</button>
+  <button id="postcard-toggle" type="button" aria-haspopup="dialog" aria-controls="postcard" title="Postcard (P)">Postcard</button>
   <details id="settings"><summary title="Settings and controls (H)">Settings</summary><section>
     <h2>Settings</h2>
     <label>Quality<select id="quality"><option value="high">High</option><option value="low">Low</option></select></label>
@@ -42,4 +43,21 @@
   <button id="leave-world" type="button" class="chip control-chip" hidden>Rise to orbit <kbd>Esc</kbd></button>
 </div>
 <footer><div class="bench" role="group" aria-label="Marbling inks"><div class="legend"><svg viewBox="0 0 22 25" aria-hidden="true" fill="none" stroke="currentColor"><path d="M11 2C9 7 4 12 4 16a7 7 0 0 0 14 0c0-4-5-9-7-14Z"/><path d="M6.7 15.9a4.6 4.6 0 0 0 7.5 3.7"/></svg><span>Ink bench</span></div><div id="inks"></div><button id="chime-toggle" class="chip control-chip" type="button" aria-pressed="true" title="Chime line (G)">Chime line <kbd>G</kbd></button></div><div id="verbs" aria-label="Gestures to try"></div></footer>
-<p id="error" role="alert" hidden></p></main><script type="module" src="/src/main.js"></script></body></html>
+<p id="error" role="alert" hidden></p></main>
+<dialog id="postcard" aria-labelledby="postcard-title">
+  <header><h2 id="postcard-title">Postcard</h2><button id="postcard-close" type="button" aria-label="Close postcard">×</button></header>
+  <div class="postcard-layout">
+    <div class="postcard-picture"><canvas id="postcard-preview" aria-label="Postcard preview. Drag to reframe."></canvas></div>
+    <div class="postcard-tools">
+      <div id="postcard-formats" role="group" aria-label="Postcard format"></div>
+      <label>System name <input id="postcard-name" maxlength="64" value="First Light"></label>
+      <label>Plain <input id="postcard-plain" type="checkbox"></label>
+      <p class="postcard-hint">Drag the picture to reframe.</p>
+      <button id="postcard-save" type="button">Save PNG</button>
+      <button id="postcard-clip" type="button">Record 10 s clip</button>
+      <p id="postcard-credit"></p>
+      <p id="postcard-status" role="status" aria-live="polite"></p>
+    </div>
+  </div>
+</dialog>
+<script type="module" src="/src/main.js"></script></body></html>

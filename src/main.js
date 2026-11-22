@@ -6,10 +6,13 @@ import {bindTimeline,chapters,createLife} from './life.js';
 import {createBlackHole,voidIndex} from './black-hole.js';
 import {createInteriors} from './interiors.js';
 import {createCreatures} from './creatures.js';
+import {createPostcard,postcardCamera} from './postcard.js';
+import {printChimes} from './atlas-diagrams.js';
 const $=s=>document.querySelector(s),canvas=$('#sky'),overlay=$('#gesture'),pen=overlay.getContext('2d'),cursor=$('#cursor'),plate=$('#plate'),news=$('#news'),help=$('#settings'),audio=soundscape(),camera=createCamera();
 const names=['Fire','Rose','Amethyst','Azure','Emerald','Gold','Void'],colors=['#ff602d','#ff4286','#b650ec','#19d5dd','#28c784','#ffba37','#070607'],verbs=['Drop ink','Stir','Comb','Fling a world','Hold to birth','Hold the star'];let selected=0,inkIndex=0,gesture=null,renderer,last=0,frames=0,newsUntil=0,hadOverlay=false,lastHover=null,shiftDown=false;
 const counts={},s=createSystem(event);Object.assign(s,{low:false,grid:256,density:1,guides:true,charge:0,hold:0,vortex:null,force:null,strokes:[],blooms:[]});
 function say(text){news.textContent=text;newsUntil=s.t+2.25;}
+function toggleMute(){say(audio.mute()?'Sound off':'Sound on');}
 function event(e){counts[e.type]=(counts[e.type]||0)+1;audio.play(e.type==='engulf'?'feed':e.type,e.id);atlas.science.event(e);const captions={collision:'Two worlds collide',feed:'A world returns to the sun',birth:'A new world condenses',escape:'Outbound · comet orbit',return:'The wanderer returns',orbit:'A new orbit holds',shock:'Supernova',reignite:'First light',dissolve:'The oldest world returns to ink'};if(captions[e.type])say(captions[e.type]);if(e.type==="engulf")say(e.name+" is swallowed by the red giant");if(['collision','dissolve','birth','feed'].includes(e.type)){const p=[e.x,e.z];s.blooms.push({p,id:e.id,r:e.size*.85,last:0,at:s.t});s.strokes.push([3,p,p,e.size*1.65,e.id,1.68]);}}
 const wells=names.map((name,i)=>{const b=document.createElement('button');b.className=i===voidIndex?'well void':'well';b.style.setProperty('--pigment',colors[i]);b.setAttribute('aria-label',`${name} ink (${i+1})`);b.title=`${name} · ${i+1}`;b.innerHTML=`<i></i><span>${name}</span><kbd>${i+1}</kbd>`;b.onclick=()=>choose(i,true);$('#inks').append(b);return b;});const chips=verbs.map(v=>{const c=document.createElement('span');c.className='chip';c.textContent=v;$('#verbs').append(c);return c;});function used(i){chips[i].classList.add('used');}function choose(i,play){selected=i;if(i!==voidIndex)inkIndex=i;wells.forEach((b,j)=>b.setAttribute('aria-pressed',String(j===i)));$('#stage').style.setProperty('--ink',colors[i]);if(play){audio.wake();audio.play('choose',INKS[inkIndex]);if(i===voidIndex)say('Hold empty ink to form a black hole.');}}choose(0,false);
 const drift=createDrift(s,moment);camera.drift=drift;
@@ -35,6 +38,19 @@ const creatures=createCreatures(s,camera,audio,say);
 s.creatures=creatures;
 $('#creatures-toggle').checked=creatures.enabled;
 $('#creatures-toggle').onchange=e=>creatures.enable(e.target.checked);
+const postcard=createPostcard({
+  draw(p,x,y,width,height,pan,live,dt){
+    const view=postcardCamera(camera,width,height,pan);
+    renderer.render(s,view,dt,{width,height,still:!live});
+    p.drawImage(canvas,x,y);printChimes(p,s,view,x,y,width,height);
+  },
+  restore:()=>renderer.render(s,camera,0,{still:true}),
+  chapter:()=>chapters[s.life.chapter].name,
+  captureAudio:()=>audio.capture(),
+  opened(){audio.wake();cancel();clearDrops();help.open=false;},
+  closed(){canvas.focus({preventScroll:true});drift.activity();},
+});
+$('#postcard-toggle').onclick=()=>postcard.open();
 $('#rekindle').onclick=()=>blackHole.rekindle();
 const chimeButton=$('#chime-toggle');
 function toggleChime(){
@@ -123,11 +139,16 @@ const movement=new Set(['KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowLeft','Arrow
 window.addEventListener('keydown',e=>{
   if(e.ctrlKey||e.metaKey||e.altKey)return;
   const k=e.code;
+  if(postcard.visible){
+    if(k==='Escape'){e.preventDefault();postcard.close();}
+    if(k==='KeyM'&&!e.repeat&&!e.target.matches('input')){e.preventDefault();toggleMute();}
+    return;
+  }
   if(e.target.matches('select,input')&&k!=='Escape')return;
   if(camera.mode==='drift')drift.activity();
   if(k==='ShiftLeft'||k==='ShiftRight'){shiftDown=true;if(lastHover)hover(lastHover);}
   if(camera.mode==='drift'&&movement.has(k)){e.preventDefault();if(!e.repeat){atlas.action();if(worlds.body)worlds.key(k,true);else drift.key(k,true);}return;}
-  if(!['Escape','Space','KeyD','KeyS','KeyO','KeyM','KeyH','KeyR','KeyB','KeyN','KeyK','KeyZ','KeyG','KeyT','Enter','BracketLeft','BracketRight'].includes(k)&&!/^Digit[1-7]$/.test(k))return;
+  if(!['Escape','Space','KeyD','KeyS','KeyO','KeyM','KeyH','KeyR','KeyB','KeyN','KeyK','KeyZ','KeyG','KeyT','KeyP','Enter','BracketLeft','BracketRight'].includes(k)&&!/^Digit[1-7]$/.test(k))return;
   if((k==='Space'||k==='Enter')&&e.target.matches('button,summary'))return;
   e.preventDefault();if(e.repeat&&!k.startsWith('Bracket'))return;
   audio.wake();if(k!=='KeyB')atlas.action();
@@ -143,6 +164,7 @@ window.addEventListener('keydown',e=>{
     case 'KeyN':atlas.science.labels=!atlas.science.labels;break;
     case 'KeyG':toggleChime();break;
     case 'KeyT':timeline.toggle();break;
+    case 'KeyP':postcard.open();break;
     case 'KeyK':atlas.science.kepler();break;
     case 'KeyZ':atlas.science.toggleZone();break;
     case 'Space':s.paused=!s.paused;say((s.paused?'Orbits paused':'Orbits in motion'));break;
@@ -150,7 +172,7 @@ window.addEventListener('keydown',e=>{
     case 'KeyH':help.open=!help.open;if(help.open&&atlas.open)atlas.bookOpen(false);break;
     case 'KeyR':reset();break;
     case 'KeyO':s.guides=!s.guides;say((s.guides?'Orbit guides on':'Orbit guides off'));break;
-    case 'KeyM':{const mute=audio.mute();say((mute?'Sound off':'Sound on'));break;}
+    case 'KeyM':toggleMute();break;
     case 'BracketLeft':case 'BracketRight':{
       const old=s.rate;s.rate=clamp(s.rate*(k==='BracketRight'?1.5:1/1.5),.17,6);
       if(s.rate>old)atlas.discover(2);say(('Orbit time ×')+s.rate.toFixed(2));break;
@@ -173,17 +195,17 @@ function overlayFrame(){const g=gesture;if(!g&&!hadOverlay)return;const w=canvas
   }}
  else if((today()&&g.item==='sun')||s.vortex){const isSun=g.item==='sun',p=isSun?pos(0,0,0):pos(...[g.anchor[0],-.49,g.anchor[1]]),r=isSun?Math.abs(pos(camera.right[0],0,camera.right[2])[0]-p[0])*1.1:21+s.hold*3;pen.strokeStyle='#ffe6bc77';pen.beginPath();pen.arc(...p,r,0,Math.PI*2);pen.stroke();pen.strokeStyle=colors[selected];pen.lineWidth=3;pen.beginPath();pen.arc(...p,r,-Math.PI/2,-Math.PI/2+Math.PI*2*clamp(s.hold/(isSun?4:3),0,1));pen.stroke();if(s.hold>.35){pen.font='11px ui-monospace, monospace';pen.textAlign='center';pen.fillText(isSun?(s.hold>=4?'Release · supernova':'Charging the star'):'Condensing',p[0],p[1]-r-10);}}}
 function fail(e){console.error(e);$('#error').hidden=false;$('#error').textContent=e.message;}canvas.addEventListener('webglcontextlost',e=>{e.preventDefault();fail(Error('Graphics context lost. Reload to restart the orrery.'));});
-function tick(now){const dt=last?Math.min(.08,(now-last)/1000):1/60;last=now;s.advance(dt);s.life.update(dt);if(!document.getElementById('timeline').hidden)timeline.update();audio.tick(blackHole.hole?2:today()?(camera.mode==='drift'?1:0):chapters[s.life.chapter].track);s.spheres.update(dt);creatures.update(dt);if(camera.focus&&!s.sceneBodies.includes(camera.focus)){const b=s.sceneBodies.find(b=>b.key===camera.focus.key);if(b)camera.focus=b;else fly('overview');}if(camera.mode==='drift'&&!blackHole.fall&&!worlds.body)drift.tick(dt,camera.flying);worlds.tick(dt);blackHole.tick(dt);audio.setPresence(1-.98*blackHole.fall);camera.nebulaPrint=s.life.chapter===3;camera.tick(s.t,dt,canvas.clientWidth/canvas.clientHeight,s.shake);blackHole.alignment();worlds.controls(camera);document.getElementById('rekindle').hidden=!blackHole.ready;const g=gesture;s.hold=g?Math.max(0,(now-g.start)/1000):0;if(g){
+function tick(now){const dt=last?Math.min(.08,(now-last)/1000):1/60;last=now;if(postcard.visible&&!postcard.recording){audio.tick(blackHole.hole?2:today()?(camera.mode==='drift'?1:0):chapters[s.life.chapter].track);postcard.preview();requestAnimationFrame(tick);return;}s.advance(dt);s.life.update(dt);if(!document.getElementById('timeline').hidden)timeline.update();audio.tick(blackHole.hole?2:today()?(camera.mode==='drift'?1:0):chapters[s.life.chapter].track);s.spheres.update(dt);creatures.update(dt);if(camera.focus&&!s.sceneBodies.includes(camera.focus)){const b=s.sceneBodies.find(b=>b.key===camera.focus.key);if(b)camera.focus=b;else fly('overview');}if(camera.mode==='drift'&&!blackHole.fall&&!worlds.body)drift.tick(dt,camera.flying);worlds.tick(dt);blackHole.tick(dt);audio.setPresence(1-.98*blackHole.fall);camera.nebulaPrint=s.life.chapter===3;camera.tick(s.t,dt,canvas.clientWidth/canvas.clientHeight,s.shake);blackHole.alignment();worlds.controls(camera);document.getElementById('rekindle').hidden=!blackHole.ready;const g=gesture;s.hold=g?Math.max(0,(now-g.start)/1000):0;if(g){
     g.voidHold=selected===voidIndex&&!g.formed&&!g.item&&!g.right&&!g.moved&&within(g.anchor);
     if(g.voidHold&&s.hold>=1){g.formed=true;g.voidHold=false;
       const ink=renderer.sample(...g.anchor,s,camera).find(id=>id>0&&id<7)??INKS[inkIndex];
       blackHole.form(...g.anchor,ink);
     }
   }
-  s.charge=selected!==voidIndex&&today()&&g?.item==='sun'?clamp(s.hold/1.5,0,1):0;s.vortex=selected!==voidIndex&&today()&&g&&!g.item&&!g.right&&!g.moved&&camera.mode==='overview'&&within(g.anchor)&&s.hold>=.6?g.anchor:null;if(s.vortex){atlas.science.vortex=s.vortex;atlas.discover(7);}if(s.vortex||s.charge){audio.charge(clamp(s.hold/(s.vortex?3:4),.01,1));if(s.vortex){s.force={x:g.anchor[0],z:g.anchor[1],r:.42+s.hold*.18,id:INKS[inkIndex],dx:0,dz:0,twist:2.8,life:.1};}}if(news.textContent&&s.t>newsUntil)news.textContent='';renderer.render(s,camera,dt);overlayFrame();
+  s.charge=selected!==voidIndex&&today()&&g?.item==='sun'?clamp(s.hold/1.5,0,1):0;s.vortex=selected!==voidIndex&&today()&&g&&!g.item&&!g.right&&!g.moved&&camera.mode==='overview'&&within(g.anchor)&&s.hold>=.6?g.anchor:null;if(s.vortex){atlas.science.vortex=s.vortex;atlas.discover(7);}if(s.vortex||s.charge){audio.charge(clamp(s.hold/(s.vortex?3:4),.01,1));if(s.vortex){s.force={x:g.anchor[0],z:g.anchor[1],r:.42+s.hold*.18,id:INKS[inkIndex],dx:0,dz:0,twist:2.8,life:.1};}}if(news.textContent&&s.t>newsUntil)news.textContent='';if(!postcard.clipFrame(now,dt))renderer.render(s,camera,dt);overlayFrame();
   if(camera.mode==='drift'&&drift.near){const n=drift.nearestDistance;audio.environment(drift.heat,Math.exp(-Math.max(0,n)*2)*.93,clamp((previousNear-n)/dt,-1,1));previousNear=n;}else audio.environment(0);
   atlas.tick(dt,today()&&g?.item!==blackHole.hole&&!!(g?.moved&&g.item&&g.item!=='sun'&&g.item!==camera.focus));frames++;requestAnimationFrame(tick);}
 try{renderer=createRenderer(canvas);requestAnimationFrame(tick);}catch(e){fail(e);}
 // Read-only capture instrumentation: all mutations still enter through the public controls.
-export function observation(){const gl=renderer?.gl,ext=gl?.getExtension('WEBGL_debug_renderer_info');return {creatures:{...creatures.state(),fish:creatures.fishCount()},world:worlds.body?{name:worlds.body.name,kind:worlds.body.kind,inside:worlds.inside,toy:worlds.toy.power,turn:worlds.toy.turn,leaving:worlds.leaving}:null,blackHole:{hole:blackHole.hole?{...blackHole.hole,xy:pixel(blackHole.hole.x,blackHole.hole.y,blackHole.hole.z)}:null,fall:blackHole.fall,dim:blackHole.dim,ready:blackHole.ready,streams:blackHole.streams.map(b=>b.name),starStream:!!blackHole.starStream},life:{value:s.life.value,chapter:s.life.chapter,playing:s.life.playing,radius:s.life.starRadius,shells:s.life.shells},audio:audio.state(),spheres:{on:s.spheres.on,total:s.spheres.total,ripples:s.spheres.ripples.length,locks:s.spheres.locks.map(p=>({ratio:p.ratio,a:p.a.name,b:p.b.name,lines:p.lines.length})),voices:s.spheres.voices.map(v=>({name:v.body.name,cycle:v.cycle,pitch:v.pitch}))},atlas:atlas.state(),drift:{eye:[...camera.eye],forward:camera.back.map(v=>-v),inside:camera.inside,yaw:drift.yaw,pitch:drift.pitch,near:drift.near?.name,distance:drift.nearestDistance,ride:drift.ride?.name,auto:drift.auto,cloud:drift.cloud?.id,heat:drift.heat,crossedAt:drift.crossedAt,ripples:drift.ripples.map(m=>({...m})),clouds:clouds.slice(0,activeClouds(s.low)).map(v=>({id:v.id,pos:v.pos,size:v.size}))},muted:audio.muted,frames,t:s.t,mode:camera.mode,focus:camera.focus?.name,flying:camera.flying,paused:s.paused,active:s.flares.length,hue:s.hue,nova:s.nova<0?-1:s.t-s.nova,yaw:camera.yaw,pitch:camera.pitch,low:s.low,vortex:!!s.vortex,counts:{...counts},sun:pixel(0,0,0),bodies:s.sceneBodies.map(b=>({key:b.key,name:b.name,xy:pixel(b.x,b.y,b.z),x:b.x,y:b.y,z:b.z,r:b.r,marks:b.marks.length,toy:(b.original?.toy??b.toy)?.power??0,tuning:b.tuning,ids:[b.id,b.id2,b.id3],comet:!!b.comet,launched:b.launched})),gpu:ext?gl.getParameter(ext.UNMASKED_RENDERER_WEBGL):null};}
+export function observation(){const gl=renderer?.gl,ext=gl?.getExtension('WEBGL_debug_renderer_info');return {postcard:postcard.state(),creatures:{...creatures.state(),fish:creatures.fishCount()},world:worlds.body?{name:worlds.body.name,kind:worlds.body.kind,inside:worlds.inside,toy:worlds.toy.power,turn:worlds.toy.turn,leaving:worlds.leaving}:null,blackHole:{hole:blackHole.hole?{...blackHole.hole,xy:pixel(blackHole.hole.x,blackHole.hole.y,blackHole.hole.z)}:null,fall:blackHole.fall,dim:blackHole.dim,ready:blackHole.ready,streams:blackHole.streams.map(b=>b.name),starStream:!!blackHole.starStream},life:{value:s.life.value,chapter:s.life.chapter,playing:s.life.playing,radius:s.life.starRadius,shells:s.life.shells},audio:audio.state(),spheres:{on:s.spheres.on,total:s.spheres.total,ripples:s.spheres.ripples.length,locks:s.spheres.locks.map(p=>({ratio:p.ratio,a:p.a.name,b:p.b.name,lines:p.lines.length})),voices:s.spheres.voices.map(v=>({name:v.body.name,cycle:v.cycle,pitch:v.pitch}))},atlas:atlas.state(),drift:{eye:[...camera.eye],forward:camera.back.map(v=>-v),inside:camera.inside,yaw:drift.yaw,pitch:drift.pitch,near:drift.near?.name,distance:drift.nearestDistance,ride:drift.ride?.name,auto:drift.auto,cloud:drift.cloud?.id,heat:drift.heat,crossedAt:drift.crossedAt,ripples:drift.ripples.map(m=>({...m})),clouds:clouds.slice(0,activeClouds(s.low)).map(v=>({id:v.id,pos:v.pos,size:v.size}))},muted:audio.muted,frames,t:s.t,mode:camera.mode,focus:camera.focus?.name,flying:camera.flying,paused:s.paused,active:s.flares.length,hue:s.hue,nova:s.nova<0?-1:s.t-s.nova,yaw:camera.yaw,pitch:camera.pitch,low:s.low,vortex:!!s.vortex,counts:{...counts},sun:pixel(0,0,0),bodies:s.sceneBodies.map(b=>({key:b.key,name:b.name,xy:pixel(b.x,b.y,b.z),x:b.x,y:b.y,z:b.z,r:b.r,marks:b.marks.length,toy:(b.original?.toy??b.toy)?.power??0,tuning:b.tuning,ids:[b.id,b.id2,b.id3],comet:!!b.comet,launched:b.launched})),gpu:ext?gl.getParameter(ext.UNMASKED_RENDERER_WEBGL):null};}
 export function projectPoint(x,z,height=-.49){return pixel(x,height,z);}

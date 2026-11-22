@@ -53,7 +53,7 @@ void main(){
   if(nearest<99999.){
     float washed=clamp(value-.23*life.w,.025,.86);
     vec3 col=engraved(washed,pigment,comb,1.);
-    col=mix(col,ink(pigment,floor(washed*9.)+2.),lineAt(filament,1.15*viewport.y/1080.)*.68);
+    col=mix(col,ink(pigment,floor(washed*9.)+2.),lineAt(filament,1.15)*.68);
     if(life.w>.48)col=ink(pigment,clamp(2.+floor(value*3.),2.,4.))*.70;
     vec4 clip=vp*vec4(position,1.);
     gl_FragDepth=.5+.5*clip.z/clip.w;
@@ -68,7 +68,7 @@ void main(){
       float warp=r+.14*noise(q*3.3)+.05*noise(q*9.);
       float broken=sin(5.*a+3.7*warp+noise(q*1.4)*1.5);
       if(r<1.48&&broken>.25&&warp>.29){
-        float lane=lineAt(8.7*warp+.54*broken,1.30*viewport.y/1080.);
+        float lane=lineAt(8.7*warp+.54*broken,1.30);
         if(lane>.45){
           gl_FragDepth=.9996;frag=vec4(lane>.73?vec3(.86,.96,1.):ink(8,4.),1.);return;
         }

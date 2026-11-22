@@ -28,14 +28,19 @@ vec2 turn(vec2 p,vec2 c,float radius,float twist){vec2 d=p-c;return c+rot(twist*
 // Smoothly compact vortex kernels; zero velocity at cell borders, no grid seams.
 vec2 roll(vec2 p,float strength){vec2 cell=floor(p),d=fract(p)-.5;float k=max(0.,1.-4.*dot(d,d));float s=grain(cell*1.71+17.).r;return cell+.5+rot(strength*(s>.5?1.:-1.)*k*k)*d;}
 vec3 ink(int id,float i){return texelFetch(inks,ivec2(int(clamp(i,0.,8.)),id),0).rgb;}
-float lineAt(float phase,float pixels){float g=max(.0001,length(vec2(dFdx(phase),dFdy(phase))));float d=abs(fract(phase+.5)-.5)/g;return (1.-smoothstep(pixels*.5-.4,pixels*.5+.4,d))*(1.-smoothstep(.29,.54,g));}
+float lineAt(float phase,float pixels){
+ float scale=max(.5,viewport.y/1080.);
+ float g=max(.0001,length(vec2(dFdx(phase),dFdy(phase))));
+ float d=abs(fract(phase+.5)-.5)/g,width=pixels*.5*scale;
+ return (1.-smoothstep(max(0.,width-.4),width+.4,d))*(1.-smoothstep(.29,.54,g*scale));
+}
 vec3 engraved(float v,int id,float comb,float richness){
  float s=clamp(v,.0001,.9998)*9.,k=floor(s),aa=clamp(fwidth(s)*.46,.0001,.48);vec3 base=ink(id,k);
  float edge=fract(s);base=mix(ink(id,k-1.),base,smoothstep(-aa,aa,edge));base=mix(base,ink(id,k+1.),smoothstep(1.-aa,1.+aa,edge));
  vec3 light=ink(id,k+2.);if(id==0&&k<2.)light=k<1.?vec3(.314,.161,.208):vec3(.69,.275,.30);
  if(k>=7.&&id!=0)light=mix(light,vec3(1.,.99,.86),.32);
- float pen=clamp(viewport.y/1080.,.75,1.5);float contour=lineAt(v*9.,1.4*pen);
- float etch=lineAt(v*9.*(k<3.?4.:3.)*density+comb,1.18*pen);float hair=lineAt((v*32.+comb*.65)*density+.41,.98*pen);
+ float contour=lineAt(v*9.,1.4);
+ float etch=lineAt(v*9.*(k<3.?4.:3.)*density+comb,1.18);float hair=lineAt((v*32.+comb*.65)*density+.41,.98);
  return mix(base,light,max(contour,max(etch*.84,hair*.48*richness)));
 }
 float hash(vec2 p){vec3 a=fract(p.xyx*vec3(.1031,.1030,.0973));a+=dot(a,a.yzx+33.33);return fract((a.x+a.y)*a.z);}
@@ -46,6 +51,6 @@ vec3 pooled(vec3 col,int id,float phase,float width){
  float d=abs(fract(phase+.5)-.5),aa=min(.12,.5*g);
  float pool=(1.-smoothstep(width-aa,width+aa,d))*(1.-smoothstep(.12,.36,g));
  vec3 deep=ink(id,0.);
- float lip=1.-smoothstep(.2,.95,abs(d-width)/g);
+ float lip=1.-smoothstep(.2,.95,abs(d-width)/(g*max(.5,viewport.y/1080.)));
  return mix(mix(col,deep,pool),ink(id,3.),lip*(1.-smoothstep(.12,.36,g))*.76);
 }
