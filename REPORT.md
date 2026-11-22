@@ -479,3 +479,25 @@ These are 1920 × 1080 Chrome app-frame readings over approximately 1.75 seconds
 - **Stage 4.** Tide’s dark share reached 41.35% on arrival and 41.23% in the toy view. Ember reached 43.74% and 42.00%. Those frames exceeded the 40% ceiling. Verdance at the maximum captured tilt reached 46.86% vivid among lit pixels against a 55% target. All five toys and their exterior state are present.
 - **Stage 5.** The rider passes close enough that the leviathan can fill the frame and overlap the near sheets. The ride print shows the close engraving and the active ride control. The white dwarf’s two large creatures draw as outlines, and its remaining small fish retain some bright ink.
 - **Stage 6.** PNGs and a WebM were verified in Chrome. Recording behaviour on other browsers is unmeasured.
+
+## Phase 4.1 · Voyages and finish
+
+[Play First Light](http://localhost:4103/). The Phase 4 server on port 4104 exited during the initial checks. The machine’s server helper started this workspace on port 4103 and registered it to keep running.
+
+### Stage 1 · Sound
+
+The collision used a sweep, a blast of noise and the birth chord. It now rings once at a low note snapped to the current scale, with two quieter overtones and a 2.65-second decay. I lowered the effects bus and made the air and water sounds narrower, darker and slower to rise and fall. The supernova retains its bass swell and music duck.
+
+Chrome triggered all 25 one-shots against the streaming Frozen Star at the default levels. The table uses peak sample amplitude from the two Web Audio buses in the same interval. A negative difference means the effect was quieter. The music and effects sliders and **M** responded in the app. The production build passed.
+
+| Effect | Music peak | Effect peak | Difference |
+|---|---:|---:|---:|
+| Collision | 0.1053 | 0.0485 | −6.7 dB |
+| Stir | 0.0951 | 0.0015 | −36.3 dB |
+| Comb | 0.1156 | 0.0032 | −31.2 dB |
+| Flare | 0.1414 | 0.0032 | −32.8 dB |
+| Dissolve | 0.1104 | 0.0021 | −34.3 dB |
+| Splash | 0.1136 | 0.0141 | −18.1 dB |
+| Supernova | 0.0999 | 0.0720 | −2.8 dB |
+
+[Mix screenshot](output/playwright/phase41/s1-mix.png) · [All 25 effects](output/playwright/phase41/s1-audio.json).

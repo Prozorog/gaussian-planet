@@ -9,6 +9,7 @@ export const creditLines = soundtrack.map(({name}) =>
   `"${name}" Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By Attribution 4.0. https://creativecommons.org/licenses/by/4.0/`);
 
 const FADE = 4, freq = midi => 440 * 2 ** ((midi - 69) / 12);
+const EFFECT_GAIN = .15;
 const rising = Float32Array.from({length:64}, (_,i) => Math.sin(i*Math.PI/126));
 const falling = Float32Array.from(rising).reverse();
 const inScale = (midi, scale) => scale.includes((midi%12+12)%12);
@@ -76,14 +77,14 @@ export function soundscape() {
     const now=ctx.currentTime, duck=now<duckUntil?.57:1;
     master.gain.setTargetAtTime(muted?0:sceneGain,now,.09);
     music.gain.setTargetAtTime(musicLevel*duck,now,duck<1?.20:.65);
-    effects.gain.setTargetAtTime(.24*effectsLevel,now,.08);
+    effects.gain.setTargetAtTime(EFFECT_GAIN*effectsLevel,now,.08);
   }
   function wake() {
     if(!ctx){
       ctx=new AudioContext();
       master=ctx.createGain();music=ctx.createGain();effects=ctx.createGain();
       master.gain.value=muted?0:sceneGain;
-      music.gain.value=musicLevel;effects.gain.value=.24*effectsLevel;
+      music.gain.value=musicLevel;effects.gain.value=EFFECT_GAIN*effectsLevel;
       master.connect(ctx.destination);music.connect(master);effects.connect(master);
       decks=Array.from({length:2},()=>{
         const media=new Audio(),gain=ctx.createGain();
@@ -99,24 +100,24 @@ export function soundscape() {
     }
     if(ctx.state==='suspended')ctx.resume().catch(()=>{});
   }
-  function tone(midi, d, gain, type='sine', delay=0, start=midi) {
+  function tone(midi, d, gain, type='sine', delay=0, start=midi, attack=Math.min(.024,d*.15)) {
     if(!ctx)return;
     const envelope=ctx.createGain(), osc=ctx.createOscillator(), at=ctx.currentTime+delay;
     osc.type=type;
     osc.frequency.setValueAtTime(freq(start),at);
     osc.frequency.exponentialRampToValueAtTime(freq(midi),at+d*.30);
     envelope.gain.setValueAtTime(.0001,at);
-    envelope.gain.exponentialRampToValueAtTime(gain,at+Math.min(.024,d*.15));
+    envelope.gain.linearRampToValueAtTime(gain,at+attack);
     envelope.gain.exponentialRampToValueAtTime(.0001,at+d);
     osc.connect(envelope).connect(effects);osc.start(at);osc.stop(at+d+.01);
   }
-  function hiss(d,f,end,gain) {
+  function currentNoise(d,f,end,gain) {
     if(!ctx)return;
     const src=ctx.createBufferSource(),filter=ctx.createBiquadFilter(),g=ctx.createGain(),t=ctx.currentTime;
-    src.buffer=noise;src.loop=true;filter.type='bandpass';filter.Q.value=.75;
+    src.buffer=noise;src.loop=true;filter.type='bandpass';filter.Q.value=2.6;
     filter.frequency.setValueAtTime(f,t);filter.frequency.exponentialRampToValueAtTime(end,t+d);
-    g.gain.setValueAtTime(.001,t);g.gain.exponentialRampToValueAtTime(gain,t+.035);
-    g.gain.exponentialRampToValueAtTime(.001,t+d);
+    g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(gain,t+Math.min(.26,d*.24));
+    g.gain.exponentialRampToValueAtTime(.0001,t+d);
     src.connect(filter).connect(g).connect(effects);src.start(t);src.stop(t+d);
   }
   function charge(v) {
@@ -144,22 +145,27 @@ export function soundscape() {
     switch(action){
       case 'drop':tone(pitch+12,.29,.32,'sine',0,pitch+24);tone(pitch+24,.26,.085,'sine',.035);break;
       case 'choose':tone(pitch,.18,.13);break;
-      case 'stir':hiss(.25,340,800,.40);break;
-      case 'comb':hiss(.38,2700,660,.58);break;
+      case 'stir':currentNoise(.52,145,245,.13);break;
+      case 'comb':currentNoise(.78,430,185,.18);break;
       case 'fling':tone(snap(73),.23,.19,'triangle',0,snap(48));break;
-      case 'flare':hiss(1,2500,140,.74);break;
-      case 'collision':tone(snap(33),.9,.63,'sine',0,snap(43));hiss(.72,870,73,.73);
-      // Both the impact and the birth resolve to a small chord in the current key.
+      case 'flare':currentNoise(1.55,355,92,.22);break;
+      case 'collision':{
+        const root=snap(36);
+        tone(root,2.65,.34,'sine',0,root,.13);
+        tone(root+12,1.55,.12,'sine',.018,root+12,.095);
+        tone(snap(root+19),.83,.041,'sine',.032,snap(root+19),.075);
+        break;
+      }
       case 'birth':case 'impact':case 'reignite':
         [pitch,snap(pitch+7),pitch+12].forEach((m,i)=>tone(m,.83-i*.12,.18,'sine',i*.057));break;
       case 'feed':tone(snap(36),.49,.43,'triangle',0,pitch);break;
-      case 'shock':duckUntil=ctx.currentTime+3.25;mix();hiss(2.9,1800,52,1.1);tone(snap(30),2.8,.69,'sine',0,snap(40));break;
+      case 'shock':duckUntil=ctx.currentTime+3.6;mix();currentNoise(3.65,345,55,.37);tone(snap(32),3.55,.66,'sine',0,snap(43),.26);break;
       case 'escape':case 'return':case 'visit':tone(snap(action==='return'?52:64),.55,.16,'sine',0,snap(57));break;
-      case 'dissolve':hiss(.65,1200,290,.34);break;
+      case 'dissolve':currentNoise(1.08,275,108,.14);break;
       case 'collapse':tone(snap(32),1,.42,'sine',0,snap(50));break;
-      case 'holeForm':tone(snap(31),1.3,.35,'sine',0,snap(50));hiss(.8,420,94,.27);break;
-      case 'stretch':hiss(.72,650,180,.34);tone(snap(38),.82,.23,'sine',0,snap(61));break;
-      case 'jets':hiss(1.15,1500,280,.26);break;
+      case 'holeForm':tone(snap(31),1.3,.35,'sine',0,snap(50),.10);currentNoise(1.12,220,76,.14);break;
+      case 'stretch':currentNoise(1.08,285,122,.14);tone(snap(38),.82,.23,'sine',0,snap(61),.085);break;
+      case 'jets':currentNoise(1.45,365,158,.16);break;
       case 'evaporate':tone(snap(77),.68,.18,'sine',0,snap(55));break;
     }
   }
@@ -171,8 +177,8 @@ export function soundscape() {
       source.buffer=noise;source.loop=true;filter.type='lowpass';gain.gain.value=0;
       source.connect(filter).connect(gain).connect(effects);source.start();wind={gain,filter};
     }
-    wind.filter.frequency.setTargetAtTime(90+heat*185+near*(270+approach*90),now,.15);
-    wind.gain.gain.setTargetAtTime(.56*heat+.30*near,now,.2);
+    wind.filter.frequency.setTargetAtTime(80+heat*140+near*(160+approach*75),now,.23);
+    wind.gain.gain.setTargetAtTime(.38*heat+.24*near,now,.30);
   }
   function bell(midi) {
     tone(snap(midi),1.16,.095,'sine');
@@ -190,7 +196,7 @@ export function soundscape() {
       const note=snap(38+(ink%7)*2);
       tone(note,3.1,.060*level);tone(note+12,2.4,.022*level,'sine',.28);
     },
-    splash(){hiss(.46,1420,240,.37);tone(snap(53),.36,.16,'sine',.035,snap(64));},
+    splash(){currentNoise(.92,340,123,.16);tone(snap(53),.64,.13,'sine',.045,snap(64),.10);},
     tick(index){
       wanted=index;
       if(!ctx||ctx.currentTime-lastMix<.095)return;
