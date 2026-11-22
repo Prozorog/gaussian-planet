@@ -1,5 +1,11 @@
 in vec3 local,world;uniform vec4 effect;uniform int eventType,first,second;uniform float age;out vec4 frag;
 void main(){vec2 p=local.xy;float r=length(p);if(r>1.35)discard;vec2 f=foldInk(p*3.6+effect.w,time*.27);float n=noise(f*2.),m=noise(f*5.7),a=atan(p.y,p.x);float v;int id=first;
+ if(eventType==5){
+   float crest=r+.035*n;
+   float ring=max(lineAt(crest-.79,1.32),lineAt(crest-.68,1.3)*.57);
+   if(ring<.04||r<.58||r>.90)discard;
+   frag=vec4(mix(ink(id,7.),vec3(1.,.92,.70),.77),ring*(1.-age/2.6));return;
+ }
  if(eventType==4){
    float filament=sin(p.x*41.+time*12.+.85*n+.49*m);
    float shape=1.-abs(p.y-.18*n);

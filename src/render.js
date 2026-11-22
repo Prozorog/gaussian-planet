@@ -1,6 +1,7 @@
 import {program,texture,mapTexture,draw} from './gl.js';
 import {driftRenderer} from './drift-render.js';
 import {horizonRenderer} from './horizon-render.js';
+import {creatureRenderer} from './creature-render.js';
 import worldInterior from './shaders/interiors.glsl?raw';
 import {createFluid} from './fluid.js';import {inks,clamp} from './system.js';import {createPrint,SPAN} from './print.js';import {particles} from './particles.js';import {meshes} from './meshes.js';
 import common from './shaders/ink.glsl?raw';import vertex from './shaders/world.vert.glsl?raw';import sky from './shaders/space.glsl?raw';import bodies from './shaders/body.glsl?raw';import corona from './shaders/corona.glsl?raw';import nebula from './shaders/disc.glsl?raw';import events from './shaders/event.glsl?raw';
@@ -27,6 +28,7 @@ export function createRenderer(canvas){const gl=canvas.getContext('webgl2',{powe
  function at(l,shape,x,y,z,r){gl.uniform3f(l.center,x,y,z);gl.uniform1f(l.radius,r);gl.uniform1i(l.shape,shape);}
  const interior=driftRenderer(gl,mesh,frame,at);
  const horizon=horizonRenderer(gl,frame);
+ const printCreatures=creatureRenderer(gl,frame);
  const worldPress=program(gl,common+worldInterior,'Planet interiors'),interiorMarks=new Float32Array(20);
  function printInterior(s,c){
    const view=s.worlds, mark=view.toy, l=frame(worldPress,s,c);
@@ -66,7 +68,12 @@ export function createRenderer(canvas){const gl=canvas.getContext('webgl2',{powe
   for(const e of s.events){const a=s.t-e.at;if(e.type==="engulf"&&a<.75)globe(...engulfPoint(e,a,rs),e.size*.25*(1-a/.76),6,e.id,e.id,e.id,s.t*.1,1,false);}
   if(!poster){for(const b of (s.sceneBodies??s.bodies)){const y=b.y+b.hit*.037*Math.sin(s.t*35);globe(b.x,y,b.z,b.r,b.kind,b.id,b.id2,b.id3,b.spin,b.hit,b.ring,b.marks,+((b.chimeUntil??0)>s.t),b.original?.toy??b.toy);if(b.ring){gl.uniform1i(l.pass,3);at(l,3,b.x,y,b.z,b.r*2.15);mesh.quad();}const toy=b.original?.toy??b.toy;if(b.kind===3&&toy?.power){const a=toy.turn*1.55+s.t*.22,d=b.r*2.6;globe(b.x+d*Math.cos(a),y+d*.31*Math.cos(a),b.z+d*Math.sin(a),b.r*.19,6,8,8,8,s.t*.03,0,false);}for(let j=0;j<b.moons;j++){const a=s.t*(.39-j*.066)+b.key+j*2.21,d=b.r*(2.16+j*.54);globe(b.x+Math.cos(a)*d,y+Math.cos(a)*d*.22,b.z+Math.sin(a)*d,b.r*(.14-j*.014),6,b.id,b.id,b.id,0,0,false);}}
    gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.depthMask(false);gl.enable(gl.CULL_FACE);gl.cullFace(gl.BACK);gl.uniform1i(l.pass,2);for(const b of (s.sceneBodies??s.bodies)){at(l,0,b.x,b.y,b.z,b.r*(1.057+.018*b.hit));gl.uniform1iv(l.ids,[b.id,b.id,b.id]);mesh.sphere();}gl.disable(gl.CULL_FACE);gl.depthMask(true);gl.disable(gl.BLEND);}
+  printCreatures(s,c);
   l=frame(fx,s,c);gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);function effect(type,shape,x,y,z,r,id,second,age,dx=0,dz=0,width=.2,seed=0){at(l,shape,x,y,z,r);gl.uniform1i(l.eventType,type);gl.uniform1i(l.first,id);gl.uniform1i(l.second,second);gl.uniform1f(l.age,age);gl.uniform4f(l.effect,dx,dz,width,seed);mesh.quad();}
+  if(s.creatures?.enabled&&!poster)for(const ring of s.creatures.ripples){
+    const a=s.t-ring.at;
+    if(a<2.6)effect(5,1,ring.x,ring.y+.022,ring.z,1.33+a*.85,ring.ink,ring.ink,a);
+  }
   const hole=s.blackHole?.hole;
   if(hole){
     const streams=s.blackHole.starStream?[...s.blackHole.streams,s.blackHole.starStream]:s.blackHole.streams;

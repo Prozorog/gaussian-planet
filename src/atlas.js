@@ -32,6 +32,7 @@ export const helpGroups = {
     ['Space / C', 'Rise / sink'], ['Shift', 'Glide faster'], ['F / Ride', 'Ride a nearby world'],
     ['Enter / Dive', 'Sink into the world you are riding'], ['Esc / Rise to orbit', 'Leave the interior or rise out of Drift'],
     ['Inside a world', 'Use the world’s toy or drag with the right button to look'],
+    ['Creatures', 'Ride a leviathan or feed it three inks. The creatures are a fairy tale.'],
   ],
   Time: [['T / Timeline', 'Scrub five chapters or play the life of the star'],
     ['Space', 'Pause or resume orbits in the overview'], ['[ / ]', 'Change orbit speed']],

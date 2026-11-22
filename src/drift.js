@@ -126,9 +126,10 @@ export function createDrift(s,onMoment) {
     d.ripples.push({id,point,ink,at:s.t,crossing});
     if(crossing){d.crossedAt=s.t;d.crossedInk=ink;}
   }
+  const riders=()=>[...(s.sceneBodies??s.bodies),...(s.creatures?.rideables??[])];
   function nearest() {
     let candidate=null,dist=Infinity;
-    for(const b of (s.sceneBodies??s.bodies)){
+    for(const b of riders()){
       const delta=Math.hypot(eye[0]-b.x,eye[1]-b.y,eye[2]-b.z)-b.r;
       if(delta<dist){candidate=b;dist=delta;}
     }
@@ -146,7 +147,7 @@ export function createDrift(s,onMoment) {
     }
     autoTime+=dt;
     const b=route.planet,rad=b?unit([b.x,0,b.z]):[0,0,1];
-    const pass=b&&(s.sceneBodies??s.bodies).includes(b)?[b.x+rad[0]*b.r*2.7,b.y+b.r*.9,b.z+rad[2]*b.r*2.7]:route.start;
+    const pass=b&&riders().includes(b)?[b.x+rad[0]*b.r*2.7,b.y+b.r*.9,b.z+rad[2]*b.r*2.7]:route.start;
     const pts=[route.start,pass,route.island.pos,route.gate,route.sky],stage=autoTime/7;
     const i=Math.floor(stage)%pts.length,u=stage%1;
     const p=spline(pts[(i+4)%5],pts[i],pts[(i+1)%5],pts[(i+2)%5],u);
@@ -161,7 +162,15 @@ export function createDrift(s,onMoment) {
     rideAngle+=dt*.21;
     const a=rideAngle,offset=rad.map((x,i)=>x*Math.cos(a)+
       (side[i]*.34+(i===1?.94:0))*Math.sin(a));
-    const center=[b.x,b.y,b.z],dest=center.map((v,i)=>v+offset[i]*b.r*1.66);
+    const center=[b.x,b.y,b.z];
+    let dest=center.map((v,i)=>v+offset[i]*b.r*1.66);
+    if(b.creature){
+      const length=Math.hypot(b.vx,b.vz)||1,sideX=b.vz/length,sideZ=-b.vx/length;
+      const above=sheetHeights.find(y=>y>b.y)??3.4;
+      const shelf=sheetHeights.findLast(y=>y<b.y)??-3.3;
+      const lift=above-b.y>.22?Math.min(.60,(above-b.y)*.76):-Math.min(.64,(b.y-shelf)*.78);
+      dest=[b.x+(sideX*2.5-b.vx/length*.68)*b.r,b.y+lift,b.z+(sideZ*2.5-b.vz/length*.68)*b.r];
+    }
     const f=clamp((s.t-rideEntry)/.88,0,1),k=f*f*(3-2*f);
     for(let i=0;i<3;i++)eye[i]=mix(rideStart[i],dest[i],k);
     const star=toward(eye,[0,0,0]),ground=toward(eye,center);
@@ -169,6 +178,7 @@ export function createDrift(s,onMoment) {
     const horizon=rad.map((x,i)=>-x*.83+side[i]*.50+(i===1?-.19:0));
     const weight=clamp((Math.cos(a)+.10)*1.3,0,1);
     setLook(unit(star.map((n,i)=>weight*(n*.80+ground[i]*.20)+(1-weight)*(ground[i]*.72+horizon[i]*.28))));
+    if(b.creature)setLook(ground);
     lookYaw+=ridePan[0];lookPitch=clamp(lookPitch+ridePan[1],-Math.PI*4/9,Math.PI*4/9);
   }
   function free(dt) {
@@ -202,7 +212,7 @@ export function createDrift(s,onMoment) {
     nearest();
     if(flying){oldY=eye[1];return;}
     if(keys.size)d.lastInput=s.t;
-    if(d.ride&&!(s.sceneBodies??s.bodies).includes(d.ride))d.ride=(s.sceneBodies??s.bodies).find(b=>b.key===d.ride.key)??null;
+    if(d.ride&&!riders().includes(d.ride))d.ride=riders().find(b=>b.key===d.ride.key)??null;
     if(keys.has('KeyF')&&!d.ride&&d.near&&d.nearestDistance<Math.max(1.55,d.near.r*3.2)){
       attachRide(d.near);
     }

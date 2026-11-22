@@ -186,6 +186,10 @@ export function soundscape() {
   }
   return {
     wake, charge, play, environment, bell, chord, snap,
+    song(ink,level){
+      const note=snap(38+(ink%7)*2);
+      tone(note,3.1,.060*level);tone(note+12,2.4,.022*level,'sine',.28);
+    },
     splash(){hiss(.46,1420,240,.37);tone(snap(53),.36,.16,'sine',.035,snap(64));},
     tick(index){
       wanted=index;

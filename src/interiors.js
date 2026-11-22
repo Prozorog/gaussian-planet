@@ -105,13 +105,14 @@ export function createInteriors(s, drift, audio, discover) {
     exit.hidden=!active;action.hidden=!active;
     dial.hidden=!(active&&interiors[candidate.kind].dial);
     action.disabled=active&&(w.inside<.80||w.leaving);
+    const command=riding?'Let go':'Ride';
+    if(ride.textContent!==command)ride.textContent=command;
     if(active!==controlInside||candidate!==controlBody){
       const spec=eligible&&interiors[candidate.kind];
       title.textContent=candidate?.name??(nearby?drift.near.name:'');
       hint.textContent=active?spec.hint:'';
       action.textContent=active?spec.action:'';
       if(active&&spec.dial){dial.setAttribute('aria-label',spec.dial);dial.value=w.toy.turn;}
-      ride.textContent=riding?'Let go':'Ride';
       if(riding?.creature)title.textContent=riding.name;
       controlInside=active;controlBody=candidate;
     }

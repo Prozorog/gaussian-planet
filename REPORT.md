@@ -395,3 +395,10 @@ The production build passed with `heavy npm run build`. The project’s existing
 | Vesper | 84.14% / 38.86% / 1.66% | 81.73% / 37.63% / 3.31% | [Arrival](output/playwright/phase4/s4-vesper-arrival.png) · [Geyser](output/playwright/phase4/s4-vesper-toy.png) |
 
 [Colour readings](output/playwright/phase4/s4-colour.json) · [World controls](output/playwright/phase4/stage4.json).
+
+### Stage 5 · Ink creatures
+
+- **Creatures** in Settings is on by default. Four face-free swimmers bend their fins and tails as they move, breach with a ring and sing occasional quiet notes in key. **F** and **Ride** also work near the swimmers. I kept the creature encounters out of the Atlas.
+- Fish flock in three instanced schools. They follow new ink, take its palette and leave local bites in the plate. Combing and flinging scatter them. Three distinct inks fed to a swimmer produce a calf that follows it. Swimmers dive during the supernova, circle clear of the black hole, migrate outward in the red giant chapter and leave two etched outlines in the white dwarf chapter. The overview runs 300 fish on High and 150 on Low, with 21 in the white dwarf chapter.
+- Chrome exercised the Settings switch, all three feed inks, the calf, fish bites, a comb scatter, **F** and the nova dive and return. It observed the breach and the chapter changes. The production build passed, and the control run recorded zero page errors.
+- The breach overview measured 80.59% vivid among lit pixels, 42.91% dark and 1.03% cream. The white dwarf frame measured 74.25% dark. [Breach](output/playwright/phase4/s5-breach.png) · [School feeding](output/playwright/phase4/s5-feeding.png) · [Riding Sable](output/playwright/phase4/s5-ride.png) · [White dwarf creatures](output/playwright/phase4/s5-white.png) · [Control run](output/playwright/phase4/stage5.json).
