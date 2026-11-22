@@ -330,7 +330,7 @@ The production build passed with `heavy npm run build`. The project’s existing
 
 ## Phase 4 · The Whole Sky
 
-[Play First Light](http://localhost:4103/). This section records the seven stages in commit order. The Phase 1–3 notes above are historical.
+[Play First Light](http://localhost:4104/). This section records the seven stages in commit order. The Phase 1–3 notes above are historical.
 
 ### Stage 0 · English and close-range engraving
 
@@ -339,3 +339,18 @@ The production build passed with `heavy npm run build`. The project’s existing
 - The gold shape was cloud 47. Its old centre lay at the height of a sheet, which sliced through the flattened cloud. I rounded the gold islands, then made that particular island more compact and moved it clear of the two adjacent sheets.
 - At 1920 × 1080 the sheet measured 81.58% vivid among lit pixels, 25.78% dark and 2.83% cream. The cloud measured 59.23%, 21.48% and 9.29%. The flyby measured 85.61%, 22.16% and 1.74%. The English Atlas frame measured 78.82%, 44.76% and 1.03%. Definitions match Phase 2. The production build passed and the browser control run recorded no page errors.
 - [Sky sheet](output/playwright/phase4/s0-sky.png) · [Cloud interior](output/playwright/phase4/s0-cloud.png) · [Planet flyby](output/playwright/phase4/s0-planet-pass.png) · [English Atlas](output/playwright/phase4/s0-atlas.png) · [Colour readings](output/playwright/phase4/s0-colour.json).
+
+### Stage 1 · Soundtrack and orbital chimes
+
+- Two media elements stream into a WebAudio mix. Scene changes use a four-second equal-power crossfade. The spare element preloads the current track near its loop point, guided by the measured quiet tails. Music initialization waits for the first gesture and the soundtrack dips during the nova shock. I used the supplied gains and pitch classes. Effects have their own level and there is no continuous oscillator drone.
+- **G** and **Chime line** enable the rotating line, one-step planet flashes and thin disc ripples. The chimes take their pitch from Keplerian periods over three octaves. The lock uses each settled orbit’s mean period and waits for two cycles of the outer planet. I kept the existing gravitational encounters and drew the rosette from the actual positions. Releasing a fling at a marked radius guides the body into that orbit.
+- Chrome verified both level sliders, the five credits, **M**, the chip and **G**, a tuned fling, and both directions of the overview/Drift crossfade. There were two active media elements during the fade and one afterward. Ember and Verdance locked at **1:2** with periods of 17.06 and 34.11 toy orbital seconds. The captured track had 52 chords and ten crossings had rung. The production build passed with zero page errors in the control run.
+- [Chime line and ripple](output/playwright/phase4/s1-chime.png) · [1:2 rosette](output/playwright/phase4/s1-rosette.png) · [Credits](output/playwright/phase4/s1-credits.png) · [Audio and orbit observations](output/playwright/phase4/stage1.json).
+
+#### Music credits
+
+- "Frozen Star" Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By Attribution 4.0. https://creativecommons.org/licenses/by/4.0/
+- "Dreams Become Real" Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By Attribution 4.0. https://creativecommons.org/licenses/by/4.0/
+- "Lightless Dawn" Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By Attribution 4.0. https://creativecommons.org/licenses/by/4.0/
+- "Echoes of Time v2" Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By Attribution 4.0. https://creativecommons.org/licenses/by/4.0/
+- "Ossuary 6 - Air" Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By Attribution 4.0. https://creativecommons.org/licenses/by/4.0/

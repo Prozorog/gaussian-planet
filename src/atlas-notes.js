@@ -42,4 +42,10 @@ export const notes=[
   ['Day, night and sunrise','The terminator divides day from night. A day depends on a planet’s spin. Venus rotates so slowly that one spin takes 243 Earth days, longer than its 225-Earth-day year.',
       'Watch the terminator slide across the marbled surface below. Sunlight takes about 8 min 20 s to reach Earth.',
       'In this toy you circle the planet in moments · In the real sky a planet’s spin sets its day.','Hold F beside a planet while in Drift.'],
+  ['Orbital resonance','In a resonance, two bodies’ orbital periods form a simple ratio. Their gravity keeps nudging them back into step. Jupiter’s moons Io, Europa and Ganymede orbit in a 1:2:4 rhythm.',
+      'Pluto circles the Sun twice for every three orbits of Neptune. The seven planets of TRAPPIST-1 form a chain of near-resonances. Earth and Venus are not locked, but 8 Earth years almost equal 13 Venus orbits, which draws a five-petalled figure.',
+      'In this toy a matching ratio draws a rosette · In the real sky a resonance is maintained by gravity.','Let two worlds keep a simple period ratio for two orbits. Fling near a tick to tune a pair.'],
+  ['The music of the spheres','In 1619 Johannes Kepler published Harmonices Mundi. He tried to find musical harmony in the planets’ speeds and gave his third law.',
+      'The note rises as the orbital period gets shorter. Watch the stave as the worlds cross the chime line.',
+      'In this toy the worlds ring · In the real sky space is silent: sound cannot travel through a vacuum.','Press G or listen for five chimes.'],
 ];

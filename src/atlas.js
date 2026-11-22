@@ -29,7 +29,8 @@ export const helpGroups = {
     ['Space / C', 'Rise / sink'], ['Shift', 'Glide faster'], ['F', 'Ride a nearby world'], ['Esc', 'Rise out'],
   ],
   Time: [['Space', 'Pause or resume orbits in the overview'], ['[ / ]', 'Change orbit speed']],
-  Sound: [['M', 'Mute sound']],
+  Sound: [['M', 'Mute sound'], ['G / Chime line', 'Show or hide the orbital chimes'],
+    ['Fling preview', 'Release near a tick to tune an orbit'], ['Music / Effects', 'Set their levels in Settings']],
   Atlas: [['B', 'Open the Sky Atlas'], ['N / O', 'Planet labels / orbit guides'],
     ['K / Z', 'Kepler sectors / habitable zone'], ['H', 'Settings and controls']],
 };

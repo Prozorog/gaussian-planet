@@ -97,18 +97,80 @@ export function diagram(canvas,id,s,c,a) {
     type(p,139,38,'liquid-water zone',mint);
     type(p,139,58,(lo/AU).toFixed(2)+'–'+(hi/AU).toFixed(2)+' toy AU',gold);
   }else if(id===14&&a.rider){terminator(p,a.rider,c);}
+  else if(id===15){
+    const pair=s.spheres.lastPair;
+    const bodies=pair?[pair.a,pair.b]:s.bodies.slice(0,2);
+    if(bodies.length<2)return;
+    const [inner,outer]=bodies.map(b=>Math.hypot(b.x,b.z)).sort((a,b)=>a-b);
+    const scale=51/outer,point=(x,z)=>[78+x*scale,45+z*scale*.68];
+    const ring=(radius,col)=>path(p,Array.from({length:81},(_,i)=>point(radius*Math.cos(i*TAU/80),radius*Math.sin(i*TAU/80))),col);
+    ring(inner,mint);ring(outer,rose);
+    for(const line of pair?.lines??[])path(p,[point(line.x,line.z),point(line.u,line.v)],'#ffde9745');
+    for(const [i,b] of bodies.entries())dot(p,...point(b.x,b.z),3.1,i?rose:mint);
+    type(p,151,28,pair?.ratio??'Period ratio',gold);
+    type(p,151,49,bodies[0].name,mint);type(p,151,66,bodies[1].name,rose);
+  }else if(id===16){
+    for(let i=0;i<5;i++)path(p,[[21,18+i*12],[257,18+i*12]],faint);
+    const voices=s.spheres.voices;
+    voices.forEach(({body,pitch},i)=>{
+      const x=39+i*198/Math.max(1,voices.length-1),y=clamp(68-(pitch-48)*1.48,11,70);
+      path(p,[[x+3,y],[x+3,y-11]],gold);dot(p,x,y,3.7,pigments[body.id]??mint);
+      type(p,x,84,body.name.slice(0,10),gold,'center');
+    });
+  }
 }
-export const illustrated=new Set([1,2,3,4,6,8,11,12,14]);
+export const illustrated=new Set([1,2,3,4,6,8,11,12,14,15,16]);
+
+function chimeLines(p,s,xy) {
+  const note=s.spheres, dx=Math.cos(note.angle),dz=Math.sin(note.angle);
+  function segment(a,b){
+    if(a[2]<=.07||b[2]<=.07)return false;
+    p.moveTo(a[0],a[1]);p.lineTo(b[0],b[1]);return true;
+  }
+  p.lineWidth=1.25;p.strokeStyle='#ffe4b5a6';p.beginPath();
+  for(let r=1.03;r<15.4;r+=.38){
+    segment(xy(dx*r,-.19,dz*r),xy(dx*(r+.38),-.19,dz*(r+.38)));
+  }
+  p.stroke();
+  for(const ripple of note.ripples){
+    const age=s.t-ripple.at,rad=.14+age*.94;
+    p.beginPath();p.strokeStyle=`rgba(255,225,173,${.92*(1-age/1.65)})`;
+    let prev=xy(ripple.x+rad,-.17,ripple.z);
+    for(let i=1;i<=54;i++){
+      const a=i*TAU/54,next=xy(ripple.x+rad*Math.cos(a),-.17,ripple.z+rad*Math.sin(a));
+      segment(prev,next);prev=next;
+    }
+    p.stroke();
+  }
+  for(const pair of note.locks){
+    p.lineWidth=1;
+    for(let band=0;band<5;band++){
+      p.beginPath();p.strokeStyle=`rgba(255,226,184,${.10+band*.066})`;
+      for(const line of pair.lines){
+        if(Math.floor(clamp(1-(pair.time-line.at)/(2.8*pair.period),0,.999)*5)!==band)continue;
+        segment(xy(line.x,-.14,line.z),xy(line.u,-.14,line.v));
+      }
+      p.stroke();
+    }
+    const a=xy(pair.a.x,pair.a.y,pair.a.z),b=xy(pair.b.x,pair.b.y,pair.b.z);
+    p.beginPath();p.strokeStyle='#ffe3b4da';
+    if(segment(a,b)){
+      p.stroke();type(p,(a[0]+b[0])/2,(a[1]+b[1])/2-8,pair.ratio,'#ffebc5','center');
+    }
+  }
+}
 
 export function chartOnSky(canvas,s,c,a,id,preview) {
   const wedges=(a.wedges||id===1)&&c.mode==='overview';
-  const active=a.labels||wedges||id===6&&a.roche||preview;
+  const chimes=s.spheres?.on&&c.mode!=='poster';
+  const active=a.labels||wedges||id===6&&a.roche||preview||chimes;
   if(!active&&canvas.hidden)return;
   canvas.hidden=!active;if(!active)return;
   const w=canvas.clientWidth,h=canvas.clientHeight,dpr=Math.min(devicePixelRatio,2);
   if(canvas.width!==w*dpr||canvas.height!==h*dpr){canvas.width=w*dpr;canvas.height=h*dpr;}
   const p=canvas.getContext('2d');p.setTransform(dpr,0,0,dpr,0,0);p.clearRect(0,0,w,h);
   const xy=(x,y,z)=>{const q=c.project(x,y,z);return [(q[0]+1)*w/2,(1-q[1])*h/2,q[2]];};
+  if(chimes)chimeLines(p,s,xy);
   if(wedges&&a.orbit&&!c.flying)orbitDrawing(a,(x,z)=>xy(x,-.10,z).slice(0,2),p,true);
   if(id===6&&a.roche&&s.bodies.includes(a.roche)&&c.mode==='overview'){
     const b=a.roche,o=[];for(let j=0;j<=100;j++){const ang=j/100*TAU;o.push(xy(b.x+Math.cos(ang)*b.r*2.2,b.y,b.z+Math.sin(ang)*b.r*2.2).slice(0,2));}
@@ -130,6 +192,6 @@ export function chartOnSky(canvas,s,c,a,id,preview) {
     path(p,[[sx,sy],[sx+142,sy]],faint,2);path(p,[[sx,sy],[axis(g.speed),sy]],rose,2);
     path(p,[[axis(g.circular),sy-5],[axis(g.circular),sy+5]],mint);
     path(p,[[axis(g.escape),sy-5],[axis(g.escape),sy+5]],gold);
-    type(p,sx,sy-11,'LAUNCH',gold);type(p,sx,sy+20,'│ circular   │ escape',mint);
+    type(p,sx,sy-11,'Launch',gold);type(p,sx,sy+20,'│ circular   │ escape',mint);
   }
 }
