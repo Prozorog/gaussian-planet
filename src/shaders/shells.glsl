@@ -1,79 +1,41 @@
-uniform vec3 eye,right,up,back;
-uniform vec2 shift;
-uniform mat4 vp;
-uniform float evolution;
+in vec3 local,world;
+uniform vec3 eye;
+uniform int pigment;
+uniform float param,radius;
 out vec4 frag;
 
-vec3 axes(vec3 p){
-  p.xy=rot(.34)*p.xy;
-  p.yz=rot(-.19)*p.yz;
-  return p/vec3(1.34,.86,1.0);
-}
 void main(){
-  vec2 ndc=uv*2.-1.-shift;
-  vec3 ray=-back+.3249197*(right*ndc.x*viewport.x/viewport.y+up*ndc.y);
-  vec3 o=axes(eye),d=axes(ray);
-  float A=dot(d,d), B=dot(o,d), C=dot(o,o);
-  const float radii[4]=float[4](3.02,4.12,5.33,6.56);
-  const int pigments[4]=int[4](3,4,6,5);
-  float expansion=.78+.23*smoothstep(2.13,3.15,evolution)+.025*sin(time*.23)+.20*life.w;
-  vec3 position=vec3(0.);
-  float nearest=1.e5,value=0.,comb=0.,filament=0.;
-  int pigment=0;
-  for(int i=3;i>=0;i--){
-    float k=float(i),r=radii[i]*expansion;
-    float discriminant=B*B-A*(C-r*r);
-    if(discriminant<=0.)continue;
-    float chord=sqrt(discriminant),t=(-B-chord)/A;
-    bool inner=t<.045;
-    if(inner)t=(-B+chord)/A;
-    if(t<.045||t>=nearest)continue;
-    vec3 n=(o+t*d)/r;
-    float edge=chord/(r*sqrt(A));
-    float theta=atan(n.y,n.x);
-    vec2 q=n.xy*4.5+n.z*vec2(2.9,-2.7)+k*8.51;
-    vec2 f=foldInk(roll(q*.86,4.1),time*.21);
-    float broad=noise(f*.83),middle=noise(f*2.65),tiny=noise(f*8.2);
-    float bend=edge+.095*broad+.063*middle+.021*tiny;
-    float wrap=theta*14.+5.6*edge+2.7*broad+1.02*middle+.28*tiny;
-    float polar=smoothstep(.12,.55,length(n.xy));
-    float rib=.52+.48*sin(wrap)*polar;
-    float exposure=inner?.69+.08*sin(time*.49+k):1.;
-    float reach=(.28+.46*life.z+float(i==0)*.11*life.z)*exposure;
-    if(bend>reach+.067*middle||bend<-.061)continue;
-    float lamina=sin(26.0*bend+2.9*broad+1.05*middle+time*.37-k*.51);
-    float fret=.12*middle+.070*tiny;
-    float strand=.48+.25*lamina+.135*broad+fret+.18*rib;
-    if(strand<.24+.34*(1.-life.z)-.12*life.w)continue;
-    if(life.w>.12&&sin(wrap*.5+bend*21.)<-.6+1.37*life.w)continue;
-    nearest=t;position=eye+ray*t;value=strand;
-    comb=.68*middle+.32*tiny+rib*.43;filament=(wrap*polar+8.*bend*(1.-polar))/6.283185;
-    pigment=pigments[i];
-  }
-  if(nearest<99999.){
-    float washed=clamp(value-.23*life.w,.025,.86);
-    vec3 col=engraved(washed,pigment,comb,1.);
-    col=mix(col,ink(pigment,floor(washed*9.)+2.),lineAt(filament,1.15)*.68);
-    if(life.w>.48)col=ink(pigment,clamp(2.+floor(value*3.),2.,4.))*.70;
-    vec4 clip=vp*vec4(position,1.);
-    gl_FragDepth=.5+.5*clip.z/clip.w;
-    frag=vec4(col,1.);return;
-  }
-  if(life.w>.15){
-    float t=-dot(eye,ray)/dot(ray,ray);
-    if(t>0.){
-      vec3 p=eye+ray*t;
-      vec2 q=vec2(dot(p,right),dot(p,up));
-      float r=length(q),a=atan(q.y,q.x);
-      float warp=r+.14*noise(q*3.3)+.05*noise(q*9.);
-      float broken=sin(5.*a+3.7*warp+noise(q*1.4)*1.5);
-      if(r<1.48&&broken>.25&&warp>.29){
-        float lane=lineAt(8.7*warp+.54*broken,1.30);
-        if(lane>.45){
-          gl_FragDepth=.9996;frag=vec4(lane>.73?vec3(.86,.96,1.):ink(8,4.),1.);return;
-        }
-      }
-    }
-  }
-  discard;
+  vec3 view=normalize(eye-world);
+  vec3 n=normalize(local);
+  vec3 normal=normalize(cross(dFdx(world),dFdy(world)));
+  float sight=abs(dot(view,normal));
+  float limb=1.-smoothstep(.075,.64,sight);
+  float k=param;
+  vec2 sheet=vec2(n.x*.85+n.z*.63,n.y+n.z*.32);
+  vec2 broad=sheet*3.25+vec2(k*5.2,1.33*k);
+  float opening=noise(broad*.79)+.30*noise(broad*2.15);
+  float drape=.55*sin(5.8*n.y+4.2*n.x+1.6*n.z+k*1.6);
+  float dose=opening+.33*drape+.46*limb;
+  float dist=distance(world,eye);
+  float within=1.-smoothstep(1.4,5.3,dist);
+  float hollow=-.018+.20*(1.-limb)+.042*k-.19*within-(pigment==6?.068:0.);
+  if(dose<hollow+.57*(1.-life.z)+.62*life.w)discard;
+  if(dist<.032)discard;
+  
+  vec2 f=foldInk(roll(broad+vec2(.38*opening,.23*drape),4.35),time*.11);
+  float wash=noise(f*.84),curl=noise(f*2.55),grit=noise(f*8.3);
+  float shellline=n.y*6.9+n.z*3.25+2.55*wash+.83*curl+.21*grit-k*1.7;
+  float ribbon=sin(shellline);
+  float folds=sin(shellline*1.84+1.30*wash+.45*curl);
+  float fan=(n.x*7.6+n.z*5.3+2.4*wash)/(1.1+.52*abs(n.y));
+  float filament=lineAt(fan*2.25+.41*grit,1.18);
+  float edge=lineAt((sight+.046*wash)*8.3+.38*curl,1.16)*limb;
+  float lightStep=sight<.19?.21:sight<.39?.13:sight<.63?.02:-.088;
+  float v=.52+.182*ribbon+.084*folds+.11*curl+.065*grit+lightStep-.26*life.w;
+  int id=pigment;
+  vec3 col=engraved(v,id,.86*curl+.23*grit,1.);
+  col=pooled(col,id,shellline*.84+curl*.93,.10);
+  col=mix(col,ink(id,floor(v*9.)+2.),max(filament*.58,edge*.74));
+  if(life.w>.19)col*=1.-.72*life.w;
+  frag=vec4(col,1.);
 }

@@ -549,3 +549,13 @@ The background rays bend before sampling the sky engraving. The same deflection 
 Chrome formed and dragged the hole, stretched a world, saw a jet, used **Rekindle** and approached in Drift. The production build passed. The public-input check did not reach the falling threshold in that Drift pass. The most magnified background is still a sampled print, so some stretched engraved marks exceed two pixels.
 
 [Overview](output/playwright/phase41/s5-overview.png) · [Star alignment](output/playwright/phase41/s5-star-ring.png) · [Low angle](output/playwright/phase41/s5-low.png) · [Drift](output/playwright/phase41/s5-drift.png) · [Bent lines at 100%](output/playwright/phase41/s5-crop.png).
+
+### Stage 6 · The planetary nebula
+
+The four colours now occupy four independently tilted, ruffled meshes. Each shell opens in patches and takes brighter ink at the grazing angle. I seeded tapered knots along outward radial paths. The old disc remains below the shells and dims as they fill out. The overview camera can orbit down to the disc plane, and the same meshes remain in view during Drift and The Life of a Star.
+
+Chrome checked the timeline chapter, **Nebula print**, right-drag to the side and three-quarter views, **D** and **Esc**. The side capture was within one degree of the disc plane and the nebula still filled the height. The production build passed.
+
+The poster measured 79.68% vivid among lit pixels and 0.80% cream. Dark pixels measured 51.64%, above the 50% ceiling. Teal, rose, violet and gold represented 17.85%, 17.51%, 23.72% and 7.93% of lit pixels. Gold was 0.07 points below its target.
+
+[Poster](output/playwright/phase41/s6-poster.png) · [Side](output/playwright/phase41/s6-side.png) · [Three-quarter](output/playwright/phase41/s6-quarter.png) · [Inside](output/playwright/phase41/s6-inside.png) · [Camera positions](output/playwright/phase41/s6-views.json) · [Colour readings](output/playwright/phase41/s6-colour.json).

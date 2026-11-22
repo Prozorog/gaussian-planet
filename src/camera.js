@@ -15,10 +15,11 @@ export function createCamera(){
   if(c.mode==='planet'&&c.focus){const b=c.focus;yaw=c.baseYaw+c.portraitYaw+.023*(t-c.arrival);pitch=(c.pitch-22)*DEG;dist=b.r*5.14/c.zoom;ax=b.x;ay=b.y;az=b.z;shift=.085;}
   if(c.mode==='poster'){
     yaw=.05;pitch=20*DEG;ay=0;
-    if(c.nebulaPrint){yaw=.23;pitch=40*DEG;dist=18.1;shift=0;}
+    if(c.nebulaPrint){yaw=.25;pitch=58*DEG;dist=21.6;shift=0;}
     else{dist=3.24;shift=-.99;}
   }
   const cp=Math.cos(pitch),bx=Math.sin(yaw)*cp,by=Math.sin(pitch),bz=Math.cos(yaw)*cp;let ex=ax+bx*dist,ey=ay+by*dist,ez=az+bz*dist;
+  if(c.mode==='overview'&&c.nebulaPrint){ex=ax+(ex-ax)*1.30;ey=ay+(ey-ay)*1.30;ez=az+(ez-az)*1.30;}
   c.inside=c.mode==='drift'?1:0;c.bank=0;
   if(c.mode==='drift'){[ex,ey,ez]=c.drift.position;const f=c.drift.forward;ax=ex+f[0]*3;ay=ey+f[1]*3;az=ez+f[2]*3;shift=0;}
   if(c.mode==='voyage'){
@@ -48,5 +49,5 @@ export function createCamera(){
  function ray(x,y){const a=(x-c.shift)*TAN*c.aspect,b=(y-c.shiftY)*TAN;return c.back.map((n,i)=>-n+c.right[i]*a+c.up[i]*b);}
  function plane(x,y,height=0){const d=ray(x,y),u=(height-c.eye[1])/d[1];return u>0?[c.eye[0]+d[0]*u,c.eye[2]+d[2]*u]:null;}
  function sphere(x,y,cx,cy,cz,r){const d=ray(x,y),a=d[0]**2+d[1]**2+d[2]**2,ox=c.eye[0]-cx,oy=c.eye[1]-cy,oz=c.eye[2]-cz,b=ox*d[0]+oy*d[1]+oz*d[2],disc=b*b-a*(ox*ox+oy*oy+oz*oz-r*r);if(disc<0)return null;const t=(-b-Math.sqrt(disc))/a;return t>0?{t,n:[(ox+t*d[0])/r,(oy+t*d[1])/r,(oz+t*d[2])/r]}:null;}
- return Object.assign(c,{tick,visit,followVoyage,takeHelm,project,ray,plane,sphere,orbit(dx,dy){if(c.mode==='poster')visit('overview');if(c.mode==='planet')c.portraitYaw-=dx*.006;else c.targetYaw-=dx*.006;c.targetPitch=clamp(c.targetPitch+dy*.16,10,75);}});
+ return Object.assign(c,{tick,visit,followVoyage,takeHelm,project,ray,plane,sphere,orbit(dx,dy){if(c.mode==='poster')visit('overview');if(c.mode==='planet')c.portraitYaw-=dx*.006;else c.targetYaw-=dx*.006;c.targetPitch=clamp(c.targetPitch+dy*.16,c.nebulaPrint&&c.mode==='overview'?-7:10,75);}});
 }

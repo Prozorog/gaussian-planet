@@ -104,7 +104,7 @@ void main(){
   float band=floor(clamp(v,0.,.999)*9.);
   float reveal=cloud?min(inside,clamp((dist-.026)/.091,0.,1.)):inside;
   float streamline=lineAt(thread,1.24);
-  float openSpace=.084+life.z*.19+life.w*.26;
+  float openSpace=.084+life.z*(cloud?.74:.30)+life.w*.26;
   if(coverage<openSpace||band>=ceil(9.*reveal))discard;
   if(picking){
     float n=floor(min(dist,63.999)*262144.);
@@ -116,6 +116,7 @@ void main(){
   vec3 engravedInk=engraved(v,id,comb,1.);
   engravedInk=mix(engravedInk,ink(id,floor(v*9.)+2.),max(.70*streamline*near,seam*.58));
   vec3 col=pooled(engravedInk,id,poolPhase,cloud?.128:.124);
+  col*=1.-.56*life.z;
   if(starHue==8)col*=vec3(.87,.96,1.);if(starHue==0)col*=vec3(1.,.87,.91);
   frag=vec4(col,1.);
 }

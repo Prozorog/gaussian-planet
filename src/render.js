@@ -6,8 +6,17 @@ import worldInterior from './shaders/interiors.glsl?raw';
 import {createFluid} from './fluid.js';import {inks,clamp} from './system.js';import {createPrint,SPAN} from './print.js';import {particles} from './particles.js';import {meshes} from './meshes.js';
 import common from './shaders/ink.glsl?raw';import vertex from './shaders/world.vert.glsl?raw';import sky from './shaders/space.glsl?raw';import bodies from './shaders/body.glsl?raw';import corona from './shaders/corona.glsl?raw';import nebula from './shaders/disc.glsl?raw';import events from './shaders/event.glsl?raw';
 import shells from './shaders/shells.glsl?raw';
+import knotVertex from './shaders/nebula-knots.vert.glsl?raw';
+import knotInk from './shaders/nebula-knots.glsl?raw';
+
+const shellLayers=[
+  [2.32,3,1.14,1.07,1.10],
+  [3.75,6,1.27,1.19,1.04],
+  [4.94,4,1.27,1.22,1.05],
+  [6.77,5,1.52,1.14,1.00],
+];
 export function createRenderer(canvas){const gl=canvas.getContext('webgl2',{powerPreference:'high-performance',alpha:false,antialias:false,depth:true,stencil:false});if(!gl||!gl.getExtension('EXT_color_buffer_float'))throw Error('WebGL2 with floating-point render targets is required. Enable hardware acceleration and reload.');
- const make=(src,label)=>program(gl,common+src,label,vertex),skyP=program(gl,common+sky,'Marbled firmament'),shellP=program(gl,common+shells,'Expanding nebula shells'),body=make(bodies,'Planet press'),crown=make(corona,'Solar currents'),disc=make(nebula,'Three nebula plates'),fx=make(events,'Marbled reactions');const mesh=meshes(gl),fluid=createFluid(gl),solar=createFluid(gl),plate=createPrint(gl);let seed=294879;const rand=()=>((seed=(Math.imul(seed,1664525)+1013904223)>>>0)/4294967296);const paper=Uint8Array.from({length:256*256*4},()=>rand()*256),fiber=mapTexture(gl,256,256,gl.RGBA8,paper,gl.LINEAR,gl.REPEAT),ramp=mapTexture(gl,9,9,gl.RGBA8,inks()),dust=particles(gl,rand);
+ const make=(src,label)=>program(gl,common+src,label,vertex),skyP=program(gl,common+sky,'Marbled firmament'),shellP=make(shells,'Expanding nebula shells'),knots=program(gl,common+knotInk,'Nebula filaments and knots',knotVertex),body=make(bodies,'Planet press'),crown=make(corona,'Solar currents'),disc=make(nebula,'Three nebula plates'),fx=make(events,'Marbled reactions');const mesh=meshes(gl),fluid=createFluid(gl),solar=createFluid(gl),plate=createPrint(gl);let seed=294879;const rand=()=>((seed=(Math.imul(seed,1664525)+1013904223)>>>0)/4294967296);const paper=Uint8Array.from({length:256*256*4},()=>rand()*256),fiber=mapTexture(gl,256,256,gl.RGBA8,paper,gl.LINEAR,gl.REPEAT),ramp=mapTexture(gl,9,9,gl.RGBA8,inks()),dust=particles(gl,rand);
  function lattice(channel){
    const coefficients=new Float32Array(256*256*4);
    const value=(x,y)=>paper[4*((y&255)*256+(x&255))+channel]/127.5-1;
@@ -57,8 +66,25 @@ export function createRenderer(canvas){const gl=canvas.getContext('webgl2',{powe
    for(const b of (s.sceneBodies??s.bodies))source(b.x-b.vx*.34,b.z-b.vz*.34,b.r*1.3,b.id,b.vx*5,b.vz*5,b.held?.15:.74+b.hit*.26,.24+b.hit);const pit=s.blackHole?.hole;if(pit)source(pit.x,pit.z,1.75,pit.ink,0,0,.22,1.02);if(s.life?.red>.1){for(let i=0;i<3;i++){const a=s.t*.17+i*2.094,r=s.life.starRadius,dx=Math.cos(a),dz=Math.sin(a);source(r*dx,r*dz,.72,0,28*dx*s.life.red,28*dz*s.life.red,.70*s.life.red,.55);}}sun[3]=s.charge;fluid.step(step,s.t,1,remap,core,positions,forces,count,s.low?6:10);solar.step(step,s.t,1,remap,sun,positions,forces,0,s.low?6:10);dust.step(step,s.t,fluid.velocity);}
   if(s.t>=colourSampleAt&&c.mode!=='poster')printChart(s,c);if(c.inside>0)interior.sampleFlow(s,c,fluid.velocity);}texture(gl,9,tag);
   const bent=horizon.begin(s,c,w,h);bindWorld();gl.viewport(0,0,w,h);gl.clearDepth(1);gl.depthMask(true);gl.clear(gl.DEPTH_BUFFER_BIT);let l=frame(skyP,s,c);gl.uniform3fv(l.back,c.back);gl.uniform2f(l.shift,c.shift,c.shiftY);draw(gl);gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LEQUAL);dust.draw(s,c,1);
-  if(s.life?.shells>.001){l=frame(shellP,s,c);gl.uniform3fv(l.back,c.back);gl.uniform2f(l.shift,c.shift,c.shiftY);gl.uniform1f(l.evolution,s.life.value);draw(gl);}
-  for(let i=0;i<(s.sceneBodies??s.bodies).length;i++){const b=(s.sceneBodies??s.bodies)[i];orbits.set([b.x,b.z,b.r,b.guide],i*4);}const poster=c.mode==='poster';if(!poster){if(c.inside<1){l=discFrame(s,c);for(const k of [1,0,-1]){gl.uniform1i(l.layer,k);at(l,1,0,-.49+k*.32,0,16);mesh.quad();}}if(c.inside>0)interior.surfaces(s,c);dust.draw(s,c,0);}
+  if(s.life?.shells>.001){
+    const expansion=.79+.23*clamp((s.life.value-2.12)/.90,0,1)+.13*s.life.white;
+    l=frame(shellP,s,c);
+    for(const [i,[radius,ink,x,y,z]] of shellLayers.entries()){
+      at(l,7,0,0,0,radius*expansion);
+      gl.uniform1f(l.param,i);gl.uniform1i(l.pigment,ink);gl.uniform3f(l.cloudSize,x,y,z);
+      mesh.sphere();
+    }
+    if(s.life.shells>.25&&s.life.white<.45){
+      l=frame(knots,s,c);gl.uniform1f(l.scale,expansion);
+      gl.bindVertexArray(null);gl.drawArraysInstanced(gl.TRIANGLES,0,6,s.low?84:136);
+    }
+  }
+  for(let i=0;i<(s.sceneBodies??s.bodies).length;i++){const b=(s.sceneBodies??s.bodies)[i];orbits.set([b.x,b.z,b.r,b.guide],i*4);}const poster=c.mode==='poster';
+  if(poster&&c.nebulaPrint){
+    l=discFrame(s,c);gl.uniform1f(l.guides,0);gl.uniform1i(l.layer,0);
+    at(l,1,0,-.55,0,16);mesh.quad();
+  }
+  if(!poster){if(c.inside<1){l=discFrame(s,c);for(const k of [1,0,-1]){gl.uniform1i(l.layer,k);at(l,1,0,-.49+k*.32,0,16);mesh.quad();}}if(c.inside>0)interior.surfaces(s,c);dust.draw(s,c,0);}
   function engulfPoint(e,a,rs){
    const [u,v]=c.project(e.x,.13,e.z),[sx,sy]=c.project(0,0,0);
    const x=(u-sx)*c.aspect,y=v-sy,k=Math.hypot(x,y)||1;

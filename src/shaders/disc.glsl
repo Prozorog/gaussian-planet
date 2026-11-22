@@ -34,5 +34,6 @@ void main(){vec2 p=world.xz;float rr=length(p);if(rr>15.5)discard;vec2 coord=p/3
    float faded=clamp(2.+floor(val*4.),2.,4.);
    col=mix(ink(id,faded)*.49,ink(id,5.)*.61,lineAt(spiral*.77+comb*.16,1.1)*.81);
  }
+ col*=1.-.46*life.z;
  frag=vec4(col,1.);
 }
