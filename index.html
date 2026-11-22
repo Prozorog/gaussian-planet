@@ -1,6 +1,137 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0b0911"><meta name="description" content="Marble a living star system, float through its currents, and open the Sky Atlas."><title>First Light · Gaussian Planet</title><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='11' fill='%23ec6821' stroke='%23ffe3a3' stroke-width='2'/%3E%3C/svg%3E"></head>
-<body><main id="stage" aria-label="The marbler’s orrery"><canvas id="sky" aria-label="Marbled star system. Use the ink bench below or press H for controls." tabindex="0"></canvas><canvas id="gesture" aria-hidden="true"></canvas><div id="cursor" aria-hidden="true"></div>
+<body style="margin:0;background:#08050c">
+<style>
+  #first-light{position:fixed;inset:0;z-index:50;isolation:isolate;overflow:hidden;background:#08050c;color:#fae2bf}
+  #first-light[hidden]{display:none}
+  #first-light canvas{position:absolute;inset:0;width:100%;height:100%}
+  #first-light.revealing{background:transparent;pointer-events:none}
+  #light-seal,#light-begin{position:absolute;top:44%;left:50%;width:clamp(142px,32vmin,324px);aspect-ratio:1;transform:translate(-50%,-50%)}
+  #light-seal{overflow:visible;pointer-events:none}
+  #light-progress{stroke-dasharray:100;stroke-dashoffset:100;transition:stroke-dashoffset .28s ease}
+  #first-light.ready #light-progress{animation:light-breath 3s ease-in-out infinite}
+  @keyframes light-breath{50%{opacity:.48}}
+  #light-begin{background:none;border:0;cursor:pointer;border-radius:50%;color:inherit;padding:0;font:italic clamp(16px,2.1vmin,23px) Georgia,serif}
+  #light-begin span{position:absolute;left:50%;bottom:0;transform:translate(-50%,50%);padding:4px 15px;border:1px solid #96614d;background:#1c1018;white-space:nowrap}
+  #light-begin:hover span,#light-begin:focus-visible span{border-color:#ffdba4;color:#fff1d7}
+  #light-type,#light-tip{position:absolute;left:50%;transform:translateX(-50%);width:92%;text-align:center}
+  #light-type{top:63%;font:italic clamp(36px,8.2vmin,82px)/1 Georgia,serif;letter-spacing:-.035em}
+  #light-type small{display:block;margin-top:11px;font:10px/1.4 system-ui,sans-serif;letter-spacing:.24em;text-transform:uppercase;color:#d2a887}
+  #light-tip{top:86%;color:#d6b695;font:italic clamp(13px,1.6vmin,17px) Georgia,serif;margin:0}
+  #first-light.revealing :is(#light-seal,#light-type,#light-tip){opacity:0;transition:opacity .55s ease}
+</style>
+<section id="first-light" aria-label="First Light">
+  <canvas id="light-ink" aria-hidden="true"></canvas>
+  <svg id="light-seal" viewBox="0 0 160 160" aria-label="Loading First Light" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+    <circle cx="80" cy="80" r="76" fill="none" stroke="#745140" stroke-width=".46"/>
+    <circle cx="80" cy="80" r="72.5" fill="none" stroke="#4c2b34" stroke-width=".38" stroke-dasharray="1 2.8"/>
+    <circle id="light-progress" cx="80" cy="80" r="76" fill="none" stroke="#f7d6a0" stroke-width=".8" pathLength="100" transform="rotate(-90 80 80)"/>
+  </svg>
+  <button id="light-begin" type="button" hidden><span>Begin</span></button>
+  <div id="light-type">First Light<small>Gaussian Planet</small></div>
+  <p id="light-tip">Hold the star to wake a flare.</p>
+</section>
+<script>
+  (() => {
+    const screen=document.getElementById('first-light'), canvas=document.getElementById('light-ink');
+    const seal=document.getElementById('light-seal'), ring=document.getElementById('light-progress');
+    const button=document.getElementById('light-begin'), tip=document.getElementById('light-tip');
+    const ink=canvas.getContext('2d'), start=performance.now(), tau=2*Math.PI;
+    const tips=['Hold the star to wake a flare.','Stir the ink to fold it into the disc.','Step inside to float between the sheets.','Choose a voyage and let the probe fly.'];
+    const fire=['#240b1e','#421029','#722031','#a22031','#cc342c','#e94f27','#f57833','#fca54a','#ffcc71','#ed954d','#a84131','#58182a'];
+    const pin=['#281827','#5c3441','#977151','#c49a77','#60475d'];
+    const done=new Set();
+    let seed=20643,revealAt=0,begin,position,finished=false;
+    const rand=()=>((seed=(Math.imul(seed,1664525)+1013904223)>>>0)/4294967296);
+    const stars=Array.from({length:860},()=>[rand(),rand(),rand(),Math.floor(rand()*pin.length)]);
+    const clear=()=>document.getElementById('stage').removeAttribute('inert');
+    const clamp=v=>Math.max(0,Math.min(1,v));
+    const ease=t=>{t=clamp(t);return t*t*(3-2*t);};
+    function contour(x,y,r,phase,spread=1){
+      ink.beginPath();
+      for(let j=0;j<=208;j++){
+        const a=j*tau/208;
+        const turn=a+.35*Math.sin(a*3.-phase*.18);
+        const edge=1.+.098*Math.sin(3*turn+phase)+.047*Math.sin(7*a-phase*1.74)+.023*Math.cos(13*a+phase*2.16);
+        const px=x+Math.cos(a)*r*edge*spread,py=y+Math.sin(a)*r*edge*.93;
+        if(j===0)ink.moveTo(px,py);else ink.lineTo(px,py);
+      }
+      ink.closePath();
+    }
+    function droplet(x,y,r){
+      ink.beginPath();ink.moveTo(x,y-r*2.85);
+      ink.bezierCurveTo(x+r*.13,y-r*1.25,x+r*1.07,y-r*.72,x+r*.92,y+r*.07);
+      ink.bezierCurveTo(x+r*.64,y+r*1.41,x-r*1.02,y+r*.92,x-r*.93,y-r*.045);
+      ink.bezierCurveTo(x-r*.84,y-r*.78,x-r*.22,y-r*1.51,x,y-r*2.85);
+      ink.closePath();ink.fillStyle='#d74d29';ink.fill();
+      ink.strokeStyle='#fed89d';ink.lineWidth=1.1;ink.stroke();
+      contour(x-r*.14,y+r*.10,r*.56,1.2);ink.fillStyle='#f28a42';ink.fill();
+      contour(x-r*.19,y+r*.19,r*.27,1.8);ink.fillStyle='#ffd789';ink.fill();
+    }
+    function paint(now){
+      if(finished)return;
+      const w=screen.clientWidth,h=screen.clientHeight;
+      if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;}
+      const t=Math.max(0,(now-start)/1000),reveal=revealAt?clamp((now-revealAt)/1500):0;
+      ink.globalCompositeOperation='source-over';ink.clearRect(0,0,w,h);
+      ink.fillStyle='#08050c';ink.fillRect(0,0,w,h);
+      for(const [x,y,r,color] of stars){
+        ink.fillStyle=pin[color];const size=r>.987?1.85:r>.93?1.24:.67;
+        ink.fillRect(Math.floor(x*w),Math.floor(y*h),size,size);
+      }
+      const sealWidth=seal.getBoundingClientRect().width;
+      const x=w*.5+(position?position[0]-w*.5:0)*ease(reveal*2.2);
+      const y=h*.44+(position?position[1]-h*.44:0)*ease(reveal*2.2);
+      if(t<.56)droplet(x,y-sealWidth*.57*(1-(t/.56)**1.85),sealWidth*.022);
+      else{
+        const age=t-.56, grow=1-Math.exp(-age*1.87);
+        const extent=sealWidth*(.038+.37*grow+.018*Math.sin(age*.61));
+        for(let i=35;i>=0;i--){
+          const depth=(i+1)/36;
+          const radius=extent*(depth+.022*Math.sin(depth*20-age*2.4));
+          contour(x,y,radius,depth*2.1-age*.39,1.02);
+          ink.fillStyle=fire[(3+i*7/4|0)%fire.length];ink.fill();
+          ink.strokeStyle=i%5===3?'#ffe0a1d6':i%3===1?'#e68b54c0':'#5e2431c8';
+          ink.lineWidth=i%5===3?.95:.58;ink.stroke();
+        }
+        droplet(x,y,Math.max(2,extent*.095*(1-grow*.56)));
+      }
+      if(revealAt){
+        ink.globalCompositeOperation='destination-out';ink.fillStyle='#fff';
+        const r=(Math.hypot(w,h)*.64+sealWidth*.4)*reveal**1.22;
+        contour(x,y,r,reveal*2.1,1.+reveal*.52);ink.fill();
+        for(let i=0;i<3;i++){
+          const d=r+sealWidth*(.04+i*.065)*Math.sin(Math.PI*reveal);
+          contour(x,y,d,reveal*2.1,1.+reveal*.52);
+          ink.strokeStyle='#fff';ink.lineWidth=sealWidth*(.038+i*.007)*Math.sin(Math.PI*reveal);
+          if(ink.lineWidth>.08)ink.stroke();
+        }
+        if(reveal===1){finished=true;screen.hidden=true;clear();performance.mark('first-light-revealed');return;}
+      }
+      requestAnimationFrame(paint);
+    }
+    function showReady(){
+      if(!begin||done.size<4||screen.classList.contains('ready'))return;
+      const minimum=1500-(performance.now()-start);
+      if(minimum>0){setTimeout(showReady,Math.ceil(minimum));return;}
+      screen.classList.add('ready');button.hidden=false;performance.mark('first-light-ready');
+    }
+    window.firstLight={
+      get active(){return !revealAt&&!finished;},
+      progress(id){done.add(id);const value=done.size*25;seal.setAttribute('aria-valuenow',value);ring.style.strokeDashoffset=100-value;showReady();},
+      ready(callback,star){begin=callback;position=star;setTimeout(showReady,Math.max(0,1500-(performance.now()-start)));},
+      fail(message){tip.textContent=message;finished=true;button.hidden=true;},
+    };
+    button.onclick=()=>{
+      if(revealAt)return;
+      revealAt=performance.now();screen.classList.add('revealing');button.hidden=true;
+      performance.mark('first-light-begin');begin();
+    };
+    setInterval(()=>{if(!revealAt&&!finished)tip.textContent=tips[Math.floor((performance.now()-start)/3800)%tips.length];},3800);
+    paint(start);performance.mark('first-light-first-frame');
+  })();
+</script>
+<main id="stage" inert aria-label="The marbler’s orrery"><canvas id="sky" aria-label="Marbled star system. Use the ink bench below or press H for controls." tabindex="0"></canvas><canvas id="gesture" aria-hidden="true"></canvas><div id="cursor" aria-hidden="true"></div>
 <nav id="sky-tools" aria-label="Sky tools">
   <button id="step-inside" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="16" rx="9" ry="3.1"/><path d="M12 2v11m-3.2-3.3L12 13l3.2-3.3"/></svg><span>Step inside</span><kbd>D</kbd></button>
   <button id="voyage-toggle" type="button" aria-expanded="false" aria-controls="voyage-list" title="Voyage (V)">Voyage <kbd>V</kbd></button>

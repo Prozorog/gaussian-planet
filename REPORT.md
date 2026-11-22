@@ -531,3 +531,11 @@ Chrome tried **V**, drag, ink, both shot arrows, **Space**, **P**, **W**, **Esc*
 | The Life of a Star | [150 seconds](output/playwright/phase41/s3-life-strip.png) |
 | Into the Dark | [60 seconds](output/playwright/phase41/s3-dark-strip.png) |
 | Endless voyage | [First 120 seconds](output/playwright/phase41/s3-endless-strip.png) |
+
+### Stage 4 · First Light
+
+The initial HTML paints the falling seed of ink, fine stars, engraved bloom, title and tips before the application imports. The seal advances as the scripts arrive, WebGL programs link, the first print initializes its textures, and the first track returns its metadata. The audio deck reuses that media element. **Begin** starts playback and opens shaped bands through the canvas mask from the real star across the disc.
+
+Chrome reported a 52 ms first contentful paint on a warm reload, and the reveal took 1,505 ms after the click. I delayed the first MP3 response only in the capture run to show the seal paused at 75%. Chrome verified a silent audio graph before **Begin**, playing audio afterward, and motion under the reduced-motion flag. The production build passed.
+
+[Falling drop](output/playwright/phase41/s4-first.png) · [Loading at 75%](output/playwright/phase41/s4-middle.png) · [Begin](output/playwright/phase41/s4-begin.png) · [Star revealed](output/playwright/phase41/s4-reveal-1.png) · [Disc revealed](output/playwright/phase41/s4-reveal-2.png) · [Timing](output/playwright/phase41/s4-timing.json).

@@ -18,6 +18,7 @@ export function soundscape() {
   let ctx, master, music, effects, noise, chargeVoice, wind;
   let muted = false, musicLevel = .52, effectsLevel = .70, sceneGain = 1, effectsPresence = 1;
   let decks, current, transition, opening = false, wanted = 0, duckUntil = 0, lastMix = -1;
+  let firstMedia, firstMetadata;
   let lastWind = -1;
   const track = () => soundtrack[(transition && ctx.currentTime >= transition.end-FADE/2
     ? transition.next : current)?.index ?? wanted];
@@ -79,6 +80,17 @@ export function soundscape() {
     music.gain.setTargetAtTime(musicLevel*duck,now,duck<1?.20:.65);
     effects.gain.setTargetAtTime(EFFECT_GAIN*effectsLevel*effectsPresence,now,.08);
   }
+  function preloadFirstTrack() {
+    if(firstMetadata)return firstMetadata;
+    firstMedia=new Audio();
+    firstMedia.preload='metadata';
+    firstMetadata=new Promise(resolve=>{
+      firstMedia.addEventListener('loadedmetadata',()=>resolve(true),{once:true});
+      firstMedia.addEventListener('error',()=>resolve(false),{once:true});
+    });
+    firstMedia.src=`${import.meta.env.BASE_URL}music/${soundtrack[0].file}.mp3`;
+    return firstMetadata;
+  }
   function wake() {
     if(!ctx){
       ctx=new AudioContext();
@@ -86,11 +98,12 @@ export function soundscape() {
       master.gain.value=muted?0:sceneGain;
       music.gain.value=musicLevel;effects.gain.value=EFFECT_GAIN*effectsLevel*effectsPresence;
       master.connect(ctx.destination);music.connect(master);effects.connect(master);
-      decks=Array.from({length:2},()=>{
-        const media=new Audio(),gain=ctx.createGain();
+      decks=Array.from({length:2},(_,i)=>{
+        const reuse=i===0&&firstMedia&&!firstMedia.error;
+        const media=reuse?firstMedia:new Audio(),gain=ctx.createGain();
         media.preload='auto';gain.gain.value=0;
         ctx.createMediaElementSource(media).connect(gain).connect(music);
-        return {media,gain,index:-1};
+        return {media,gain,index:reuse?0:-1};
       });
       noise=ctx.createBuffer(1,ctx.sampleRate,ctx.sampleRate);
       const samples=noise.getChannelData(0);
@@ -191,7 +204,7 @@ export function soundscape() {
     tone(snap(root+interval),1.46,.085,'sine',.05);
   }
   return {
-    wake, charge, play, environment, bell, chord, snap,
+    preloadFirstTrack, wake, charge, play, environment, bell, chord, snap,
     song(ink,level){
       const note=snap(38+(ink%7)*2);
       tone(note,3.1,.060*level);tone(note+12,2.4,.022*level,'sine',.28);

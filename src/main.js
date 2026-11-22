@@ -10,6 +10,9 @@ import {createPostcard,postcardCamera} from './postcard.js';
 import {printChimes} from './atlas-diagrams.js';
 import {bindVoyage} from './voyage-controls.js';
 const $=s=>document.querySelector(s),canvas=$('#sky'),overlay=$('#gesture'),pen=overlay.getContext('2d'),cursor=$('#cursor'),plate=$('#plate'),news=$('#news'),help=$('#settings'),audio=soundscape(),camera=createCamera();
+const boot=window.firstLight;
+boot.progress('scripts');
+const firstTrack=audio.preloadFirstTrack().then(()=>boot.progress('music'));
 const names=['Fire','Rose','Amethyst','Azure','Emerald','Gold','Void'],colors=['#ff602d','#ff4286','#b650ec','#19d5dd','#28c784','#ffba37','#070607'],verbs=['Drop ink','Stir','Comb','Fling a world','Hold to birth','Hold the star'];let selected=0,inkIndex=0,gesture=null,renderer,last=0,frames=0,newsUntil=0,hadOverlay=false,lastHover=null,shiftDown=false;
 const counts={},s=createSystem(event);Object.assign(s,{low:false,grid:256,density:1,guides:true,charge:0,hold:0,vortex:null,force:null,strokes:[],blooms:[]});
 function say(text){news.textContent=text;newsUntil=s.t+2.25;}
@@ -79,8 +82,6 @@ for(const line of creditLines){
 }
 $('#music-level').oninput=e=>audio.setMusic(e.target.valueAsNumber/100);
 $('#effects-level').oninput=e=>audio.setEffects(e.target.valueAsNumber/100);
-document.addEventListener('pointerdown',audio.wake,{capture:true,once:true});
-window.addEventListener('keydown',audio.wake,{capture:true,once:true});
 const pendingDrops=new Set();let previousNear=0;
 function clearDrops(point){for(const drop of pendingDrops){if(point&&Math.hypot(drop.p[0]-point[0],drop.p[1]-point[1])>.18)continue;clearTimeout(drop.timer);pendingDrops.delete(drop);}}
 function queueDrop(p){const drop={p,id:selected};pendingDrops.add(drop);drop.timer=setTimeout(()=>{pendingDrops.delete(drop);ordinaryDrop(p,drop.id);},265);}
@@ -169,6 +170,7 @@ canvas.addEventListener('wheel',e=>{e.preventDefault();if(camera.mode==='drift')
 function reset(){cancel();clearDrops();drift.ripples.length=0;atlas.science.reset();s.reset();s.life.reset();blackHole.reset();worlds.reset();creatures.reset();s.spheres.reset();s.blooms.length=s.strokes.length=0;s.force=null;renderer.reset();camera.targetYaw=0;camera.targetPitch=30;camera.zoom=1;fly('overview');say('Original system restored');}
 const movement=new Set(['KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowLeft','ArrowDown','ArrowRight','Space','KeyC','KeyF','ShiftLeft','ShiftRight']);
 window.addEventListener('keydown',e=>{
+  if($('#stage').inert)return;
   if(e.ctrlKey||e.metaKey||e.altKey)return;
   const k=e.code;
   if(postcard.visible){
@@ -240,7 +242,7 @@ function overlayFrame(){const g=gesture;if(!g&&!hadOverlay)return;const w=canvas
     }
   }}
  else if((today()&&g.item==='sun')||s.vortex){const isSun=g.item==='sun',p=isSun?pos(0,0,0):pos(...[g.anchor[0],-.49,g.anchor[1]]),r=isSun?Math.abs(pos(camera.right[0],0,camera.right[2])[0]-p[0])*1.1:21+s.hold*3;pen.strokeStyle='#ffe6bc77';pen.beginPath();pen.arc(...p,r,0,Math.PI*2);pen.stroke();pen.strokeStyle=colors[selected];pen.lineWidth=3;pen.beginPath();pen.arc(...p,r,-Math.PI/2,-Math.PI/2+Math.PI*2*clamp(s.hold/(isSun?4:3),0,1));pen.stroke();if(s.hold>.35){pen.font='11px ui-monospace, monospace';pen.textAlign='center';pen.fillText(isSun?(s.hold>=4?'Release · supernova':'Charging the star'):'Condensing',p[0],p[1]-r-10);}}}
-function fail(e){console.error(e);$('#error').hidden=false;$('#error').textContent=e.message;}canvas.addEventListener('webglcontextlost',e=>{e.preventDefault();fail(Error('Graphics context lost. Reload to restart the orrery.'));});
+function fail(e){console.error(e);$('#error').hidden=false;$('#error').textContent=e.message;if(boot.active)boot.fail(e.message);}canvas.addEventListener('webglcontextlost',e=>{e.preventDefault();fail(Error('Graphics context lost. Reload to restart the orrery.'));});
 function tick(now){const dt=last?Math.min(.08,(now-last)/1000):1/60;last=now;if(postcard.visible&&!postcard.recording){audio.tick(blackHole.hole?2:today()?(camera.mode==='drift'||voyage.active&&camera.inside>.62?1:0):chapters[s.life.chapter].track);postcard.preview();requestAnimationFrame(tick);return;}s.advance(dt);voyage.auto();voyage.updateAge(dt);s.life.update(dt);if(!document.getElementById('timeline').hidden)timeline.update();audio.tick(blackHole.hole?2:today()?(camera.mode==='drift'||voyage.active&&camera.inside>.62?1:0):chapters[s.life.chapter].track);s.spheres.update(dt);creatures.update(dt);voyage.tick(dt);if(camera.focus&&!s.sceneBodies.includes(camera.focus)){const b=s.sceneBodies.find(b=>b.key===camera.focus.key);if(b)camera.focus=b;else fly('overview');}if(camera.mode==='drift'&&!blackHole.fall&&!worlds.body)drift.tick(dt,camera.flying);worlds.tick(dt);blackHole.tick(dt);audio.setPresence(1-.98*blackHole.fall);audio.setEffectsPresence(voyage.active?.5:1);camera.nebulaPrint=s.life.chapter===3;camera.tick(s.t,dt,canvas.clientWidth/canvas.clientHeight,s.shake);blackHole.alignment();if(voyage.shot?.nearSun&&Math.hypot(...camera.eye)<2.75)atlas.discover(13);worlds.controls(camera);document.getElementById('rekindle').hidden=!blackHole.ready;const g=gesture;s.hold=g?Math.max(0,(now-g.start)/1000):0;if(g){
     g.voidHold=selected===voidIndex&&!g.formed&&!g.item&&!g.right&&!g.moved&&within(g.anchor);
     if(g.voidHold&&s.hold>=1){g.formed=true;g.voidHold=false;
@@ -257,7 +259,16 @@ function tick(now){const dt=last?Math.min(.08,(now-last)/1000):1/60;last=now;if(
     previousNear=n;
   }else audio.environment(0);
   atlas.tick(dt,today()&&g?.item!==blackHole.hole&&!!(g?.moved&&g.item&&g.item!=='sun'&&g.item!==camera.focus));frames++;requestAnimationFrame(tick);}
-try{renderer=createRenderer(canvas);requestAnimationFrame(tick);}catch(e){fail(e);}
+requestAnimationFrame(()=>setTimeout(async()=>{
+  try{
+    renderer=createRenderer(canvas);boot.progress('shaders');
+    camera.tick(s.t,1/60,canvas.clientWidth/canvas.clientHeight,0);
+    renderer.render(s,camera,1/60);
+    boot.progress('textures');
+    await firstTrack;
+    boot.ready(()=>{audio.wake();requestAnimationFrame(tick);},pixel(0,0,0));
+  }catch(e){fail(e);}
+},0));
 // Read-only capture instrumentation: all mutations still enter through the public controls.
 export function observation(){const gl=renderer?.gl,ext=gl?.getExtension('WEBGL_debug_renderer_info');return {postcard:postcard.state(),voyage:voyage.state(),creatures:{...creatures.state(),fish:creatures.fishCount()},world:worlds.body?{name:worlds.body.name,kind:worlds.body.kind,inside:worlds.inside,toy:worlds.toy.power,turn:worlds.toy.turn,leaving:worlds.leaving}:null,blackHole:{hole:blackHole.hole?{...blackHole.hole,xy:pixel(blackHole.hole.x,blackHole.hole.y,blackHole.hole.z)}:null,fall:blackHole.fall,dim:blackHole.dim,ready:blackHole.ready,streams:blackHole.streams.map(b=>b.name),starStream:!!blackHole.starStream},life:{value:s.life.value,chapter:s.life.chapter,playing:s.life.playing,radius:s.life.starRadius,shells:s.life.shells},audio:audio.state(),spheres:{on:s.spheres.on,total:s.spheres.total,ripples:s.spheres.ripples.length,locks:s.spheres.locks.map(p=>({ratio:p.ratio,a:p.a.name,b:p.b.name,lines:p.lines.length})),voices:s.spheres.voices.map(v=>({name:v.body.name,cycle:v.cycle,pitch:v.pitch}))},atlas:atlas.state(),drift:{eye:[...camera.eye],forward:camera.back.map(v=>-v),inside:camera.inside,yaw:drift.yaw,pitch:drift.pitch,near:drift.near?.name,distance:drift.nearestDistance,ride:drift.ride?.name,auto:drift.auto,cloud:drift.cloud?.id,heat:drift.heat,crossedAt:drift.crossedAt,ripples:drift.ripples.map(m=>({...m})),clouds:clouds.slice(0,activeClouds(s.low)).map(v=>({id:v.id,pos:v.pos,size:v.size}))},muted:audio.muted,frames,t:s.t,mode:camera.mode,focus:camera.focus?.name,flying:camera.flying,paused:s.paused,active:s.flares.length,hue:s.hue,nova:s.nova<0?-1:s.t-s.nova,yaw:camera.yaw,pitch:camera.pitch,low:s.low,vortex:!!s.vortex,counts:{...counts},sun:pixel(0,0,0),bodies:s.sceneBodies.map(b=>({key:b.key,name:b.name,xy:pixel(b.x,b.y,b.z),x:b.x,y:b.y,z:b.z,r:b.r,marks:b.marks.length,toy:(b.original?.toy??b.toy)?.power??0,tuning:b.tuning,ids:[b.id,b.id2,b.id3],comet:!!b.comet,launched:b.launched})),gpu:ext?gl.getParameter(ext.UNMASKED_RENDERER_WEBGL):null};}
 export function projectPoint(x,z,height=-.49){return pixel(x,height,z);}
