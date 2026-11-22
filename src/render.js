@@ -73,7 +73,15 @@ export function createRenderer(canvas){const gl=canvas.getContext('webgl2',{powe
   }
   globe(0,0,0,rs,0,s.hue,s.hue,s.hue,s.t*.018,0,false);gl.uniform1iv(l.ids,[s.hue===8?8:0,0,0]);gl.uniform1i(l.pass,4);at(l,4,0,0,0,rs);if(rs>.30)for(let j=0;j<7;j++){gl.uniform1f(l.param,j+.67);mesh.ribbon();}
   for(const e of s.events){const a=s.t-e.at;if(e.type==="engulf"&&a<.75)globe(...engulfPoint(e,a,rs),e.size*.25*(1-a/.76),6,e.id,e.id,e.id,s.t*.1,1,false);}
-  if(!poster){for(const b of (s.sceneBodies??s.bodies)){const y=b.y+b.hit*.037*Math.sin(s.t*35);globe(b.x,y,b.z,b.r,b.kind,b.id,b.id2,b.id3,b.spin,b.hit,b.ring,b.marks,+((b.chimeUntil??0)>s.t),b.original?.toy??b.toy);if(b.ring){gl.uniform1i(l.pass,3);at(l,3,b.x,y,b.z,b.r*2.15);mesh.quad();}const toy=b.original?.toy??b.toy;if(b.kind===3&&toy?.power){const a=toy.turn*1.55+s.t*.22,d=b.r*2.6;globe(b.x+d*Math.cos(a),y+d*.31*Math.cos(a),b.z+d*Math.sin(a),b.r*.19,6,8,8,8,s.t*.03,0,false);}for(let j=0;j<b.moons;j++){const a=s.t*(.39-j*.066)+b.key+j*2.21,d=b.r*(2.16+j*.54);globe(b.x+Math.cos(a)*d,y+Math.cos(a)*d*.22,b.z+Math.sin(a)*d,b.r*(.14-j*.014),6,b.id,b.id,b.id,0,0,false);}}
+  if(!poster){for(const b of (s.sceneBodies??s.bodies)){
+    const weather=b.kind===4&&c.inside>.96&&Math.hypot(c.eye[0]-b.x,c.eye[1]-b.y,c.eye[2]-b.z)<b.r*3.55;
+    if(weather){
+      gl.uniform1i(l.pass,5);gl.uniform1iv(l.ids,[b.id,b.id,b.id]);
+      for(const [height,current] of [[1.77,-.53],[1.28,1.83]]){
+        at(l,0,b.x,b.y,b.z,b.r*height);gl.uniform1f(l.spin,current);mesh.cloud();
+      }
+    }
+    const y=b.y+b.hit*.037*Math.sin(s.t*35);globe(b.x,y,b.z,b.r,b.kind,b.id,b.id2,b.id3,b.spin,b.hit,b.ring,b.marks,+((b.chimeUntil??0)>s.t),(b.original?.toy??b.toy)??(weather&&s.voyage?.shot?.bands?{power:.52}:null));if(b.ring){gl.uniform1i(l.pass,3);at(l,3,b.x,y,b.z,b.r*2.15);mesh.quad();}const toy=b.original?.toy??b.toy;if(b.kind===3&&toy?.power){const a=toy.turn*1.55+s.t*.22,d=b.r*2.6;globe(b.x+d*Math.cos(a),y+d*.31*Math.cos(a),b.z+d*Math.sin(a),b.r*.19,6,8,8,8,s.t*.03,0,false);}for(let j=0;j<b.moons;j++){const a=s.t*(.39-j*.066)+b.key+j*2.21,d=b.r*(2.16+j*.54);globe(b.x+Math.cos(a)*d,y+Math.cos(a)*d*.22,b.z+Math.sin(a)*d,b.r*(.14-j*.014),6,b.id,b.id,b.id,0,0,false);}}
    gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.depthMask(false);gl.enable(gl.CULL_FACE);gl.cullFace(gl.BACK);gl.uniform1i(l.pass,2);for(const b of (s.sceneBodies??s.bodies)){at(l,0,b.x,b.y,b.z,b.r*(1.057+.018*b.hit));gl.uniform1iv(l.ids,[b.id,b.id,b.id]);mesh.sphere();}gl.disable(gl.CULL_FACE);gl.depthMask(true);gl.disable(gl.BLEND);}
   printCreatures(s,c);
   l=frame(fx,s,c);gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);function effect(type,shape,x,y,z,r,id,second,age,dx=0,dz=0,width=.2,seed=0){at(l,shape,x,y,z,r);gl.uniform1i(l.eventType,type);gl.uniform1i(l.first,id);gl.uniform1i(l.second,second);gl.uniform1f(l.age,age);gl.uniform4f(l.effect,dx,dz,width,seed);mesh.quad();}

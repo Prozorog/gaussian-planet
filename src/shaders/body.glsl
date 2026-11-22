@@ -9,6 +9,18 @@ void main(){vec3 n=normalize(local),view=normalize(eye-world),light=normalize(-w
   frag=vec4(ink(id,k)*(.65+.35*line),1.);return;
  }
  if(pass==4){float u=local.x,w=local.y;float v=.51+.25*sin(w*9.+u*11.+1.4*noise(vec2(u*14.,time*.14)))+.11*noise(vec2(u*47.,w*2.));frag=vec4(engraved(v,id,w*.5,1.),1.);return;}
+ if(pass==5){
+  vec3 p=n;p.xz=rot(time*.023)*p.xz;
+  vec2 f=foldInk(vec2(p.x+p.z*.63,p.y*1.65)*3.7+spin,time*.12);
+  float broad=noise(f*.83),swirl=noise(f*3.0),fine=noise(f*9.);
+  float phase=p.y*19.+broad*4.4+swirl*.88+.20*fine+spin*.54;
+  float strip=sin(phase),dist=distance(world,eye);
+  float cloud=strip+.38*broad+.26*swirl;
+  if(dist<.06||cloud<.48+(1.-smoothstep(.07,.32,dist))*.83)discard;
+  float value=.38+.23*cloud+.10*swirl+.08*step(.1,lit);
+  int pigment=sin(phase*.71+spin+broad)>.65?6:id;
+  frag=vec4(engraved(value,pigment,swirl*.83+fine*.26,1.),1.);return;
+ }
  if(pass==2){float eclipse=smoothstep(.64,.965,dot(normalize(center-eye),normalize(-center)));float rim=1.-smoothstep(.04,.37,facing);if(rim<.01)discard;float a=atan(n.z,n.x),waves=sin(a*11.+n.y*14.+time*.4);float v=.36+.23*max(0.,lit)+.16*rim+.06*waves;float iso=lineAt(facing*12.+.24*waves,1.2);float strength=max(eclipse,clamp(.37+lit*.65,.16,1.));col=ink(id,3.+floor(v*4.)+iso*2.);if(eclipse>.55&&rim>.67)col=ink(id,8.);frag=vec4(col,(.18+.69*rim+.25*iso)*strength);return;}
  vec3 surf=n;surf.xz=rot(spin+float(kind)*.68)*surf.xz;float v,comb;vec3 f=marble(surf*(kind==0?4.8:2.7));float big=volume(f*1.4),mid=volume(f*4.3),tiny=volume(f*11.7);comb=.51*mid+.20*tiny;
  if(kind==0){

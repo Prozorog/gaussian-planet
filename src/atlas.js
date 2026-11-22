@@ -34,6 +34,8 @@ export const helpGroups = {
     ['Enter / Dive', 'Sink into the world you are riding'], ['Esc / Rise to orbit', 'Leave the interior or rise out of Drift'],
     ['Inside a world', 'Use the world’s toy or drag with the right button to look'],
     ['Creatures', 'Ride a leviathan or feed it three inks. The creatures are a fairy tale.'],
+    ['V / Voyage', 'Choose a flight. Drag to look, Space to pause, arrows for shots.'],
+    ['WASD during a voyage', 'Take the helm at the current position'],
   ],
   Time: [['T / Timeline', 'Scrub five chapters or play the life of the star'],
     ['Space', 'Pause or resume orbits in the overview'], ['[ / ]', 'Change orbit speed']],
@@ -128,6 +130,7 @@ export function createAtlas(s, c) {
     if (illustrated.has(current)) diagram($('note-diagram'), current, s, c, science);
   }
   function show(id, fromBook = false) {
+    if(s.voyage?.active)return;
     if (id === 3 && !science.gauge) science.gauge = records.gauge;
     if (id === 4 && !science.assist) science.assist = records.assist;
     if (id === 6 && !science.roche) science.roche = previousBody('roche');
@@ -144,13 +147,14 @@ export function createAtlas(s, c) {
     found.add(id);
     save();
     if (!book.hidden) drawBook();
-    if (enabled) queue.push(id);
+    if(s.voyage?.active)s.voyage.discovered();
+    else if(enabled)queue.push(id);
   }
   function action() {
     if (!manual && !expanded && current && s.t - openedAt > 1.2) close();
   }
   function mode() {
-    const drift = c.mode === 'drift';
+    const drift = c.mode === 'drift'||c.mode==='voyage';
     $('stage').classList.toggle('drifting', drift);
     const button = $('step-inside');
     button.querySelector('span').textContent = drift ? 'Rise out' : 'Step inside';
@@ -171,7 +175,7 @@ export function createAtlas(s, c) {
   function tick(dt, preview) {
     science.tick(dt);
     if (current && !manual && !expanded && s.t - openedAt >= 10) close();
-    if (enabled && !current && queue.length && s.t >= displayAt && book.hidden) show(queue.shift());
+    if (enabled && !s.voyage?.active && !current && queue.length && s.t >= displayAt && book.hidden) show(queue.shift());
     s.zoneNote = current === 12;
     if (current && illustrated.has(current) && s.t - lastDraw > .048) {
       diagram($('note-diagram'), current, s, c, science);
@@ -184,6 +188,7 @@ export function createAtlas(s, c) {
   drawBook();
   save();
   return { science, discover, tick, action, mode, bookOpen,
+    dismiss(){queue.length=0;close();},
     get open() { return !book.hidden; }, toggleBook() { bookOpen(book.hidden); },
     state() { return { enabled, found: [...found], shown: shown.slice(), current, queued: queue.slice(),
       labels: science.labels, zone: !!s.zone, zoneRadii: science.zoneRadii(), light: science.light,

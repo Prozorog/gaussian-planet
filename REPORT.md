@@ -511,3 +511,23 @@ The fish school follows one moving ribbon. The fish retain their eaten ink, spli
 Chrome checked **Creatures**, **D**, **F**, three-colour feeding and the calf, comb scatter, the young disc, red giant, white dwarf and a supernova dive and return. The recaptured ride leaves the head below the upper two-thirds of the frame. The production build passed. The side-on silhouette reads more like a narrow fish during the neutral wing pose. In Drift, a sheet or cloud can still briefly hide the swimmer.
 
 [Silhouette sheet](output/playwright/phase41/s2-silhouette.png) · [Wake](output/playwright/phase41/s2-wake.png) · [First Drift frame](output/playwright/phase41/s2-first-drift.png) · [School](output/playwright/phase41/s2-school.png) · [Ride](output/playwright/phase41/s2-ride.png) · [Skin at 100%](output/playwright/phase41/s2-skin.png) · [Calf](output/playwright/phase41/s2-calf.png) · [Control results](output/playwright/phase41/s2-controls.json).
+
+### Stage 3 · Voyages
+
+**Voyage** or **V** opens the itinerary. Grand Tour, Sun Dive, Ring Run, Leviathan Song and The Life of a Star are always listed. Into the Dark appears while the hole exists, and Endless voyage shuffles shots without repeating the immediately previous one. Completion is saved locally. Endless can start after 90 seconds in the overview or eight seconds after settling in Drift. Settings control idle voyages and the cinema bars.
+
+The probe uses a 36° lens and continuous steering through a series of waypoints, with look-ahead for orbiting targets, a speed envelope and a clearance margin around the real bodies. I capped both camera and travel turns after the first audit. The Life of a Star follows the existing live timeline and returns to Today on completion. Captions share the Atlas facts, and a new discovery briefly prints **+1 Atlas**. The soundtrack follows the surroundings and the effects bus runs at half level.
+
+Chrome tried **V**, drag, ink, both shot arrows, **Space**, **P**, **W**, **Esc**, both settings, both idle starts and all six completions. The frame on either side of taking the helm had the same eye position and heading to the precision of the camera state. The production build passed. A scripted Drift pass taken during Leviathan Song supplied the missing clean swimmer view from Stage 2.
+
+[Voyage list](output/playwright/phase41/s3-list.png) · [Caption](output/playwright/phase41/s3-caption.png) · [Taking the helm](output/playwright/phase41/s3-helm.png) · [Swimmer in Drift](output/playwright/phase41/s2-swimmer-in-drift.png) · [Controls and capture times](output/playwright/phase41/s3-controls.json).
+
+| Voyage | Six-frame strip |
+|---|---|
+| Grand Tour | [120 seconds](output/playwright/phase41/s3-grand-strip.png) |
+| Sun Dive | [70 seconds](output/playwright/phase41/s3-sun-strip.png) |
+| Ring Run | [70 seconds](output/playwright/phase41/s3-rings-strip.png) |
+| Leviathan Song | [70 seconds](output/playwright/phase41/s3-song-strip.png) |
+| The Life of a Star | [150 seconds](output/playwright/phase41/s3-life-strip.png) |
+| Into the Dark | [60 seconds](output/playwright/phase41/s3-dark-strip.png) |
+| Endless voyage | [First 120 seconds](output/playwright/phase41/s3-endless-strip.png) |

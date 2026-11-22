@@ -67,23 +67,17 @@ function cloudDistance(p,c) {
   const q=p.map((v,i)=>(v-c.pos[i])/c.size[i]);
   return Math.hypot(...q)/cloudRadius(unit(q),c.seed);
 }
-function spline(p0,p1,p2,p3,t) {
-  const t2=t*t,t3=t2*t;
-  return p1.map((v,i)=>.5*(2*v+(-p0[i]+p2[i])*t+
-    (2*p0[i]-5*v+4*p2[i]-p3[i])*t2+(-p0[i]+3*v-3*p2[i]+p3[i])*t3));
-}
-
 export function createDrift(s,onMoment) {
   const keys=new Set();
   const d={position:[0,0,5.55],forward:[0,0,-1],velocity:[0,0,0],current:[0,0],
     yaw:0,pitch:0,ride:null,auto:false,cloud:null,heat:0,ripples:[],lastInput:0,
     hintUntil:0,enteredAt:-20,near:null,nearestDistance:Infinity,crossedAt:-10,crossedInk:3};
-  let lookYaw=0,lookPitch=0,rideAngle=0,ridePan=[0,0],autoTime=0,route,oldY=0;
+  let lookYaw=0,lookPitch=0,rideAngle=0,ridePan=[0,0],oldY=0,helmHold=false;
   let currentPass=null,lastSplash=-10,nearSun=false,rideEntry=0,rideStart,pinned=false;
   const eye=d.position;
   const setLook=v=>{lookYaw=Math.atan2(-v[0],-v[2]);lookPitch=Math.asin(clamp(v[1],-1,1));};
   function activity(hide=true) {
-    d.lastInput=s.t;d.auto=false;
+    d.lastInput=s.t;
     if(hide)d.hintUntil=0;
   }
   function enter(point) {
@@ -99,7 +93,12 @@ export function createDrift(s,onMoment) {
     oldY=eye[1];activity(false);d.enteredAt=s.t;d.hintUntil=s.t+8;d.lastInput=s.t+2;
     updateDirection();
   }
-  function leave(){keys.clear();d.ride=null;d.auto=false;d.heat=0;d.hintUntil=0;}
+  function handoff(pose,velocity){
+    leave();eye.splice(0,3,...pose.position);d.velocity=velocity.slice();d.current.fill(0);
+    setLook(pose.forward);d.yaw=lookYaw;d.pitch=lookPitch;updateDirection();
+    d.enteredAt=s.t-5;oldY=eye[1];activity();helmHold=true;
+  }
+  function leave(){keys.clear();d.ride=null;d.heat=0;d.hintUntil=0;d.cloud=null;}
   function look(dx,dy) {
     activity();
     if(d.ride){ridePan[0]-=dx*.0028;ridePan[1]=clamp(ridePan[1]-dy*.0028,-1.25,1.25);}
@@ -135,28 +134,6 @@ export function createDrift(s,onMoment) {
       if(delta<dist){candidate=b;dist=delta;}
     }
     d.near=candidate;d.nearestDistance=dist;
-  }
-  function scenic(dt) {
-    if(!d.auto){
-      d.auto=true;autoTime=0;
-      const planet=d.near, start=[...eye];
-      const island=clouds.slice(0,activeClouds(s.low)).reduce((a,b)=>
-        Math.hypot(...b.pos.map((v,i)=>v-start[i]))<Math.hypot(...a.pos.map((v,i)=>v-start[i]))?b:a);
-      const rad=unit([island.pos[0],0,island.pos[2]]),side=[-rad[2],0,rad[0]];
-      route={start,planet,island,gate:[rad[0]*2.35+side[0]*.65,.33,rad[2]*2.35+side[2]*.65],
-        sky:[rad[0]*4+side[0]*2.8,1.14,rad[2]*4+side[2]*2.8]};
-    }
-    autoTime+=dt;
-    const b=route.planet,rad=b?unit([b.x,0,b.z]):[0,0,1];
-    const pass=b&&riders().includes(b)?[b.x+rad[0]*b.r*2.7,b.y+b.r*.9,b.z+rad[2]*b.r*2.7]:route.start;
-    const pts=[route.start,pass,route.island.pos,route.gate,route.sky],stage=autoTime/7;
-    const i=Math.floor(stage)%pts.length,u=stage%1;
-    const p=spline(pts[(i+4)%5],pts[i],pts[(i+1)%5],pts[(i+2)%5],u);
-    for(let j=0;j<3;j++)eye[j]=mix(eye[j],p[j],ease(dt,3));
-    const sights=[b?[b.x,b.y,b.z]:route.gate,route.island.pos,[0,.12,0],[0,.58,0],pass];
-    const v=toward(eye,sights[i]),next=toward(eye,sights[(i+1)%5]);
-    const blend=clamp((u-.62)/.38,0,1);
-    setLook(unit(v.map((n,j)=>mix(n,next[j],blend*blend*(3-2*blend)))));
   }
   function ride(dt) {
     const b=d.ride,rad=unit([b.x,0,b.z]),side=[-rad[2],0,rad[0]];
@@ -207,25 +184,27 @@ export function createDrift(s,onMoment) {
     for(let i=0;i<3;i++)eye[i]=center[i]+n[i]*Math.max(radius*(sun?.83:.89),dist+push);
     const inward=Math.min(0,d.velocity.reduce((a,v,i)=>a+v*n[i],0));
     for(let i=0;i<3;i++)d.velocity[i]-=n[i]*inward;
-    if(sun&&!d.ride&&!d.auto&&dist<1.54&&d.forward.reduce((a,v,i)=>a+v*n[i],0)<-.2)
+    if(sun&&!d.ride&&dist<1.54&&d.forward.reduce((a,v,i)=>a+v*n[i],0)<-.2)
       lookYaw+=dt*1.35*(Math.sin(lookYaw-Math.atan2(-n[0],-n[2]))<0?-1:1);
   }
   function tick(dt,flying) {
     nearest();
-    if(flying){oldY=eye[1];return;}
+    if(flying||helmHold){helmHold=false;oldY=eye[1];return;}
+    const radiusLimit=Math.max(14.8,Math.hypot(eye[0],eye[2]));
+    const floor=Math.min(-3.3,eye[1]),ceiling=Math.max(3.4,eye[1]);
     if(keys.size)d.lastInput=s.t;
     if(d.ride&&!riders().includes(d.ride))d.ride=riders().find(b=>b.key===d.ride.key)??null;
     if(keys.has('KeyF')&&!d.ride&&d.near&&d.nearestDistance<Math.max(1.55,d.near.r*3.2)){
       attachRide(d.near);
     }
-    if(d.ride)ride(dt);else if(s.t-d.lastInput>=8)scenic(dt);else free(dt);
+    if(d.ride)ride(dt);else free(dt);
     const star=s.life?.starRadius??1;soften([0,0,0],star+.70,dt,true);
     if(d.near&&!d.ride)soften([d.near.x,d.near.y,d.near.z],d.near.r*1.23,dt,false);
     const r=Math.hypot(eye[0],eye[2]);
-    if(r>14.8){eye[0]*=14.8/r;eye[2]*=14.8/r;}
-    eye[1]=clamp(eye[1],-3.3,3.4);
-    d.yaw+=angleDifference(lookYaw,d.yaw)*ease(dt,d.auto?2.2:9);
-    d.pitch=mix(d.pitch,lookPitch,ease(dt,d.auto?2.2:9));updateDirection();
+    if(r>radiusLimit){eye[0]*=radiusLimit/r;eye[2]*=radiusLimit/r;}
+    eye[1]=clamp(eye[1],floor,ceiling);
+    d.yaw+=angleDifference(lookYaw,d.yaw)*ease(dt,9);
+    d.pitch=mix(d.pitch,lookPitch,ease(dt,9));updateDirection();
     for(let i=0;i<sheetHeights.length;i++){
       const y=sheetHeights[i];
       if((oldY-y)*(eye[1]-y)<0&&s.t-lastSplash>.21){
@@ -242,5 +221,5 @@ export function createDrift(s,onMoment) {
     d.cloud=null;
     for(let i=0;i<activeClouds(s.low);i++)if(cloudDistance(eye,clouds[i])<1){d.cloud=clouds[i];break;}
   }
-  return Object.assign(d,{enter,leave,look,key,tick,activity,ripple,attachRide,releaseRide,clearKeys(){keys.clear();d.ride=null;pinned=false;}});
+  return Object.assign(d,{enter,leave,handoff,look,key,tick,activity,ripple,attachRide,releaseRide,clearKeys(){keys.clear();d.ride=null;pinned=false;}});
 }

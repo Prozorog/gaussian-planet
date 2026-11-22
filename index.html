@@ -3,6 +3,7 @@
 <body><main id="stage" aria-label="The marbler’s orrery"><canvas id="sky" aria-label="Marbled star system. Use the ink bench below or press H for controls." tabindex="0"></canvas><canvas id="gesture" aria-hidden="true"></canvas><div id="cursor" aria-hidden="true"></div>
 <nav id="sky-tools" aria-label="Sky tools">
   <button id="step-inside" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="16" rx="9" ry="3.1"/><path d="M12 2v11m-3.2-3.3L12 13l3.2-3.3"/></svg><span>Step inside</span><kbd>D</kbd></button>
+  <button id="voyage-toggle" type="button" aria-expanded="false" aria-controls="voyage-list" title="Voyage (V)">Voyage <kbd>V</kbd></button>
   <button id="timeline-toggle" type="button" aria-expanded="false" aria-controls="timeline" title="Timeline (T)">Timeline</button>
   <button id="book-toggle" type="button" aria-controls="atlas" aria-expanded="false" aria-label="Sky Atlas" title="Sky Atlas (B)">Atlas</button>
   <button id="postcard-toggle" type="button" aria-haspopup="dialog" aria-controls="postcard" title="Postcard (P)">Postcard</button>
@@ -15,10 +16,22 @@
     <label>Music<input id="music-level" type="range" min="0" max="100" value="52"></label>
     <label>Effects<input id="effects-level" type="range" min="0" max="100" value="70"></label>
     <label>Creatures<input id="creatures-toggle" type="checkbox" checked></label>
+    <label>Start voyages when idle<input id="voyage-idle" type="checkbox" checked></label>
+    <label>Voyage cinema bars<input id="voyage-cinema" type="checkbox" checked></label>
     <details id="credits"><summary>Credits</summary><ul></ul></details>
     <div id="help-groups"></div>
   </section></details>
 </nav>
+<section id="voyage-list" aria-labelledby="voyage-title" hidden><h2 id="voyage-title">Voyages</h2><div></div></section>
+<div id="voyage-bands" aria-hidden="true"></div>
+<div id="voyage-log" aria-live="polite"></div>
+<span id="voyage-discovery" role="status">+1 Atlas</span>
+<div id="voyage-controls" role="group" aria-label="Voyage controls" hidden>
+  <button id="voyage-prev" type="button" class="chip control-chip" aria-label="Previous shot">←</button>
+  <button id="voyage-pause" type="button" class="chip control-chip">Pause</button>
+  <button id="voyage-next" type="button" class="chip control-chip" aria-label="Next shot">→</button>
+  <button id="voyage-helm" type="button" class="chip control-chip">Take the helm</button>
+</div>
 <button id="rekindle" type="button" class="chip control-chip" hidden>Rekindle</button>
 <section id="timeline" aria-label="Stellar timeline" hidden>
   <div class="life-header">

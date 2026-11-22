@@ -16,7 +16,7 @@ const inScale = (midi, scale) => scale.includes((midi%12+12)%12);
 
 export function soundscape() {
   let ctx, master, music, effects, noise, chargeVoice, wind;
-  let muted = false, musicLevel = .52, effectsLevel = .70, sceneGain = 1;
+  let muted = false, musicLevel = .52, effectsLevel = .70, sceneGain = 1, effectsPresence = 1;
   let decks, current, transition, opening = false, wanted = 0, duckUntil = 0, lastMix = -1;
   let lastWind = -1;
   const track = () => soundtrack[(transition && ctx.currentTime >= transition.end-FADE/2
@@ -77,14 +77,14 @@ export function soundscape() {
     const now=ctx.currentTime, duck=now<duckUntil?.57:1;
     master.gain.setTargetAtTime(muted?0:sceneGain,now,.09);
     music.gain.setTargetAtTime(musicLevel*duck,now,duck<1?.20:.65);
-    effects.gain.setTargetAtTime(EFFECT_GAIN*effectsLevel,now,.08);
+    effects.gain.setTargetAtTime(EFFECT_GAIN*effectsLevel*effectsPresence,now,.08);
   }
   function wake() {
     if(!ctx){
       ctx=new AudioContext();
       master=ctx.createGain();music=ctx.createGain();effects=ctx.createGain();
       master.gain.value=muted?0:sceneGain;
-      music.gain.value=musicLevel;effects.gain.value=EFFECT_GAIN*effectsLevel;
+      music.gain.value=musicLevel;effects.gain.value=EFFECT_GAIN*effectsLevel*effectsPresence;
       master.connect(ctx.destination);music.connect(master);effects.connect(master);
       decks=Array.from({length:2},()=>{
         const media=new Audio(),gain=ctx.createGain();
@@ -204,6 +204,7 @@ export function soundscape() {
     },
     setMusic(level){musicLevel=level;mix();},setEffects(level){effectsLevel=level;mix();},
     setPresence(level){sceneGain=level;},
+    setEffectsPresence(level){effectsPresence=level;},
     capture(){
       if(!ctx)return null;
       const tap=ctx.createMediaStreamDestination();master.connect(tap);
