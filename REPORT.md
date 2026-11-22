@@ -539,3 +539,13 @@ The initial HTML paints the falling seed of ink, fine stars, engraved bloom, tit
 Chrome reported a 52 ms first contentful paint on a warm reload, and the reveal took 1,505 ms after the click. I delayed the first MP3 response only in the capture run to show the seal paused at 75%. Chrome verified a silent audio graph before **Begin**, playing audio afterward, and motion under the reduced-motion flag. The production build passed.
 
 [Falling drop](output/playwright/phase41/s4-first.png) · [Loading at 75%](output/playwright/phase41/s4-middle.png) · [Begin](output/playwright/phase41/s4-begin.png) · [Star revealed](output/playwright/phase41/s4-reveal-1.png) · [Disc revealed](output/playwright/phase41/s4-reveal-2.png) · [Timing](output/playwright/phase41/s4-timing.json).
+
+### Stage 5 · Black hole
+
+The old disc and its upper arc met at a horizontal join. The new accretion surface uses one continuous projection across the near and far halves. The far half rises at shallow angles and the lens carries a weaker copy beneath it. I made the accretion ink sample the live dye, paint and velocity fields through a logarithmic spiral. The inner paint prints in the fire palette. It gives way to the local pigment and curls farther out.
+
+The background rays bend before sampling the sky engraving. The same deflection moves the depth-tested print of the worlds, stars and sheets. In the low-angle capture the cyan world and the sheet behind it stretch over the hole. Dragging the hole onto the star gave upper and lower orange arcs. The lit ring uses a screen-pixel width, and single foreground dust grains are excluded from the black silhouette.
+
+Chrome formed and dragged the hole, stretched a world, saw a jet, used **Rekindle** and approached in Drift. The production build passed. The public-input check did not reach the falling threshold in that Drift pass. The most magnified background is still a sampled print, so some stretched engraved marks exceed two pixels.
+
+[Overview](output/playwright/phase41/s5-overview.png) · [Star alignment](output/playwright/phase41/s5-star-ring.png) · [Low angle](output/playwright/phase41/s5-low.png) · [Drift](output/playwright/phase41/s5-drift.png) · [Bent lines at 100%](output/playwright/phase41/s5-crop.png).
