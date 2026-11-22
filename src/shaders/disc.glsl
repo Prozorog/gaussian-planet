@@ -6,14 +6,20 @@ void main(){vec2 p=world.xz;float rr=length(p);if(rr>15.5)discard;vec2 coord=p/3
  vec2 q=w*.65+.42*noise2(w*.47+vec2(t*.028,epoch));q=roll(q+vec2(1.22,-.47),3.8);vec2 f=foldInk(q*.92+vec2(epoch*.62,t*.036),t);float a=atan(w.y,w.x),r=length(w);float spiral=a*2.+r*.91+1.16*noise(f*.68)+.46*noise(f*1.8)+L*.69;float ridge=.52+.37*sin(spiral)+.16*sin(spiral*2.1+.63*noise(f*2.));float island=noise(roll(f*4.6+.45*noise2(f*8.),4.));float val=ridge+.27*noise(f*1.77)+.116*island+.045*noise(f*14.)-.23-max(0.,r-9.2)*.18;float hue=a/TAU+r*.097+.115*noise(f*1.2)+L*.064+epoch*.13;int id=r<2.45+.56*noise(f)?0:family(hue);float comb=.54*noise(f*3.)+.23*island+.33*noise(q*8.5-d.ba*18.);
  val-=.07+max(0.,r-8.3)*.085+.45*(1.-smoothstep(1.85,3.1,rr));
  if(life.x>.001){
-   float rp=rr+.048*sin(a*6.+time*.22)+.060*noise(f*1.3);
-   float lap=cos(6.95*rp+1.35);
-   float knots=sin(3.8*r+a*7.+1.42*noise(f*2.1))*.078*life.x;
-   float drum=.274+.40*lap+.17*noise(f*1.3)+.102*island+knots;
-   drum-=max(0.,rr-9.3)*.19+.43*(1.-smoothstep(.45,1.3,rr));
+   vec2 polar=p*.83+.29*noise2(p*.38+11.);
+   vec2 curl=foldInk(roll(polar,4.4),time*.18);
+   float large=noise(curl*.57),small=noise(curl*2.87),fine=noise(curl*9.8);
+   float swelling=sin(a*3.+rr*.76+large*.93)+.47*sin(a*7.-rr*.96+time*.17);
+   float rp=rr+.127*swelling+.098*large+.036*small+.014*fine+.037*L;
+   float lane=6.33*rp+1.05;
+   float edge=.5+.5*cos(lane);
+   float wave=smoothstep(.25,.97,edge);
+   float trough=sin(lane*2.+1.24*large+.42*small);
+   float drum=-.075+.63*wave+.088*trough+.135*small+.044*fine;
+   drum-=max(0.,rr-9.7)*.225+.44*(1.-smoothstep(.45,1.46,rr));
    val=mix(val,drum,life.x);
-   if(life.x>.49)id=rr<2.4?1:family(a/TAU+.023*r+.14*noise(f*.74)+L*.048);
-   comb+=lap*1.54*life.x;
+   if(life.x>.49)id=rr<2.16+.23*large?1:family(a/TAU+.031*rr+.16*large+.028*small);
+   comb=mix(comb,.57*small+.37*fine+.61*trough,life.x);
  }
  if(life.y>.001){
    float wind=sin(spiral*.72-time*.93+noise(f*1.64)*1.72);
@@ -24,8 +30,12 @@ void main(){vec2 p=world.xz;float rr=length(p);if(rr>15.5)discard;vec2 coord=p/3
  }
  val-=.39*life.z+.30*life.w;
  if(layer!=0){if(paint.b>.45)discard;val-=layer>0?.54:.30;val*=.80;}float coverage=val;val+=layer==0?.15:.24;
- if(layer==0){float guide=0.;for(int i=0;i<10;i++){if(i>=count)break;vec4 b=bodies[i];vec2 dir=normalize(b.xy);float along=dot(p-b.xy,dir),lat=abs(dot(p-b.xy,vec2(-dir.y,dir.x)));if(along>0.&&along<2.8*b.z&&lat<b.z*(1.+.18*along))val-=lat<b.z*.68?.28:.15;float orbit=abs(rr-b.w)/max(.0001,fwidth(rr));guide=max(guide,(1.-smoothstep(.20,1.25,orbit))*step(.33,fract(a*21.)));}
-  if(d.r>.025){float dyeValue=sqrt(d.r)*1.32+.14*noise(f*3.);if(dyeValue>val){val=dyeValue;coverage=dyeValue;id=int(round(texelFetch(dye,ivec2(coord*vec2(textureSize(dye,0))),0).g));}}
+ if(layer==0){float guide=0.;for(int i=0;i<10;i++){if(i>=count)break;vec4 b=bodies[i];vec2 dir=normalize(b.xy);float along=dot(p-b.xy,dir)/b.z,lat=abs(dot(p-b.xy,vec2(-dir.y,dir.x)))/b.z;
+  float taper=1.-smoothstep(.12,3.3,along);
+  float rounded=length(vec2((along-.98)*.47,lat/(.51+.47*taper)));
+  val-=.34*taper*smoothstep(-.20,.45,along)*(1.-smoothstep(.28,1.,rounded));
+  float orbit=abs(rr-b.w)/max(.0001,fwidth(rr));guide=max(guide,(1.-smoothstep(.20,1.25,orbit))*step(.33,fract(a*21.)));}
+  if(d.r>.025){float dyeValue=sqrt(d.r)*mix(1.32,.88,life.x)+.14*noise(f*3.);if(dyeValue>val){val=dyeValue;coverage=dyeValue;id=int(round(texelFetch(dye,ivec2(coord*vec2(textureSize(dye,0))),0).g));}}
   int tag=int(round(texelFetch(plate,ivec2(coord*vec2(textureSize(plate,0))),0).b));if(tag>0){id=tag-1;val=paint.a+.028*noise(f*4.);coverage=1.;}
   if(vortexAge>0.){vec2 v=p-vortex;float dst=length(v),width=.25+.33*vortexAge,phase=atan(v.y,v.x)*2.+dst*21.-time*4.;if(dst<width&&sin(phase)>.04+dst/width*.52){id=family(hue+.22*floor(dst*8.));val=.62+.22*sin(phase);coverage=1.;}}
   if(probe){frag=vec4(float(id),floor(clamp(val,0.,.999)*9.),0.,255.)/255.;return;}if(guide*guides>.1){frag=vec4(mix(engraved(val,id,comb,1.),vec3(.61,.47,.48),guide*.56),1.);return;}}

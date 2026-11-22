@@ -71,7 +71,7 @@ export function createSpheres(s, audio, discover) {
       }
       if(pair.locked&&pair.time>=pair.drawAt){
         pair.drawAt=pair.time+long/100;
-        pair.lines.push({x:a.body.x,z:a.body.z,u:b.body.x,v:b.body.z,at:pair.time});
+        pair.lines.push({x:b.body.x-a.body.x,z:b.body.z-a.body.z,at:pair.time});
         while(pair.lines.length&&pair.lines[0].at<pair.time-2.8*long)pair.lines.shift();
       }
     }

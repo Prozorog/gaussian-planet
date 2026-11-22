@@ -24,8 +24,10 @@ const atlas=createAtlas(s,camera);drawHelp();
 s.spheres=createSpheres(s,audio,atlas.discover);
 s.sceneBodies=s.bodies;
 const reasons={3:'Flinging is available in Today.',4:'Hold to birth a world in Today.',5:'Flares and the supernova are available in Today.'};
-s.life=createLife(s,atlas.discover,()=>{
+s.life=createLife(s,atlas.discover,next=>{
   cancel();
+  news.textContent='';
+  atlas.chapterChanged(next);
   for(const [index,reason] of Object.entries(reasons)){
     const chip=chips[index],disabled=s.life.chapter!==1;
     chip.classList.toggle('chapter-disabled',disabled);chip.setAttribute('aria-disabled',String(disabled));
@@ -181,7 +183,8 @@ window.addEventListener('keydown',e=>{
   if(e.target.matches('select,input')&&k!=='Escape')return;
   if(voyage.active){
     if(k==='Escape'&&voyage.open){e.preventDefault();voyage.close();return;}
-    if(['Space','ArrowLeft','ArrowRight','KeyW','KeyA','KeyS','KeyD'].includes(k)&&!e.target.matches('button,summary')){
+    const choosing=voyage.open&&k==='Space'&&e.target.closest('#voyage-list');
+    if(['Space','ArrowLeft','ArrowRight','KeyW','KeyA','KeyS','KeyD'].includes(k)&&!choosing){
       e.preventDefault();
       if(e.repeat)return;
       if(k==='Space')voyage.togglePause();

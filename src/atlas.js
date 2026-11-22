@@ -52,7 +52,7 @@ export function createAtlas(s, c) {
   const found = new Set((Array.isArray(saved.found) ? saved.found : [])
     .filter(i => Number.isInteger(i) && i >= 1 && i <= notes.length));
   const queue = [], shown = [];
-  let current = 0, expanded = false, manual = false, openedAt = 0, displayAt = 0, lastDraw = -1;
+  let current = 0, currentChapter = 1, expanded = false, manual = false, openedAt = 0, displayAt = 0, lastDraw = -1;
   let topic = 'Orbits';
   const book = $('atlas'), card = $('discovery'), grid = $('atlas-grid');
   const science = createAstronomy(s, c, discover);
@@ -136,6 +136,7 @@ export function createAtlas(s, c) {
     if (id === 6 && !science.roche) science.roche = previousBody('roche');
     if (id === 14 && !science.rider) science.rider = previousBody('rider') ?? s.bodies[0];
     current = id; manual = fromBook; expanded = fromBook; openedAt = s.t; card.hidden = false;
+    currentChapter=s.life?.chapter??1;
     if (!fromBook) shown.push(id);
     paintCard();
   }
@@ -148,7 +149,17 @@ export function createAtlas(s, c) {
     save();
     if (!book.hidden) drawBook();
     if(s.voyage?.active)s.voyage.discovered();
-    else if(enabled)queue.push(id);
+    else if(enabled)queue.push({id,chapter:s.life?.chapter??1});
+  }
+  function chapterChanged(next){
+    const chapter=s.life.chapter;
+    for(let i=queue.length-1;i>=0;i--)if(queue[i].chapter!==chapter)queue.splice(i,1);
+    if(current&&currentChapter!==chapter)close();
+    displayAt=s.t;
+    if(enabled&&next.note&&found.has(next.note)&&!s.voyage?.active){
+      if(book.hidden)show(next.note);
+      else queue.unshift({id:next.note,chapter});
+    }
   }
   function action() {
     if (!manual && !expanded && current && s.t - openedAt > 1.2) close();
@@ -175,7 +186,7 @@ export function createAtlas(s, c) {
   function tick(dt, preview) {
     science.tick(dt);
     if (current && !manual && !expanded && s.t - openedAt >= 10) close();
-    if (enabled && !s.voyage?.active && !current && queue.length && s.t >= displayAt && book.hidden) show(queue.shift());
+    if (enabled && !s.voyage?.active && !current && queue.length && s.t >= displayAt && book.hidden) show(queue.shift().id);
     s.zoneNote = current === 12;
     if (current && illustrated.has(current) && s.t - lastDraw > .048) {
       diagram($('note-diagram'), current, s, c, science);
@@ -187,10 +198,10 @@ export function createAtlas(s, c) {
   mode();
   drawBook();
   save();
-  return { science, discover, tick, action, mode, bookOpen,
+  return { science, discover, chapterChanged, tick, action, mode, bookOpen,
     dismiss(){queue.length=0;close();},
     get open() { return !book.hidden; }, toggleBook() { bookOpen(book.hidden); },
-    state() { return { enabled, found: [...found], shown: shown.slice(), current, queued: queue.slice(),
+    state() { return { enabled, found: [...found], shown: shown.slice(), current, queued: queue.map(item=>item.id),
       labels: science.labels, zone: !!s.zone, zoneRadii: science.zoneRadii(), light: science.light,
       transiting: science.transiting?.name ?? null, wedges: science.wedges }; } };
 }

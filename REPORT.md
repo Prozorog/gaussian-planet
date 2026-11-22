@@ -482,7 +482,7 @@ These are 1920 × 1080 Chrome app-frame readings over approximately 1.75 seconds
 
 ## Phase 4.1 · Voyages and finish
 
-[Play First Light](http://localhost:4103/). The Phase 4 server on port 4104 exited during the initial checks. The machine’s server helper started this workspace on port 4103 and registered it to keep running.
+[Play First Light](http://localhost:4106/). The Phase 4 server on port 4104 exited during the initial checks. I used port 4103 through the stage captures. During final play that server exited and another project took the port. The machine’s server helper restarted this workspace on port 4106 for the play rerun.
 
 ### Stage 1 · Sound
 
@@ -504,7 +504,7 @@ Chrome triggered all 25 one-shots against the streaming Frozen Star at the defau
 
 ### Stage 2 · Creatures
 
-I replaced the flat silhouettes with three cross-sectioned bodies, thick-rooted wing-fins and tapered tails with two streamers. Nose-to-streamer lengths are 1.66–1.91 times Tide’s diameter. The fin wave, tail and bank deform the mesh. Each body carries its own engraved ink and takes discrete light from the star. The sheets keep their normal depth tests. Swimmers intersect them, write a V-shaped wake, inject velocity and ink behind it, and send a ring out on a breach.
+I replaced the flat silhouettes with three cross-sectioned bodies, thick-rooted wing-fins and tapered tails with two streamers. Nose-to-streamer lengths are 1.69–1.95 times Tide’s diameter. The fin wave, tail and bank deform the mesh. Each body carries its own engraved ink and takes discrete light from the star. The sheets keep their normal depth tests. Swimmers intersect them, write a V-shaped wake, inject velocity and ink behind it, and send a ring out on a breach.
 
 The fish school follows one moving ribbon. The fish retain their eaten ink, split around a 1.43-unit camera bubble and are capped at 38 pixels in Drift. The initial dive gives the star three seconds of clear sight, measured from the end of the camera transition. Young-disc pages have no creatures. I left the five other story behaviours in the shared simulation.
 
@@ -546,7 +546,7 @@ The old disc and its upper arc met at a horizontal join. The new accretion surfa
 
 The background rays bend before sampling the sky engraving. The same deflection moves the depth-tested print of the worlds, stars and sheets. In the low-angle capture the cyan world and the sheet behind it stretch over the hole. Dragging the hole onto the star gave upper and lower orange arcs. The lit ring uses a screen-pixel width, and single foreground dust grains are excluded from the black silhouette.
 
-Chrome formed and dragged the hole, stretched a world, saw a jet, used **Rekindle** and approached in Drift. The production build passed. The public-input check did not reach the falling threshold in that Drift pass. The most magnified background is still a sampled print, so some stretched engraved marks exceed two pixels.
+Chrome formed and dragged the hole, stretched a world, saw a jet, used **Rekindle** and approached in Drift. The Stage 5 pass missed the falling threshold. The final targeted check verified falling in, the automatic return and coloured-ink evaporation. The most magnified background is still a sampled print, so some stretched engraved marks exceed two pixels. The production build passed.
 
 [Overview](output/playwright/phase41/s5-overview.png) · [Star alignment](output/playwright/phase41/s5-star-ring.png) · [Low angle](output/playwright/phase41/s5-low.png) · [Drift](output/playwright/phase41/s5-drift.png) · [Bent lines at 100%](output/playwright/phase41/s5-crop.png).
 
@@ -559,3 +559,66 @@ Chrome checked the timeline chapter, **Nebula print**, right-drag to the side an
 The poster measured 79.68% vivid among lit pixels and 0.80% cream. Dark pixels measured 51.64%, above the 50% ceiling. Teal, rose, violet and gold represented 17.85%, 17.51%, 23.72% and 7.93% of lit pixels. Gold was 0.07 points below its target.
 
 [Poster](output/playwright/phase41/s6-poster.png) · [Side](output/playwright/phase41/s6-side.png) · [Three-quarter](output/playwright/phase41/s6-quarter.png) · [Inside](output/playwright/phase41/s6-inside.png) · [Camera positions](output/playwright/phase41/s6-views.json) · [Colour readings](output/playwright/phase41/s6-colour.json).
+
+### Stage 7 · Small defects
+
+| Defect | Change and verification |
+|---|---|
+| Young disc | The ring profile follows a smooth radius with three frequencies of folds. I reduced the young disc’s fluid override so the gaps stay legible. [Young disc](output/playwright/phase41/s7-young.png) |
+| Resonance | The trace stores the difference between the two live orbital positions. A continuous curve travels through those samples and fades toward its tail. Chrome caught Ember and Verdance locked at 1:2. [Relative orbit](output/playwright/phase41/s7-rosette.png) |
+| Stellar face | Geometry shading clips bright arches at the photosphere’s projected limb. A dark filament follows the rotating face. [Solar print](output/playwright/phase41/s7-prominences.png) |
+| Pale patch by Aurelia | A hard rectangular planet-shadow mask on the disc caused the abrupt edge. The shadow now tapers through a rounded profile. [Aurelia in overview](output/playwright/phase41/s7-aurelia.png) |
+| Late notes | Notes carry their chapter, and a jump replaces the current card and discards pending cards from earlier chapters. Chrome jumped Red giant → Nebula → White dwarf → Red giant and checked the active card and queue. [Current chapter note](output/playwright/phase41/s7-notes.png) |
+| Ember | Three staggered lava ribbons and their droplets follow ballistic arcs. Branching rivers spread outward from the vent. Chrome cracked the crust, rode back out and verified the surviving surface state. [Fountain](output/playwright/phase41/s7-fountain.png) |
+
+The production build and the focused Chrome run passed. The young disc measured 81.51% vivid among lit pixels, 40.66% dark and 1.39% cream. The final control check also verified **Space** and the helm handoff with focus on the next-shot button. [Control results](output/playwright/phase41/s7-controls.json) · [Young-disc colour reading](output/playwright/phase41/s7-young-colour.json) · [Final control check](output/playwright/phase41/s7-final-controls.json).
+
+### Camera audit
+
+I sampled the live flight controller and simulation at 60 Hz. The test used the default overview as the starting camera and ran all six finite routes to their ends. For Endless it sampled a four-minute sequence with a fixed shuffle seed and a black hole present. Clearance is the smallest gap above a surface as a fraction of that body’s radius. The extra margin around a swimmer includes its moving fins and streamers.
+
+| Voyage | Zero-speed frames | Largest one-second speed change | Fastest camera / travel turn | Smallest clearance | Largest bank |
+|---|---:|---:|---:|---:|---:|
+| Grand Tour | 0 | 26.7% | 23.5°/s / 23.8°/s | 0.655 r | 5.46° |
+| Sun Dive | 0 | 26.7% | 21.6°/s / 23.8°/s | 0.578 r | 5.04° |
+| Ring Run | 0 | 26.7% | 21.6°/s / 23.8°/s | 0.967 r | 4.49° |
+| Leviathan Song | 0 | 26.7% | 21.6°/s / 23.8°/s | 0.250 r | 4.14° |
+| The Life of a Star | 0 | 26.7% | 21.6°/s / 23.8°/s | 0.516 r | 5.38° |
+| Into the Dark | 0 | 26.7% | 21.6°/s / 23.8°/s | 0.384 r | 4.02° |
+| Endless voyage | 0 | 26.7% | 23.5°/s / 23.8°/s | 0.750 r | 5.45° |
+
+[Camera samples](output/playwright/phase41/s3-audit.json).
+
+### 1080p performance
+
+I took one approximately 1.75-second app-frame reading per scene and GPU. The three swimmers were in frame with 300 fish on High or 150 on Low. The accretion disc spanned an estimated 794 pixels on High and 759 on Low. Sun Dive reached 3.25–3.28 stellar radii from the star’s centre before the sampling window.
+
+| Scene | RTX 4070 Laptop · High | Iris Xe · Low |
+|---|---:|---:|
+| Voyage close pass | 144.41 fps | 38.87 fps |
+| Three leviathans and fish | 144.66 fps | 84.24 fps |
+| Black hole close-up | 144.11 fps | 87.34 fps |
+| Inside the nebula | 144.41 fps | 80.07 fps |
+
+- High GPU string `ANGLE (NVIDIA, NVIDIA GeForce RTX 4070 Laptop GPU (0x00002860) Direct3D11 vs_5_0 ps_5_0, D3D11)`
+- Low GPU string `ANGLE (Intel, Intel(R) Iris(R) Xe Graphics (0x000046A6) Direct3D11 vs_5_0 ps_5_0, D3D11)`
+
+[High readings](output/playwright/phase41/s7-performance-high.json) · [Low readings](output/playwright/phase41/s7-performance-low.json).
+
+### Final play and language check
+
+The 300.02-second Chrome rerun completed with zero page or WebGL errors and zero failed actions. It ran a full 150.07-second **The Life of a Star** voyage and reached Today again. The session also exercised ink, stir, comb, birth, flares, a fling, chimes, manual Drift, Aurelia’s storm, black-hole formation and evaporation, all six Atlas tabs and the postcard editor. I found no Cyrillic in the source, production bundle or visible page text.
+
+The automatic cards that appeared were How planets are born, Equal areas, Habitable zone, A planet in transit, The music of the spheres, Escape speed, Flares and auroras, The Sun’s surface, Giant impacts, Day, night and sunrise, Storms on gas giants, and Black holes and the event horizon. Red giant, Planetary nebula and White dwarf were discovered quietly during the voyage.
+
+[Play session](output/playwright/phase41/s7-natural-play.json) · [Shells during the live voyage](output/playwright/phase41/s7-life-shells.png).
+
+### NOT done / still weak
+
+- **Stage 1.** Peak balance was measured against Frozen Star. The other four mixes and listening comfort across sound systems remain unmeasured.
+- **Stage 2.** When a swimmer is directly below opaque ink, the sheet can briefly hide the head in the ride view. The neutral side silhouette is the least distinct of the three views.
+- **Stage 3.** The sampled routes meet the motion limits. The Grand Tour does not consistently give every world a half-frame close pass. In the audited run, Tide and Aurelia merged before their assigned encounters. Ring Run’s storm and Leviathan Song’s breach depend on the live scene and were not guaranteed in the captures. A voyage started inside a planet uses the exterior Drift pose that supports that interior.
+- **Stage 4.** Warm paint and the reveal passed in Chrome. Other browsers and interrupted media connections were not measured.
+- **Stage 5.** A few background lines still widen beyond two pixels under the strongest magnification.
+- **Stage 6.** The poster missed the dark ceiling and gold floor by the margins above. Shell patches sometimes cover the core.
+- **Stage 7.** The rosette’s fine trace can be hard to pick out over a bright band.

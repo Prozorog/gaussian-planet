@@ -105,7 +105,8 @@ export function diagram(canvas,id,s,c,a) {
     const scale=51/outer,point=(x,z)=>[78+x*scale,45+z*scale*.68];
     const ring=(radius,col)=>path(p,Array.from({length:81},(_,i)=>point(radius*Math.cos(i*TAU/80),radius*Math.sin(i*TAU/80))),col);
     ring(inner,mint);ring(outer,rose);
-    for(const line of pair?.lines??[])path(p,[point(line.x,line.z),point(line.u,line.v)],'#ffde9745');
+    const trace=pair?.lines.map(({x,z})=>point(x,z));
+    if(trace?.length){p.beginPath();smoothTrace(p,trace.map(([x,y])=>[x,y,1]));p.strokeStyle='#ffde97aa';p.stroke();}
     for(const [i,b] of bodies.entries())dot(p,...point(b.x,b.z),3.1,i?rose:mint);
     type(p,151,28,pair?.ratio??'Period ratio',gold);
     type(p,151,49,bodies[0].name,mint);type(p,151,66,bodies[1].name,rose);
@@ -171,6 +172,17 @@ export function diagram(canvas,id,s,c,a) {
 }
 export const illustrated=new Set([1,2,3,4,6,8,11,12,14,15,16,17,18,19,20,21,22,23]);
 
+function smoothTrace(p,points,start=0,end=points.length-1){
+  let moving=false;
+  for(let i=Math.max(0,start);i<=Math.min(end,points.length-1);i++){
+    const b=points[i],a=points[Math.max(0,i-1)],c=points[Math.min(i+1,points.length-1)];
+    if(Math.min(a[2],b[2],c[2])<=.07){moving=false;continue;}
+    if(!moving)p.moveTo((a[0]+b[0])*.5,(a[1]+b[1])*.5);
+    p.quadraticCurveTo(b[0],b[1],(b[0]+c[0])*.5,(b[1]+c[1])*.5);
+    moving=true;
+  }
+}
+
 function chimeLines(p,s,xy,weight=1,labels=true) {
   const note=s.spheres, dx=Math.cos(note.angle),dz=Math.sin(note.angle);
   function segment(a,b){
@@ -194,13 +206,17 @@ function chimeLines(p,s,xy,weight=1,labels=true) {
   }
   for(const pair of note.locks){
     p.lineWidth=weight;
+    const points=pair.lines.map(({x,z})=>xy(x,-.14,z));
+    let start=0;
     for(let band=0;band<5;band++){
-      p.beginPath();p.strokeStyle=`rgba(255,226,184,${.10+band*.066})`;
-      for(const line of pair.lines){
-        if(Math.floor(clamp(1-(pair.time-line.at)/(2.8*pair.period),0,.999)*5)!==band)continue;
-        segment(xy(line.x,-.14,line.z),xy(line.u,-.14,line.v));
-      }
+      const oldest=pair.time-2.8*pair.period*(1-(band+1)/5);
+      let end=start;
+      while(end<pair.lines.length&&pair.lines[end].at<=oldest)end++;
+      if(end===start)continue;
+      p.beginPath();p.strokeStyle=`rgba(255,226,184,${.07+band*.129})`;
+      smoothTrace(p,points,start,end-1);
       p.stroke();
+      start=end;
     }
     const a=xy(pair.a.x,pair.a.y,pair.a.z),b=xy(pair.b.x,pair.b.y,pair.b.z);
     p.beginPath();p.strokeStyle='#ffe3b4da';

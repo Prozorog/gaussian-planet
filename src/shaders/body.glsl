@@ -8,7 +8,14 @@ void main(){vec3 n=normalize(local),view=normalize(eye-world),light=normalize(-w
   vec3 to=world-center;float along=dot(to,light);bool shadow=along<0.&&length(to-along*light)<radius/2.15;float k=shadow?1.:4.+floor(3.8*grain(vec2(r*40.,7.)).r)+step(.67,abs(dot(light,normalize(vec3(-.241,.900,-.363)))));
   frag=vec4(ink(id,k)*(.65+.35*line),1.);return;
  }
- if(pass==4){float u=local.x,w=local.y;float v=.51+.25*sin(w*9.+u*11.+1.4*noise(vec2(u*14.,time*.14)))+.11*noise(vec2(u*47.,w*2.));frag=vec4(engraved(v,id,w*.5,1.),1.);return;}
+ if(pass==4){
+  // Only the part of the arch beyond the visible photosphere prints bright.
+  vec3 ray=normalize(world-eye);
+  if(length(cross(center-eye,ray))<radius*1.002)discard;
+  float u=local.x,w=local.y;
+  float v=.55+.25*sin(w*9.+u*11.+1.4*noise(vec2(u*14.,time*.14)))+.10*noise(vec2(u*47.,w*2.));
+  frag=vec4(engraved(v,id,w*.5,1.),1.);return;
+ }
  if(pass==5){
   vec3 p=n;p.xz=rot(time*.023)*p.xz;
   vec2 f=foldInk(vec2(p.x+p.z*.63,p.y*1.65)*3.7+spin,time*.12);
@@ -37,6 +44,13 @@ void main(){vec3 n=normalize(local),view=normalize(eye-world),light=normalize(-w
    if(life.y>.35||life.x>.42)id=1;
    if(life.z>.66||life.w>.22){id=8;v=.73+.12*mid+.10*tiny;}
    col=engraved(v,id,comb+.24*noise(cell*4.),1.);
+   if(life.z<.18&&life.w<.14){
+     float bend=surf.y-.25+.21*sin(surf.x*4.8+surf.z*2.7)+.018*mid;
+     float gate=smoothstep(.08,.27,surf.x)*(1.-smoothstep(.44,.70,surf.x))*smoothstep(.22,.49,surf.z);
+     float pen=max(.0002,fwidth(bend));
+     float gas=(1.-smoothstep(.34,1.1,abs(bend)/pen))*gate;
+     col=mix(col,ink(0,2.),gas*.86);
+   }
    float edge=facing+.048*mid+.026*tiny;
    float rim=1.-smoothstep(.205,.285+.035*charge,edge);
    vec3 limb=life.z>.66||life.w>.22?vec3(.92,.98,1.):life.y>.43||life.x>.62?ink(1,7.):vec3(1.,.968,.76);

@@ -86,6 +86,7 @@ vec3 ocean(vec2 p,float h,vec3 sky){
 vec3 ember(vec2 p,float h,vec3 sky){
   float rim=.198+.068*sin(p.x*4.4+look.x)+.052*noise(p*7.);
   vec3 col=sky;
+  vec2 root=p-toy.yz;
   if(h<rim){
     vec2 q=sea(p,h-rim,1.23);
     vec2 f=foldInk(roll(q*.82,3.65),time*.23);
@@ -93,23 +94,60 @@ vec3 ember(vec2 p,float h,vec3 sky){
     float tectonic=q.x*.83+q.y*.90+2.95*a+.88*b+.20*c;
     float rift=abs(sin(tectonic)+.20*sin(tectonic*2.1+1.6*b));
     float river=.50+.13*sin(q.y*1.74+a*3.-time*.31);
-    vec2 root=p-toy.yz;
-    float crack=abs(sin(atan(root.y,root.x)*6.+length(root)*16.+b*1.7));
-    bool split=toy.x>0.&&length(root)<.59&&crack<.16+.17*toy.x;
+    vec2 runoff=root*vec2(.92,1.78);
+    float distanceFromVent=length(runoff);
+    float reach=.09+.52*(1.-exp(-max(0.,toyAge-.22)*.85));
+    vec2 branch=foldInk(9.6*runoff+vec2(.42,2.4),time*.08);
+    float channel=abs(sin(branch.x*1.9+branch.y*1.36+.60*noise(branch*2.2)));
+    float width=.27*(1.-smoothstep(.12,reach+.12,distanceFromVent))+.035;
+    bool split=toy.x>0.&&distanceFromVent<reach+.035*b&&root.y<.045&&channel<width;
     bool lava=rift<river||split;
     float light=.58+.24*(1.-rift)+.10*b+.07*c;
-    col=lava?printInk(light,split?7:sin(tectonic*1.24)>.25?1:0,b+c*.27,tectonic*1.71):
+    col=lava?printInk(split?.65+.22*(1.-channel/max(.0001,width))+.055*b:light,
+      split?(channel>width*.60?1:7):sin(tectonic*1.24)>.25?1:0,b+c*.27,tectonic*1.71):
       printInk(.355+.17*a+.19*b+.062*c,0,.44*b+.12*c,tectonic*.68);
   }
-  if(toy.x>0.){
-    vec2 q=p-toy.yz;
-    float up=q.y,streak=up/max(.06,min(.57,.25+toyAge*.27));
-    float fan=.11*max(0.,streak)+.03;
-    float x=q.x+.058*sin(up*10.+toyAge*1.9)*streak;
-    float veins=sin((x/max(.02,fan))*14.+toyAge*2.6+2.5*sin(up*19.));
-    float crest=.89+.115*cos(x*36.+toyAge*2.4);
-    if(streak>0.&&streak<crest&&abs(x)<fan&&veins>.23+.37*streak&&toyAge<3.6)
-      col=engraved(.62+.21*veins-.11*streak,veins>.77?7:1,streak*1.77,1.);
+  if(toy.x>0.&&toyAge<3.4&&root.y>-.022&&root.y<.61&&abs(root.x)<.72){
+    const float gravity=1.59;
+    float closest=1.,braid=0.;
+    for(int j=0;j<3;j++){
+      float n=float(j),random=hash(vec2(n,9.81));
+      float vx=j==0?-.43:j==1?.065:.40;
+      float vy=j==0?1.14:j==1?1.26:.98;
+      float disc=vy*vy-2.*gravity*root.y;
+      if(disc<0.)continue;
+      float arc=sqrt(disc);
+      for(int k=0;k<2;k++){
+        float since=(vy+(k==0?-arc:arc))/gravity;
+        float start=toyAge-since-.078*n;
+        float duration=.70+.35*random;
+        if(since<0.||since>2.*vy/gravity||start<0.||start>duration)continue;
+        float center=vx*since+.073*sin(since*5.6+n*1.6)*since;
+        float thickness=(j==1?.043:.026)*(1.-.61*smoothstep(.26,1.48,since));
+        thickness*=.83+.17*sin(7.*since+start*9.);
+        thickness*=smoothstep(0.,.13,start)*(1.-smoothstep(duration-.10,duration,start));
+        float d=abs(root.x-center)/max(.001,thickness);
+        if(d>=closest)continue;
+        closest=d;braid=since*12.+n*.4+2.5*d+.34*sin(start*9.+since*10.);
+      }
+    }
+    if(closest<1.){
+      float lane=sin(braid),body=1.-closest;
+      float v=.43+.27*body+.17*lane+.076*sin(braid*2.48+root.y*20.);
+      col=printInk(v,closest<.6&&lane>.13?7:1,braid*.52,braid*.85);
+    }
+    for(int j=0;j<14;j++){
+      float n=float(j),dice=hash(vec2(n,11.5)),t=toyAge-(.13+.057*n);
+      if(t<0.)continue;
+      float vx=(dice-.47)*.82,vy=1.02+.29*hash(vec2(n,60.8));
+      vec2 delta=root-vec2(vx*t,vy*t-gravity*.5*t*t);
+      if(t>2.*vy/gravity||dot(delta,delta)>.0036)continue;
+      vec2 axis=normalize(vec2(vx,vy-gravity*t)+vec2(.0001));
+      float width=.0045+.007*dice;
+      vec2 shape=vec2(dot(delta,axis)*.58,dot(delta,vec2(-axis.y,axis.x)));
+      float radius=length(shape)/width;
+      if(radius<1.)col=engraved(.69+.16*cos(10.*radius+shape.x*87.),radius>.75?1:7,dice+.3*radius,1.);
+    }
   }
   return col;
 }
