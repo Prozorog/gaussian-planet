@@ -17,10 +17,10 @@ void main(){int i=gl_VertexID;float f=float(i);vec3 p;float sz;vec3 col;uv=vec2(
 const frag=`in vec3 pigment;in vec4 droplet;flat in int inkID;uniform sampler2D inks;out vec4 frag;
 void main(){vec2 p=gl_PointCoord-.5;float r=length(p);if(r>.5)discard;
  if(droplet.x>3.){
-  ivec2 b=ivec2(gl_FragCoord.xy)&3;const int pattern[16]=int[16](0,8,2,10,12,4,14,6,3,11,1,9,15,7,13,5);
-  if(floor(droplet.z*8.)*2.<=float(pattern[b.x+b.y*4]))discard;
   float wave=p.y*2.8+.40*sin(p.x*8.+droplet.y*12.)+.24*sin(p.x*16.+p.y*3.);
-  float stepInk=clamp(droplet.w+floor(2.*sin(wave*4.))+1.,1.,7.);
+  float ribbon=floor(2.*sin(wave*4.));
+  if(ribbon+2.>=ceil(droplet.z*4.))discard;
+  float stepInk=clamp(droplet.w+ribbon+1.,1.,7.);
   if((.5-r)*droplet.x<1.15)stepInk=min(8.,stepInk+2.);
   frag=vec4(texelFetch(inks,ivec2(int(stepInk),inkID),0).rgb,1.);
  }else frag=vec4(pigment*(r>.38?.74:1.),1.);}`;

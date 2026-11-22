@@ -11,5 +11,5 @@ void main(){vec2 p=world.xz;float rr=length(p);if(rr>15.5)discard;vec2 coord=p/3
   int tag=int(round(texelFetch(plate,ivec2(coord*vec2(textureSize(plate,0))),0).b));if(tag>0){id=tag-1;val=paint.a+.028*noise(f*4.);coverage=1.;}
   if(vortexAge>0.){vec2 v=p-vortex;float dst=length(v),width=.25+.33*vortexAge,phase=atan(v.y,v.x)*2.+dst*21.-time*4.;if(dst<width&&sin(phase)>.04+dst/width*.52){id=family(hue+.22*floor(dst*8.));val=.62+.22*sin(phase);coverage=1.;}}
   if(probe){frag=vec4(float(id),floor(clamp(val,0.,.999)*9.),0.,255.)/255.;return;}if(guide*guides>.1){frag=vec4(mix(engraved(val,id,comb,1.),vec3(.61,.47,.48),guide*.56),1.);return;}}
- if(coverage<.032||val<.10||inside>0.&&inside>fract(dot(mod(gl_FragCoord.xy,4.),vec2(.25,.5625))))discard;float seam=step(.5,fwidth(float(id)));vec3 col=engraved(val,id,comb,1.);col=mix(col,ink(id,7.),seam*.62);if(starHue==8)col*=vec3(.84,.95,1.);if(starHue==0)col*=vec3(1.,.81,.93);frag=vec4(col,1.);
+ if(coverage<.032||val<.10||floor(clamp(val,0.,.999)*9.)<floor(inside*9.))discard;float seam=step(.5,fwidth(float(id)));vec3 col=engraved(val,id,comb,1.);col=mix(col,ink(id,7.),seam*.62);if(starHue==8)col*=vec3(.84,.95,1.);if(starHue==0)col*=vec3(1.,.81,.93);frag=vec4(col,1.);
 }

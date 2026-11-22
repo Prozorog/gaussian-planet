@@ -22,9 +22,9 @@ export function driftRenderer(gl,mesh,frame,at) {
   gl.bindBuffer(gl.PIXEL_PACK_BUFFER,null);
   let fence=null,readAt=-1;
   const positions=new Float32Array(48),states=new Float32Array(48);
-  function surfaces(s,c,picking=false,pickX=0,pickY=0) {
+  function surfaces(s,c,picking=false) {
     const l=frame(skin,s,c),d=c.drift;
-    gl.uniform1f(l.inside,c.inside);gl.uniform1i(l.picking,picking?1:0);gl.uniform2f(l.pickOffset,pickX,pickY);
+    gl.uniform1f(l.inside,c.inside);gl.uniform1i(l.picking,picking?1:0);
     const marks=d.ripples.filter(m=>!m.crossing||s.t-m.at<2.5);
     for(let i=0;i<marks.length;i++){
       const m=marks[i];positions.set(m.point,i*4);states.set([m.id,m.ink,m.at,Number(m.crossing)],i*4);
@@ -54,7 +54,7 @@ export function driftRenderer(gl,mesh,frame,at) {
     const px=Math.floor((q[0]*.5+.5)*w),py=Math.floor((q[1]*.5+.5)*h);
     gl.viewport(-px,-py,w,h);
     gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
-    gl.enable(gl.DEPTH_TEST);surfaces(s,c,true,px,py);
+    gl.enable(gl.DEPTH_TEST);surfaces(s,c,true);
     gl.readPixels(0,0,1,1,gl.RGBA,gl.UNSIGNED_BYTE,bytes);
     gl.disable(gl.DEPTH_TEST);gl.bindFramebuffer(gl.FRAMEBUFFER,null);gl.viewport(0,0,w,h);
     if(!bytes[3])return null;

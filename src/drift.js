@@ -23,6 +23,14 @@ function islands() {
   // Low, navigable landmarks on the inner edge of the ice giant's orbit.
   Object.assign(result[0],{pos:[1.95,.30,-3.12],size:[.84,.36,.57],ink:3});
   Object.assign(result[1],{pos:[-2.48,.64,2.53],size:[.98,.42,.72],ink:4});
+  // Rounded gold islands sit in the open space between the paper-thin sheets.
+  for(const cloud of result.filter(b=>b.ink===6)){
+    const y=cloud.pos[1];
+    cloud.pos[1]=y<-.52?-1.48:y>.47?1.36:.18;
+    const radius=Math.min(cloud.size[0],1.04);
+    cloud.size=[radius,.45*radius,Math.min(cloud.size[2],radius*1.22)];
+  }
+  Object.assign(result[41],{pos:[-2.81,.095,4.13],size:[.57,.34,.58]});
   return result;
 }
 export const clouds=islands();

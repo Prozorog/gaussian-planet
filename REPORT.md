@@ -327,3 +327,15 @@ The production build passed with `heavy npm run build`. The project’s existing
 - A cloud is a set of open, nested surfaces. Passing very close to an inner fold can expose the ordered screen-door pattern. The stellar corona still uses a camera-facing engraving around its three-dimensional core and prominence loops.
 - The light curve models a uniformly bright stellar disc. Stellar limb darkening, the density dependence of the Roche limit and climate-dependent habitable-zone boundaries are outside the simulation. The Atlas identifies the illustrative scale of the ring and the toy zone.
 - The GPU readings are short, shared-machine samples. Audio controls and the procedural sound paths were exercised in Chrome. Listening comfort and long-session thermal performance were not measured.
+
+## Phase 4 · The Whole Sky
+
+[Play First Light](http://localhost:4103/). This section records the seven stages in commit order. The Phase 1–3 notes above are historical.
+
+### Stage 0 · English and close-range engraving
+
+- The page and Atlas use English throughout, including the diagrams, tooltips, ink wells and grouped controls under **H**. The Atlas retains the existing discovery storage key and ignores the old language value. I checked a saved discovery from a Russian-language session, **L** having no effect, an opened note, the Atlas tabs, **Step inside**, **Esc**, an ink drop in Drift and the overview drop and stir.
+- Close sheets reconstruct the fluid and persistent paint displacement with cubic filtering. The close view damps the grid displacement and adds folded world-space turbulence, a separate streamline family and curved palette boundaries. Clouds and near dust shed whole tonal bands. The overview-to-Drift transition uses tonal bands as well.
+- The gold shape was cloud 47. Its old centre lay at the height of a sheet, which sliced through the flattened cloud. I rounded the gold islands, then made that particular island more compact and moved it clear of the two adjacent sheets.
+- At 1920 × 1080 the sheet measured 81.58% vivid among lit pixels, 25.78% dark and 2.83% cream. The cloud measured 59.23%, 21.48% and 9.29%. The flyby measured 85.61%, 22.16% and 1.74%. The English Atlas frame measured 78.82%, 44.76% and 1.03%. Definitions match Phase 2. The production build passed and the browser control run recorded no page errors.
+- [Sky sheet](output/playwright/phase4/s0-sky.png) · [Cloud interior](output/playwright/phase4/s0-cloud.png) · [Planet flyby](output/playwright/phase4/s0-planet-pass.png) · [English Atlas](output/playwright/phase4/s0-atlas.png) · [Colour readings](output/playwright/phase4/s0-colour.json).

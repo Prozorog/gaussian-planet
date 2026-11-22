@@ -1,151 +1,197 @@
 import './atlas.css';
-import {notes} from './atlas-notes.js';
-import {diagram,illustrated,chartOnSky} from './atlas-diagrams.js';
-import {createAstronomy} from './astronomy.js';
+import { notes } from './atlas-notes.js';
+import { diagram, illustrated, chartOnSky } from './atlas-diagrams.js';
+import { createAstronomy } from './astronomy.js';
 
-const $=id=>document.getElementById(id);
-const storage='gaussian-planet.atlas.v1';
-const ui={
-  ru:{book:'Небесный атлас',notes:'Заметки об открытиях',language:'Язык',more:'Подробнее',less:'Свернуть',
-    close:'Закрыть',enter:'Шаг внутрь',exit:'К общему виду',found:'Открыто',settings:'Настройки оттиска',
-    hint:'Тяните, чтобы осмотреться · WASD — плыть · Space / C — вверх и вниз · Щелчок — капля краски · У планеты удерживайте F · Esc — выйти',
-    inks:['Огонь','Роза','Аметист','Лазурь','Изумруд','Золото'],verbs:['Капнуть краску','Закрутить поток','Провести гребнем','Бросить планету','Удержать для рождения','Удержать звезду']},
-  en:{book:'Sky Atlas',notes:'Discovery notes',language:'Language',more:'More',less:'Less',close:'Close',enter:'Step inside',exit:'Rise out',found:'Discovered',settings:'Print settings',
-    hint:'Drag to look · WASD to float · Space/C up/down · Click to drop ink · Hold F near a planet to ride · Esc to rise out',
-    inks:['Fire','Rose','Violet','Teal','Emerald','Gold'],verbs:['Drop ink','Stir','Comb','Fling a planet','Hold to birth a planet','Hold the sun']}
+const $ = id => document.getElementById(id);
+const storage = 'gaussian-planet.atlas.v1';
+const topics = {
+  Orbits: [1, 2, 3, 4, 5, 6, 11, 12],
+  'The star': [7, 8, 9, 10, 13],
+  'Life of the star': [17, 18, 19],
+  'Black hole': [20, 21, 22, 23],
+  Worlds: [14, 24, 25, 26, 27, 28],
+  Music: [15, 16],
 };
-const helpRows=[
-  ['1–6','Выбрать краску','Choose ink'],['Щелчок / drag','Капнуть / закрутить поток','Drop / stir'],['Shift + drag','Провести гребнем','Seven-tine comb'],
-  ['Hold','Создать мир · 0,6–3 с','Birth a world · 0.6–3 s'],['Drag ↗','Оттянуть и бросить планету','Pull and fling a planet'],
-  ['Click ◉','Посетить и расписать планету','Visit and ink a planet'],['Hold ☉','Вспышка · 4 с для сверхновой','Aim a flare · 4 s for nova'],
-  ['RMB / wheel','Повернуть / приблизить','Orbit / zoom'],['Space · [ ]','Пауза · скорость орбит','Pause · orbit speed'],['O · M · S','Орбиты · звук · портрет Солнца','Guides · mute · solar print'],['Esc · R','Назад · исходная система','Return · reset system'],
-  ['D / 2×','Войти в дрейф','Step inside'],['B · N · L','Атлас · подписи · язык','Atlas · labels · language'],['K · Z','Секторы Кеплера · обитаемая зона','Kepler sectors · habitable zone']
-];
-export function createAtlas(s,c) {
-  let saved={};try{saved=JSON.parse(localStorage.getItem(storage))||{};}catch{}
-  let lang=saved.lang==='en'?'en':'ru',enabled=saved.enabled!==false;
-  const found=new Set((Array.isArray(saved.found)?saved.found:[]).filter(i=>Number.isInteger(i)&&i>=1&&i<=14));
-  const queue=[],shown=[];
-  let current=0,expanded=false,manual=false,openedAt=0,displayAt=0,lastDraw=-1;
-  const book=$('atlas'),card=$('discovery'),grid=$('atlas-grid');
-  const science=createAstronomy(s,c,discover);
-  const records=saved.records??{};
-  function rememberBody(b){return {name:b.name,id:b.id,r:b.r,x:b.x,y:b.y,z:b.z};}
-  function previousBody(key){const b=records[key];return b&&(s.bodies.find(o=>o.name===b.name)??b);}
-  s.zoneRadii=science.zoneRadii;
-  const settings=$('settings').querySelector('section');
-  const check=document.createElement('label'),language=document.createElement('label');
-  const toggle=document.createElement('input'),select=document.createElement('select');
-  toggle.type='checkbox';toggle.checked=enabled;select.innerHTML='<option value="ru">Русский</option><option value="en">English</option>';
-  check.append(document.createTextNode(''),toggle);language.append(document.createTextNode(''),select);
-  settings.insertBefore(check,settings.querySelector('h3'));check.after(language);
-  const copy=()=>ui[lang];
-  function save(){
-    if(science.gauge){const {body,circular,escape,speed}=science.gauge;records.gauge={body:rememberBody(body),circular,escape,speed};}
-    if(science.assist)records.assist=science.assist;
-    if(science.roche)records.roche=rememberBody(science.roche);
-    if(science.rider)records.rider=rememberBody(science.rider);
-    try{localStorage.setItem(storage,JSON.stringify({found:[...found],lang,enabled,records}));}catch{}
+
+export const helpGroups = {
+  Marble: [
+    ['1–6 · ink wells', 'Choose ink'], ['Click / drag', 'Drop ink / stir'],
+    ['Shift + drag', 'Comb'], ['Hold still', 'Hold to birth'],
+    ['Right drag / wheel', 'Orbit / zoom'], ['R', 'Reset the system'],
+  ],
+  Worlds: [
+    ['Pull a planet', 'Fling a world'], ['Click a planet', 'Visit and ink its surface'],
+    ['Hold the star', 'Aim a flare or hold for a supernova'], ['S', 'Solar print'],
+  ],
+  Drift: [
+    ['D / double-click disc', 'Step inside'], ['Drag', 'Look around'], ['WASD / arrows', 'Float'],
+    ['Space / C', 'Rise / sink'], ['Shift', 'Glide faster'], ['F', 'Ride a nearby world'], ['Esc', 'Rise out'],
+  ],
+  Time: [['Space', 'Pause or resume orbits in the overview'], ['[ / ]', 'Change orbit speed']],
+  Sound: [['M', 'Mute sound']],
+  Atlas: [['B', 'Open the Sky Atlas'], ['N / O', 'Planet labels / orbit guides'],
+    ['K / Z', 'Kepler sectors / habitable zone'], ['H', 'Settings and controls']],
+};
+
+export function createAtlas(s, c) {
+  let saved = {};
+  try { saved = JSON.parse(localStorage.getItem(storage)) || {}; } catch {}
+  let enabled = saved.enabled !== false;
+  const found = new Set((Array.isArray(saved.found) ? saved.found : [])
+    .filter(i => Number.isInteger(i) && i >= 1 && i <= notes.length));
+  const queue = [], shown = [];
+  let current = 0, expanded = false, manual = false, openedAt = 0, displayAt = 0, lastDraw = -1;
+  let topic = 'Orbits';
+  const book = $('atlas'), card = $('discovery'), grid = $('atlas-grid');
+  const science = createAstronomy(s, c, discover);
+  const records = saved.records ?? {};
+  const toggle = $('notes-toggle');
+  toggle.checked = enabled;
+  s.zoneRadii = science.zoneRadii;
+
+  function rememberBody({ name, id, r, x, y, z }) { return { name, id, r, x, y, z }; }
+  function previousBody(key) {
+    const b = records[key];
+    return b && (s.bodies.find(o => o.name === b.name) ?? b);
   }
-  function drawBook(){
-    const words=copy();$('atlas-title').textContent=words.book;
-    $('atlas-count').textContent=words.found+'   '+found.size+' / 14';
-    const children=notes.map((n,i)=>{
-      const data=n[lang],b=document.createElement('button');
-      b.className='atlas-slot';b.type='button';b.disabled=!found.has(i+1);
-      const no=document.createElement('i'),title=document.createElement('strong');
-      no.textContent=String(i+1).padStart(2,'0');title.textContent=data[0];b.append(no,title);
-      if(b.disabled){const hint=document.createElement('small');hint.textContent=data[4];b.append(hint);}
-      else b.onclick=()=>show(i+1,true);
+  function save() {
+    if (science.gauge) {
+      const { body, circular, escape, speed } = science.gauge;
+      records.gauge = { body: rememberBody(body), circular, escape, speed };
+    }
+    if (science.assist) records.assist = science.assist;
+    if (science.roche) records.roche = rememberBody(science.roche);
+    if (science.rider) records.rider = rememberBody(science.rider);
+    try { localStorage.setItem(storage, JSON.stringify({ found: [...found], enabled, records })); } catch {}
+  }
+  const tabs = new Map();
+  for (const [name, ids] of Object.entries(topics)) {
+    if (!ids.some(id => notes[id - 1])) continue;
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.textContent = name;
+    button.onclick = () => { topic = name; drawBook(); };
+    tabs.set(name, button);
+  }
+  $('atlas-tabs').replaceChildren(...tabs.values());
+  function drawBook() {
+    $('atlas-count').textContent = `Discovered ${found.size} / ${notes.length}`;
+    for (const [name, button] of tabs) button.setAttribute('aria-pressed', String(name === topic));
+    const children = topics[topic].filter(id => notes[id - 1]).map(id => {
+      const [titleText, , , , hintText] = notes[id - 1];
+      const b = document.createElement('button');
+      b.className = 'atlas-slot';
+      b.type = 'button';
+      b.disabled = !found.has(id);
+      const no = document.createElement('i'), title = document.createElement('strong');
+      no.textContent = String(id).padStart(2, '0');
+      title.textContent = titleText;
+      b.append(no, title);
+      if (b.disabled) {
+        const hint = document.createElement('small');
+        hint.textContent = hintText;
+        b.append(hint);
+      } else b.onclick = () => show(id, true);
       return b;
     });
     grid.replaceChildren(...children);
   }
   function bookOpen(open) {
-    book.hidden=!open;$('book-toggle').setAttribute('aria-expanded',String(open));
-    if(open){$('settings').open=false;drawBook();}
-    else if(manual)close();
+    book.hidden = !open;
+    $('book-toggle').setAttribute('aria-expanded', String(open));
+    if (open) { $('settings').open = false; drawBook(); }
+    else if (manual) close();
   }
-  function paintCard(){
-    if(!current)return;
-    const n=notes[current-1][lang],words=copy();
-    $('note-meta').textContent=words.book.toLocaleUpperCase(lang)+'   /   '+String(current).padStart(2,'0');
-    $('note-title').textContent=n[0];$('note-body').textContent=n[1];$('note-extra').textContent=n[2];
-    $('note-extra').hidden=!expanded;$('note-scale').textContent=n[3];
-    $('note-more').textContent=(expanded?'−  ':'+  ')+(expanded?words.less:words.more);
-    $('note-more').setAttribute('aria-expanded',String(expanded));
-    $('note-diagram').hidden=!illustrated.has(current);
-    if(illustrated.has(current))diagram($('note-diagram'),current,s,c,science,lang==='ru');
+  function paintCard() {
+    if (!current) return;
+    const [title, body, extra, scale] = notes[current - 1];
+    $('note-meta').textContent = 'Sky Atlas / ' + String(current).padStart(2, '0');
+    $('note-title').textContent = title;
+    $('note-body').textContent = body;
+    $('note-extra').textContent = extra;
+    $('note-extra').hidden = !expanded;
+    $('note-scale').textContent = scale;
+    $('note-more').textContent = expanded ? '−  Less' : '+  More';
+    $('note-more').hidden = !extra;
+    $('note-more').setAttribute('aria-expanded', String(expanded));
+    $('note-diagram').hidden = !illustrated.has(current);
+    if (illustrated.has(current)) diagram($('note-diagram'), current, s, c, science);
   }
-  function show(id,fromBook=false){
-    if(id===3&&!science.gauge)science.gauge=records.gauge;
-    if(id===4&&!science.assist)science.assist=records.assist;
-    if(id===6&&!science.roche)science.roche=previousBody('roche');
-    if(id===14&&!science.rider)science.rider=previousBody('rider')??s.bodies[0];
-    current=id;manual=fromBook;expanded=fromBook;openedAt=s.t;card.hidden=false;
-    if(!fromBook)shown.push(id);
+  function show(id, fromBook = false) {
+    if (id === 3 && !science.gauge) science.gauge = records.gauge;
+    if (id === 4 && !science.assist) science.assist = records.assist;
+    if (id === 6 && !science.roche) science.roche = previousBody('roche');
+    if (id === 14 && !science.rider) science.rider = previousBody('rider') ?? s.bodies[0];
+    current = id; manual = fromBook; expanded = fromBook; openedAt = s.t; card.hidden = false;
+    if (!fromBook) shown.push(id);
     paintCard();
   }
-  function close(){current=0;manual=false;expanded=false;card.hidden=true;displayAt=s.t+.23;}
-  function discover(id){
-    if(found.has(id))return;
-    found.add(id);save();if(!book.hidden)drawBook();if(enabled)queue.push(id);
+  function close() {
+    current = 0; manual = false; expanded = false; card.hidden = true; displayAt = s.t + .23;
   }
-  function action(){
-    if(!manual&&!expanded&&current&&s.t-openedAt>1.2)close();
+  function discover(id) {
+    if (found.has(id)) return;
+    found.add(id);
+    save();
+    if (!book.hidden) drawBook();
+    if (enabled) queue.push(id);
   }
-  function mode(){
-    const words=copy(),drift=c.mode==='drift';
-    $('stage').classList.toggle('drifting',drift);$('step-inside').querySelector('span').textContent=drift?words.exit:words.enter;
-    $('step-inside').querySelector('kbd').textContent=drift?'Esc':'D';
-    $('step-inside').title=drift?words.exit+' (Esc)':words.enter+' (D)';
-    $('drift-hint').textContent=words.hint;
-    const rows=drift?[
-      ['Drag',lang==='ru'?'Осмотреться':'Look around'],['W A S D / ↑ ← ↓ →',lang==='ru'?'Плыть':'Float'],['Space / C',lang==='ru'?'Вверх / вниз':'Rise / sink'],
-      ['Shift',lang==='ru'?'Быстрее':'Glide faster'],['Click · 1–6',lang==='ru'?'Капнуть · выбрать краску':'Drop · select ink'],['F',lang==='ru'?'Лететь вместе с планетой':'Ride a nearby planet'],
-      ['Esc',words.exit],['B · N · L',lang==='ru'?'Атлас · подписи · язык':'Atlas · labels · language'],['M · H',lang==='ru'?'Звук · справка':'Mute · help']
-    ]:helpRows.map(([key,ru,en])=>[key==='Щелчок / drag'&&lang==='en'?'Click / drag':key,lang==='ru'?ru:en]);
-    const dl=settings.querySelector('dl');dl.replaceChildren();
-    const keysRu={'Щелчок / drag':'Щелчок / тянуть','Hold':'Удерживать','Drag ↗':'Тянуть планету','Click ◉':'Щелчок по планете','Hold ☉':'Удерживать звезду','RMB / wheel':'ПКМ / колесо','D / 2×':'D / двойной щелчок','Drag':'Тянуть мышью','Click · 1–6':'Щелчок · 1–6','Shift + drag':'Shift + тянуть'};
-    for(const [key,desc] of rows){const k=document.createElement('dt'),v=document.createElement('dd');k.textContent=lang==='ru'?(keysRu[key]??key):key;v.textContent=desc;dl.append(k,v);}
-    settings.querySelector('h3').textContent=drift?(lang==='ru'?'В дрейфе':'In Drift'):(lang==='ru'?'За работой':'At the bench');
+  function action() {
+    if (!manual && !expanded && current && s.t - openedAt > 1.2) close();
   }
-  function localize(){
-    const words=copy(),ru=lang==='ru';document.documentElement.lang=lang;
-    document.title='Gaussian Planet · '+(ru?'Дрейф и Небесный атлас':'Drift and Sky Atlas');
-    $('sky').setAttribute('aria-label',ru?'Мраморная звёздная система. Нажмите H для справки.':'Marbled star system. Press H for controls.');
-    select.value=lang;check.firstChild.nodeValue=words.notes;language.firstChild.nodeValue=words.language;
-    settings.querySelector('h2').textContent=words.settings;
-    ['quality','density','resolution'].forEach((id,i)=>{$(id).parentElement.firstChild.nodeValue=(ru?['Качество','Густота линий','Сетка потока']:['Quality','Line density','Fluid grid'])[i];});
-    [...$('quality').options].forEach((opt,i)=>{opt.textContent=(ru?['Высокое','Низкое']:['High','Low'])[i];});
-    $('book-toggle').title=words.book+' (B)';$('book-toggle').setAttribute('aria-label',words.book);
-    $('settings').querySelector('summary').setAttribute('aria-label',words.settings+' (H)');
-    $('settings').querySelector('summary').title=words.settings+' (H)';
-    for(const id of ['note-close','atlas-close'])$(id).setAttribute('aria-label',words.close);
-    document.querySelector('.legend span').textContent=ru?'Краски':'Ink bench';
-    document.querySelectorAll('.well').forEach((b,i)=>{b.querySelector('span').textContent=words.inks[i];b.title=words.inks[i]+' · '+(i+1);b.setAttribute('aria-label',b.title);});
-    document.querySelectorAll('.chip').forEach((chip,i)=>{chip.textContent=words.verbs[i];});
-    document.querySelector('#plate span').textContent=ru?'Щелчок — краска · Тяните для вихря · Esc — назад':'Click to ink · drag to stir · Esc to return';
-    mode();drawBook();paintCard();save();
+  function mode() {
+    const drift = c.mode === 'drift';
+    $('stage').classList.toggle('drifting', drift);
+    const button = $('step-inside');
+    button.querySelector('span').textContent = drift ? 'Rise out' : 'Step inside';
+    button.querySelector('kbd').textContent = drift ? 'Esc' : 'D';
+    button.title = drift ? 'Rise out (Esc)' : 'Step inside (D)';
   }
-  toggle.onchange=()=>{enabled=toggle.checked;if(!enabled){queue.length=0;if(!manual)close();}save();};
-  select.onchange=()=>{lang=select.value;localize();};
-  $('book-toggle').onclick=()=>bookOpen(book.hidden);$('atlas-close').onclick=()=>bookOpen(false);
-  $('note-close').onclick=close;$('note-more').onclick=()=>{expanded=!expanded;openedAt=s.t;paintCard();};
-  function tick(dt,preview){
+  toggle.onchange = () => {
+    enabled = toggle.checked;
+    if (!enabled) { queue.length = 0; if (!manual) close(); }
+    save();
+  };
+  $('book-toggle').onclick = () => bookOpen(book.hidden);
+  $('atlas-close').onclick = () => bookOpen(false);
+  $('note-close').setAttribute('aria-label', 'Close note');
+  $('note-close').onclick = close;
+  $('note-more').onclick = () => { expanded = !expanded; openedAt = s.t; paintCard(); };
+  $('drift-hint').textContent = 'Drag to look · WASD to float · Space / C to rise or sink · Click to drop ink · Hold F to ride · Esc to rise out';
+  function tick(dt, preview) {
     science.tick(dt);
-    if(current&&!manual&&!expanded&&s.t-openedAt>=10)close();
-    if(enabled&&!current&&queue.length&&s.t>=displayAt&&book.hidden)show(queue.shift());
-    s.zoneNote=current===12;
-    if(current&&illustrated.has(current)&&s.t-lastDraw>.048){
-      diagram($('note-diagram'),current,s,c,science,lang==='ru');lastDraw=s.t;
+    if (current && !manual && !expanded && s.t - openedAt >= 10) close();
+    if (enabled && !current && queue.length && s.t >= displayAt && book.hidden) show(queue.shift());
+    s.zoneNote = current === 12;
+    if (current && illustrated.has(current) && s.t - lastDraw > .048) {
+      diagram($('note-diagram'), current, s, c, science);
+      lastDraw = s.t;
     }
-    chartOnSky($('sky-chart'),s,c,science,current,lang==='ru',preview);
-    $('drift-hint').hidden=!(c.mode==='drift'&&!c.flying&&c.drift.hintUntil>s.t);
+    chartOnSky($('sky-chart'), s, c, science, current, preview);
+    $('drift-hint').hidden = !(c.mode === 'drift' && !c.flying && c.drift.hintUntil > s.t);
   }
-  localize();
-  return {science,discover,tick,action,mode,bookOpen,get ru(){return lang==='ru';},get open(){return !book.hidden;},
-    language(){lang=lang==='ru'?'en':'ru';localize();},toggleBook(){bookOpen(book.hidden);},
-    state(){return {lang,enabled,found:[...found],shown:shown.slice(),current,queued:queue.slice(),labels:science.labels,zone:!!s.zone,
-      zoneRadii:science.zoneRadii(),light:science.light,transiting:science.transiting?.name??null,wedges:science.wedges};}};
+  mode();
+  drawBook();
+  save();
+  return { science, discover, tick, action, mode, bookOpen,
+    get open() { return !book.hidden; }, toggleBook() { bookOpen(book.hidden); },
+    state() { return { enabled, found: [...found], shown: shown.slice(), current, queued: queue.slice(),
+      labels: science.labels, zone: !!s.zone, zoneRadii: science.zoneRadii(), light: science.light,
+      transiting: science.transiting?.name ?? null, wedges: science.wedges }; } };
+}
+
+export function drawHelp() {
+  const contents = $('help-groups');
+  for (const [name, rows] of Object.entries(helpGroups)) {
+    const heading = document.createElement('h3'), list = document.createElement('dl');
+    heading.textContent = name;
+    for (const [key, description] of rows) {
+      const input = document.createElement('dt'), effect = document.createElement('dd');
+      input.textContent = key;
+      effect.textContent = description;
+      list.append(input, effect);
+    }
+    contents.append(heading, list);
+  }
 }
