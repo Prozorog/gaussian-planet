@@ -55,6 +55,10 @@ export function createAtlas(s, c) {
   let current = 0, currentChapter = 1, expanded = false, manual = false, openedAt = 0, displayAt = 0, lastDraw = -1;
   let topic = 'Orbits';
   const book = $('atlas'), card = $('discovery'), grid = $('atlas-grid');
+  const peek=document.createElement('button');
+  peek.id='note-peek';peek.type='button';peek.setAttribute('aria-controls','note-body');
+  $('note-close').before(peek);
+  peek.onclick=()=>{card.classList.remove('compact-note');expanded=true;paintCard();$('note-close').focus({preventScroll:true});};
   const science = createAstronomy(s, c, discover);
   const records = saved.records ?? {};
   const toggle = $('notes-toggle');
@@ -119,6 +123,7 @@ export function createAtlas(s, c) {
     const [title, body, extra, scale] = notes[current - 1];
     $('note-meta').textContent = 'Sky Atlas / ' + String(current).padStart(2, '0');
     $('note-title').textContent = title;
+    peek.textContent=title;peek.setAttribute('aria-label','Read Atlas note: '+title);
     $('note-body').textContent = body;
     $('note-extra').textContent = extra;
     $('note-extra').hidden = !expanded;
@@ -136,6 +141,7 @@ export function createAtlas(s, c) {
     if (id === 6 && !science.roche) science.roche = previousBody('roche');
     if (id === 14 && !science.rider) science.rider = previousBody('rider') ?? s.bodies[0];
     current = id; manual = fromBook; expanded = fromBook; openedAt = s.t; card.hidden = false;
+    card.classList.toggle('compact-note',!fromBook);
     currentChapter=s.life?.chapter??1;
     if (!fromBook) shown.push(id);
     paintCard();
@@ -203,7 +209,7 @@ export function createAtlas(s, c) {
       transiting: science.transiting?.name ?? null, wedges: science.wedges }; } };
 }
 
-export function drawHelp(mode='bench', playing=false) {
+export function drawHelp(mode='bench', playing=false, touch=false) {
   const contents = $('help-groups');
   const groups=mode==='voyage'?{Film:playing?[
     ['Drag','Look around'],['Click / 1–7','Drop ink / choose ink'],['Space','Pause or resume'],
@@ -211,7 +217,12 @@ export function drawHelp(mode='bench', playing=false) {
   ]:[['Select a film','Start watching'],['D','Fly in Drift'],['Esc','Return to Bench']]}:
     mode==='drift'?{Drift:helpGroups.Drift.slice(0,-2)}:Object.fromEntries(Object.entries(helpGroups).filter(([name])=>name!=='Drift'));
   contents.replaceChildren();
-  for (const [name, rows] of Object.entries(groups)) {
+  const gestures=mode==='voyage'?{Voyage:playing?[
+    ['Tap the sky','Show the film controls'],['Drag','Look around'],['Take the helm','Fly from here'],['Films','Return to the picker']
+  ]:[['Tap a film','Start watching'],['Drift / Bench','Fly or marble the system']]}:
+    mode==='drift'?{Drift:[['Slide the pad','Fly forward, back or sideways'],['↑ / ↓','Rise or sink'],['Drag the sky','Look around'],['Tap the ink','Leave a ripple'],['Ride / Dive','Ride a nearby world, then enter it'],['Bench','Return to the table']]}:
+    {Bench:[['Tap / drag','Drop ink or stir'],['Comb, then drag','Rake lines through the ink'],['Two fingers','Slide to orbit. Pinch to zoom.'],['Pull a world','Fling it into a new orbit'],['Hold the ink / star','Birth a world or wake a flare'],['Timeline','Visit the five ages of the star'],['Chime line','Toggle orbital chimes']]};
+  for (const [name, rows] of Object.entries(touch?gestures:groups)) {
     const heading = document.createElement('h3'), list = document.createElement('dl');
     heading.textContent = name;
     for (const [key, description] of rows) {

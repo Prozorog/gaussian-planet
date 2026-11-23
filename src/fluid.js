@@ -41,11 +41,11 @@ const pressure=neighbours+`uniform sampler2D deriv;out float result;void main(){
 const project=neighbours+`uniform sampler2D deriv,vel;uniform float dt;out vec2 result;
 void main(){vec2 v=texture(vel,uv).xy;float c=texture(deriv,uv).g;vec2 g=vec2(abs(texture(deriv,uv+vec2(0,dx.y)).g)-abs(texture(deriv,uv-vec2(0,dx.y)).g),abs(texture(deriv,uv-vec2(dx.x,0)).g)-abs(texture(deriv,uv+vec2(dx.x,0)).g));
  result=v-.5*vec2(R.r-L.r,T.r-B.r)+g/max(length(g),.00001)*c*dt*32.;}`;
-export function createFluid(gl){
+export function createFluid(gl,rgbaOnly=false){
  const A=program(gl,advect,'Advection and sources'),D=program(gl,differential,'Divergence / curl'),P=program(gl,pressure,'Jacobi pressure'),V=program(gl,project,'Pressure projection');
  let w=0,h=0,idx=0,targets=[],tex=[],flow,adv,gradient,prs,dyes,mixed;
  function target(...textures){const f=gl.createFramebuffer();targets.push(f);gl.bindFramebuffer(gl.FRAMEBUFFER,f);const bufs=textures.map((t,i)=>{const att=gl.COLOR_ATTACHMENT0+i;gl.framebufferTexture2D(gl.FRAMEBUFFER,att,gl.TEXTURE_2D,t,0);return att;});gl.drawBuffers(bufs);if(gl.checkFramebufferStatus(gl.FRAMEBUFFER)!==gl.FRAMEBUFFER_COMPLETE)throw Error('Floating-point framebuffer unavailable');return f;}
- function make(format,linear=false){const t=mapTexture(gl,w,h,format,null,linear?gl.LINEAR:gl.NEAREST);tex.push(t);return t;}
+ function make(format,linear=false){const t=mapTexture(gl,w,h,rgbaOnly?gl.RGBA16F:format,null,linear?gl.LINEAR:gl.NEAREST);tex.push(t);return t;}
  function resize(n,aspect){const width=Math.round(n*aspect);if(h===n&&w===width)return;for(const f of targets)gl.deleteFramebuffer(f);for(const t of tex)gl.deleteTexture(t);targets=[];tex=[];w=width;h=n;idx=0;
   flow=make(gl.RG16F,true);adv=make(gl.RG16F,true);gradient=make(gl.RG16F);prs=[make(gl.R16F),make(gl.R16F)];dyes=[make(gl.RGBA16F,true),make(gl.RGBA16F,true)];mixed=dyes.map(d=>target(adv,d));target(gradient);target(prs[0]);target(prs[1]);target(flow);gl.bindFramebuffer(gl.FRAMEBUFFER,null);
  }

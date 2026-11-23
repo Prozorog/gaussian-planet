@@ -87,7 +87,7 @@ export function createBlackHole(s, c, discover, say, ascend) {
     if(d<=.05||Math.abs(x)>1.2||Math.abs(y)>1.2)return;
     for(const b of [{x:0,y:0,z:0,r:s.life.starRadius},...s.sceneBodies]){
       const [u,v,depth]=c.project(b.x,b.y,b.z);
-      if(depth<=d||Math.hypot((x-u)*c.aspect,y-v)>(hole.r+b.r)*1.3/(Math.max(d,.2)*.64984))continue;
+      if(depth<=d||Math.hypot((x-u)*c.aspect,y-v)>(hole.r+b.r)*1.3/(Math.max(d,.2)*2*c.tanHalfFov))continue;
       wasInFront=true;discover(21);return;
     }
   }

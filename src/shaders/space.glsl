@@ -1,8 +1,8 @@
-uniform float filmSky;
+uniform float filmSky,tanHalfFov;
 uniform vec3 right,up,back;uniform vec2 shift;
 vec3 firmament(vec2 position){
   vec2 p=position*2.-1.-shift;
-  vec3 d=normalize(-back+.32492*(right*p.x*viewport.x/viewport.y+up*p.y));
+  vec3 d=normalize(-back+tanHalfFov*(right*p.x*viewport.x/viewport.y+up*p.y));
   vec2 q=d.xz*3.6+d.y*vec2(6.,-3.);
   vec2 f=q+.48*noise2(q*1.42);
   float v=noise(f*.92)+.31*noise(f*3.7)+.10*noise(f*10.),l=lineAt(v*8.,1.);

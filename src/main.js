@@ -9,6 +9,8 @@ import {createCreatures} from './creatures.js';
 import {createPostcard,postcardCamera} from './postcard.js';
 import {printChimes} from './atlas-diagrams.js';
 import {bindVoyage} from './voyage-controls.js';
+import {bindTouch} from './touch.js';
+import './mobile.css';
 const $=s=>document.querySelector(s),canvas=$('#sky'),overlay=$('#gesture'),pen=overlay.getContext('2d'),cursor=$('#cursor'),plate=$('#plate'),news=$('#news'),help=$('#settings'),audio=soundscape(),camera=createCamera();
 const boot=window.firstLight;
 boot.progress('scripts');
@@ -22,17 +24,29 @@ const wells=names.map((name,i)=>{const b=document.createElement('button');b.clas
 const drift=createDrift(s,moment);camera.drift=drift;
 const atlas=createAtlas(s,camera);
 const stage=$('#stage'),modeHelp=$('#mode-help'),hint=$('#mode-hint');
+const touchScreen=matchMedia('(pointer: coarse)');
+if(touchScreen.matches){
+  s.low=true;s.grid=128;
+  $('#quality').value='low';$('#resolution').value='128';
+}
+const combButton=document.createElement('button');
+combButton.id='touch-comb';combButton.type='button';combButton.className='chip control-chip';
+combButton.textContent='Comb';combButton.setAttribute('aria-pressed','false');
+$('#timeline-toggle').before(combButton);
+combButton.onclick=()=>combButton.setAttribute('aria-pressed',String(combButton.getAttribute('aria-pressed')!=='true'));
 const hints={voyage:'Choose a film, or let it begin in ten seconds.',drift:'Drag to look. Use WASD to float through the ink.',bench:'Choose an ink. Click to drop it or drag to stir.'};
+const touchHints={...hints,drift:'Slide the pad to fly. Drag the sky to look.',bench:'Tap to ink. Drag to stir. Pinch to zoom.'};
 const seenModes=new Set();let hintTimer;
 try{for(const mode of JSON.parse(localStorage.getItem('gaussian-planet.mode-hints')||'[]'))seenModes.add(mode);}catch{}
 function setMode(mode){
+  if(stage.dataset.mode!==mode)resetTouch();
   stage.dataset.mode=mode;camera.picker=mode==='voyage';
   modeHelp.hidden=true;help.open=false;
   for(const b of stage.querySelectorAll('[data-select]'))b.setAttribute('aria-pressed',String(b.dataset.select===mode));
   if(mode!=='bench'&&!$('#timeline').hidden)timeline.toggle();
   clearTimeout(hintTimer);hint.textContent='';
   if(!seenModes.has(mode)){
-    seenModes.add(mode);hint.textContent=hints[mode];
+    seenModes.add(mode);hint.textContent=(touchScreen.matches?touchHints:hints)[mode];
     try{localStorage.setItem('gaussian-planet.mode-hints',JSON.stringify([...seenModes]));}catch{}
     hintTimer=setTimeout(()=>{hint.textContent='';},6500);
   }
@@ -41,7 +55,7 @@ function toggleHelp(){
   help.open=false;
   if(!modeHelp.hidden){modeHelp.hidden=true;canvas.focus({preventScroll:true});return;}
   const mode=stage.dataset.mode;$('#help-title').textContent=mode[0].toUpperCase()+mode.slice(1)+' controls';
-  drawHelp(mode,voyage.active);modeHelp.hidden=false;
+  drawHelp(mode,voyage.active,touchScreen.matches);modeHelp.hidden=false;
   atlas.bookOpen(false);$('#help-close').focus({preventScroll:true});
 }
 $('#help-toggle').onclick=toggleHelp;$('#help-close').onclick=toggleHelp;
@@ -59,11 +73,18 @@ s.life=createLife(s,atlas.discover,next=>{
   }
 });
 const timeline=bindTimeline(s.life,()=>fly('poster'));
+$('#timeline-close').onclick=()=>timeline.toggle();
 const today=()=>s.life.chapter===1;
 const blackHole=createBlackHole(s,camera,atlas.discover,say,()=>fly('overview'));
 s.blackHole=blackHole;
 const worlds=createInteriors(s,drift,audio,atlas.discover);
 s.worlds=worlds;
+const resetTouch=bindTouch({canvas,camera,cancel,canOrbit:()=>stage.dataset.mode==='bench',
+  move(key,down){
+    if(!down){drift.key(key,false);worlds.key(key,false);return;}
+    if(camera.mode==='drift')(worlds.body?worlds:drift).key(key,true);
+  },
+});
 const creatures=createCreatures(s,camera,audio,say);
 s.creatures=creatures;
 const voyage=bindVoyage(s,camera,{
@@ -187,7 +208,7 @@ canvas.onpointermove=e=>{hover(e);const g=gesture;
    g.lx=e.clientX;g.ly=e.clientY;return;
  }
  if(g?.inWorld&&g.id===e.pointerId){g.moved||=Math.hypot(e.clientX-g.x,e.clientY-g.y)>4;if(g.moved)worlds.gesture(interiorPoint(e),e.clientX-g.lx,e.clientY-g.ly,g.right||e.shiftKey);g.lx=e.clientX;g.ly=e.clientY;return;}if(camera.mode==='drift'){if(e.movementX||e.movementY)drift.activity(!!g);if(g?.drift&&g.id===e.pointerId){g.moved||=Math.hypot(e.clientX-g.x,e.clientY-g.y)>4;if(g.moved){if(blackHole.hole&&g.item===blackHole.hole){const p=camera.plane(...ndc(e),blackHole.hole.y);if(p)blackHole.move(...p);}else drift.look(e.clientX-g.lx,e.clientY-g.ly);}g.lx=e.clientX;g.ly=e.clientY;}return;}if(!g||e.pointerId!==g.id)return;const dx=e.clientX-g.lx,dy=e.clientY-g.ly,q=ndc(e);g.q=q;g.lx=e.clientX;g.ly=e.clientY;g.moved||=Math.hypot(e.clientX-g.x,e.clientY-g.y)>5;if(g.right){camera.orbit(dx,dy);return;}if(!g.moved||g.item==='sun')return;if(blackHole.hole&&g.item===blackHole.hole){const p=camera.plane(...q,blackHole.hole.y);if(p)blackHole.move(...p);return;}if(selected===voidIndex)return;if(g.item===camera.focus&&g.item){surface(g.item,q,true,dx,dy);used(1);if(s.t>g.swish){audio.play('stir');g.swish=s.t+.23;}return;}if(today()&&g.item&&g.item!==camera.focus&&g.anchor)atlas.science.preview(g.item,...sling(g,q));if(g.item||camera.mode!=='overview')return;
- const b=camera.plane(...q,-.49),a=g.prev;if(!within(b)||!a){g.prev=b;return;}const comb=e.shiftKey||shiftDown,speed=Math.hypot(dx,dy),size=comb?.98:.38+Math.min(.7,speed*.016);s.strokes.push([comb?2:1,a,b,size,INKS[inkIndex]]);g.prev=b;s.vortex=null;s.force={x:b[0],z:b[1],r:size,id:INKS[inkIndex],dx:clamp((b[0]-a[0])*110,-44,44),dz:clamp((b[1]-a[1])*110,-44,44),twist:(dx*dy<0?-1:1)*(.4+speed*.034),life:.22};if(s.t>g.swish){audio.play(comb?'comb':'stir');g.swish=s.t+.18;}if(comb)creatures.scatter(b[0],b[1]);used(comb?2:1);counts[comb?'comb':'stir']=(counts[comb?'comb':'stir']||0)+1;};
+ const b=camera.plane(...q,-.49),a=g.prev;if(!within(b)||!a){g.prev=b;return;}const comb=e.shiftKey||shiftDown||(e.pointerType==='touch'&&combButton.getAttribute('aria-pressed')==='true'),speed=Math.hypot(dx,dy),size=comb?.98:.38+Math.min(.7,speed*.016);s.strokes.push([comb?2:1,a,b,size,INKS[inkIndex]]);g.prev=b;s.vortex=null;s.force={x:b[0],z:b[1],r:size,id:INKS[inkIndex],dx:clamp((b[0]-a[0])*110,-44,44),dz:clamp((b[1]-a[1])*110,-44,44),twist:(dx*dy<0?-1:1)*(.4+speed*.034),life:.22};if(s.t>g.swish){audio.play(comb?'comb':'stir');g.swish=s.t+.18;}if(comb)creatures.scatter(b[0],b[1]);used(comb?2:1);counts[comb?'comb':'stir']=(counts[comb?'comb':'stir']||0)+1;};
 function cancel(){if(gesture?.voyage)voyage.endLook();if(gesture?.item&&gesture.item!=='sun')gesture.item.held=false;gesture=null;s.vortex=null;s.charge=s.hold=0;audio.charge(0);}
 canvas.onpointerup=e=>{const g=gesture;if(!g||g.id!==e.pointerId)return;
  if(g.voyage){

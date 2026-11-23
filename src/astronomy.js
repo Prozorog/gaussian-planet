@@ -28,7 +28,7 @@ function overlap(r,R,d){
 export function transit(s,c) {
   const [u,v,depth]=c.project(0,0,0),dist=Math.hypot(...c.eye);
   const radius=Math.asin(Math.min(.999,(s.life?.starRadius??1)/Math.max(1.001,dist)));
-  if(s.nova>=0||depth<=0||Math.abs(u)>1+1.74/depth||Math.abs(v)>1+3.08/depth)
+  if(s.nova>=0||depth<=0||Math.abs(u)>1+1/(c.tanHalfFov*c.aspect*depth)||Math.abs(v)>1+1/(c.tanHalfFov*depth))
     return {light:1,body:null,visible:false};
   let blocked=0,body=null;const silhouettes=[];
   const star=c.eye.map(x=>-x/dist);

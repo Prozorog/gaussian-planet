@@ -4,6 +4,7 @@ layout(location=0) in vec3 rest;
 uniform mat4 vp;
 uniform vec3 eye,right,up;
 uniform vec2 viewport;
+uniform float tanHalfFov;
 uniform vec4 swimmers[8],motion[8],schools[3];
 uniform float scatter[3],time,driftView;
 uniform int typeOfInk,schoolSize;
@@ -61,7 +62,7 @@ void main(){
     vec2 axis=normalize(headingOnScreen+vec2(.002,0.));
     vec2 crossAxis=vec2(-axis.y,axis.x);
     float z=max(.05,(vp*vec4(world,1.)).w);
-    float perPixel=.3249197*z/viewport.y;
+    float perPixel=tanHalfFov*z/viewport.y;
     float orbitLength=mix(6.7,13.5,rand(seed*3.7));
     float halfSize=mix(orbitLength*perPixel,min(38.*perPixel,.050+.014*rand(seed)),driftView);
     uv=corners[gl_VertexID%6];

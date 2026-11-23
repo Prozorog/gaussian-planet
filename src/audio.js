@@ -85,8 +85,15 @@ export function soundscape() {
     firstMedia=new Audio();
     firstMedia.preload='metadata';
     firstMetadata=new Promise(resolve=>{
-      firstMedia.addEventListener('loadedmetadata',()=>resolve(true),{once:true});
-      firstMedia.addEventListener('error',()=>resolve(false),{once:true});
+      // Some phone browsers defer media requests until the first tap.
+      const timeout=setTimeout(()=>finish(false),2400);
+      function finish(ready){
+        clearTimeout(timeout);firstMedia.removeEventListener('loadedmetadata',loaded);
+        firstMedia.removeEventListener('error',failed);resolve(ready);
+      }
+      const loaded=()=>finish(true), failed=()=>finish(false);
+      firstMedia.addEventListener('loadedmetadata',loaded);
+      firstMedia.addEventListener('error',failed);
     });
     firstMedia.src=`${import.meta.env.BASE_URL}music/${soundtrack[0].file}.mp3`;
     return firstMetadata;

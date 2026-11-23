@@ -9,14 +9,16 @@ import shells from './shaders/shells.glsl?raw';
 import knotVertex from './shaders/nebula-knots.vert.glsl?raw';
 import knotInk from './shaders/nebula-knots.glsl?raw';
 
+const touchPixels=matchMedia('(pointer: coarse)');
 const shellLayers=[
   [3.20,3,1.08,.97,1.02],
   [4.55,4,1.09,.96,1.01],
   [5.73,6,1.10,.95,1.02],
   [7.05,5,1.10,.95,1.02],
 ];
-export function createRenderer(canvas){const gl=canvas.getContext('webgl2',{powerPreference:'high-performance',alpha:false,antialias:false,depth:true,stencil:false});if(!gl||!gl.getExtension('EXT_color_buffer_float'))throw Error('WebGL2 with floating-point render targets is required. Enable hardware acceleration and reload.');
- const make=(src,label)=>program(gl,common+src,label,vertex),skyP=program(gl,common+sky,'Marbled firmament'),shellP=make(shells,'Expanding nebula shells'),knots=program(gl,common+knotInk,'Nebula filaments and knots',knotVertex),body=make(bodies,'Planet press'),crown=make(corona,'Solar currents'),disc=make(nebula,'Three nebula plates'),fx=make(events,'Marbled reactions');const mesh=meshes(gl),fluid=createFluid(gl),solar=createFluid(gl),plate=createPrint(gl);let seed=294879;const rand=()=>((seed=(Math.imul(seed,1664525)+1013904223)>>>0)/4294967296);const paper=Uint8Array.from({length:256*256*4},()=>rand()*256),fiber=mapTexture(gl,256,256,gl.RGBA8,paper,gl.LINEAR,gl.REPEAT),ramp=mapTexture(gl,9,9,gl.RGBA8,inks()),dust=particles(gl,rand);
+export function createRenderer(canvas){const gl=canvas.getContext('webgl2',{powerPreference:'high-performance',alpha:false,antialias:false,depth:true,stencil:false});const fullFloat=gl?.getExtension('EXT_color_buffer_float');
+ if(!gl||(!fullFloat&&!gl.getExtension('EXT_color_buffer_half_float')))throw Error('This scene requires WebGL2 with floating-point render targets.');
+ const make=(src,label)=>program(gl,common+src,label,vertex),skyP=program(gl,common+sky,'Marbled firmament'),shellP=make(shells,'Expanding nebula shells'),knots=program(gl,common+knotInk,'Nebula filaments and knots',knotVertex),body=make(bodies,'Planet press'),crown=make(corona,'Solar currents'),disc=make(nebula,'Three nebula plates'),fx=make(events,'Marbled reactions');const mesh=meshes(gl),fluid=createFluid(gl,!fullFloat),solar=createFluid(gl,!fullFloat),plate=createPrint(gl);let seed=294879;const rand=()=>((seed=(Math.imul(seed,1664525)+1013904223)>>>0)/4294967296);const paper=Uint8Array.from({length:256*256*4},()=>rand()*256),fiber=mapTexture(gl,256,256,gl.RGBA8,paper,gl.LINEAR,gl.REPEAT),ramp=mapTexture(gl,9,9,gl.RGBA8,inks()),dust=particles(gl,rand);
  function lattice(channel){
    const coefficients=new Float32Array(256*256*4);
    const value=(x,y)=>paper[4*((y&255)*256+(x&255))+channel]/127.5-1;
@@ -36,7 +38,7 @@ export function createRenderer(canvas){const gl=canvas.getContext('webgl2',{powe
  const swimmerInk=new Float32Array(12),swimmerAxes=new Float32Array(6);
  function frame(prog,s,c){const l=prog.use();
    if(l.swimmersInInk){gl.uniform4fv(l.swimmersInInk,swimmerInk);gl.uniform2fv(l.swimmerHeading,swimmerAxes);}
-   gl.uniform2f(l.viewport,w,h);gl.uniform1f(l.time,s.t);gl.uniform1f(l.density,s.density);gl.uniform1f(l.filmSky,c.mode==='voyage'?1:0);gl.uniform1i(l.paper,4);gl.uniform1i(l.inks,5);gl.uniform1i(l.dye,6);gl.uniform1i(l.velocity,7);gl.uniform1i(l.plate,8);gl.uniform1i(l.redLattice,10);gl.uniform1i(l.greenLattice,11);gl.uniform1i(l.finePaper,c.inside>.01?1:0);gl.uniformMatrix4fv(l.vp,false,c.matrix);gl.uniform3fv(l.right,c.right);gl.uniform3fv(l.up,c.up);gl.uniform3fv(l.eye,c.eye);gl.uniform1i(l.starHue,s.hue);gl.uniform4f(l.life,s.life?.young??0,s.life?.red??0,s.life?.shells??0,s.life?.white??0);return l;}
+   gl.uniform1f(l.tanHalfFov,c.tanHalfFov);gl.uniform2f(l.viewport,w,h);gl.uniform1f(l.time,s.t);gl.uniform1f(l.density,s.density);gl.uniform1f(l.filmSky,c.mode==='voyage'?1:0);gl.uniform1i(l.paper,4);gl.uniform1i(l.inks,5);gl.uniform1i(l.dye,6);gl.uniform1i(l.velocity,7);gl.uniform1i(l.plate,8);gl.uniform1i(l.redLattice,10);gl.uniform1i(l.greenLattice,11);gl.uniform1i(l.finePaper,c.inside>.01?1:0);gl.uniformMatrix4fv(l.vp,false,c.matrix);gl.uniform3fv(l.right,c.right);gl.uniform3fv(l.up,c.up);gl.uniform3fv(l.eye,c.eye);gl.uniform1i(l.starHue,s.hue);gl.uniform4f(l.life,s.life?.young??0,s.life?.red??0,s.life?.shells??0,s.life?.white??0);return l;}
  function at(l,shape,x,y,z,r){gl.uniform3f(l.center,x,y,z);gl.uniform1f(l.radius,r);gl.uniform1i(l.shape,shape);}
  const interior=driftRenderer(gl,mesh,frame,at);
  const horizon=horizonRenderer(gl,frame);
@@ -64,7 +66,7 @@ export function createRenderer(canvas){const gl=canvas.getContext('webgl2',{powe
      const speed=Math.hypot(b.vx,b.vz)||1;
      swimmerInk.set([b.x,b.y,b.z,b.r],i*4);swimmerAxes.set([b.vx/speed,b.vz/speed],i*2);
    }
-   const dpr=Math.min(devicePixelRatio,2);w=output?.width??Math.max(1,Math.round(canvas.clientWidth*dpr));h=output?.height??Math.max(1,Math.round(canvas.clientHeight*dpr));if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;}gl.disable(gl.DEPTH_TEST);gl.disable(gl.BLEND);gl.bindVertexArray(null);if(s.worlds?.inside>=.999){bindWorld();gl.viewport(0,0,w,h);printInterior(s,c);return;}
+   const dpr=Math.min(devicePixelRatio,touchPixels.matches&&s.low?1.25:2);w=output?.width??Math.max(1,Math.round(canvas.clientWidth*dpr));h=output?.height??Math.max(1,Math.round(canvas.clientHeight*dpr));if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;}gl.disable(gl.DEPTH_TEST);gl.disable(gl.BLEND);gl.bindVertexArray(null);if(s.worlds?.inside>=.999){bindWorld();gl.viewport(0,0,w,h);printInterior(s,c);return;}
   const wakes=s.creatures?.wakes(c.inside)??[];
   if(!output?.still){fluid.resize(s.grid,1);solar.resize(Math.max(96,s.grid/2),1);if(pendingReset){fluid.clear();solar.clear();pendingReset=false;}if(lastEpoch!==s.epoch){plate.clear();lastEpoch=s.epoch;}
   for(let i=0;i<s.blooms.length;){const b=s.blooms[i],u=Math.min(1,(s.t-b.at)/.32),r=b.r*Math.sqrt(1-(1-u)**3);if(r>b.last+.008||u===1){plate.stamp(0,b.p,b.p,r,b.id,b.last);b.last=r;}if(u===1)s.blooms.splice(i,1);else i++;}for(const m of s.strokes)plate.stamp(...m);s.strokes.length=0;

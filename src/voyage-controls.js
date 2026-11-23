@@ -99,7 +99,7 @@ export function bindVoyage(s,c,{begin,helm,picker,canIdle}) {
     if(!idle.checked)return;
     if(!c.flying&&['bench','drift'].includes(stage.dataset.mode)&&s.t-lastInput>=90)start(defaultVoyage);
   }
-  button.onclick=toggle;$('voyage-prev').onclick=()=>skip(-1);
+  button.onclick=toggle;$('film-exit').onclick=toggle;$('voyage-prev').onclick=()=>skip(-1);
   $('voyage-next').onclick=()=>skip(1);pause.onclick=togglePause;
   $('voyage-helm').onclick=()=>take();
   return {

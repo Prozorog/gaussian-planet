@@ -12,7 +12,7 @@ export function horizonRenderer(gl, frame) {
     if(!hole&&!bh?.dim)return false;
     const [x,y,d]=hole?c.project(hole.x,hole.y,hole.z):[10,10,-1];
     const r=hole?.r??.5;
-    const radius=Math.min(1.7,r/Math.max(.042,.6498394*Math.sqrt(Math.max(.001,d*d-r*r))));
+    const radius=Math.min(1.7,r/Math.max(.042,2*c.tanHalfFov*Math.sqrt(Math.max(.001,d*d-r*r))));
     if(!bh.fall&&!bh.dim&&(d<.025||Math.abs(x)>1+radius*12||Math.abs(y)>1+radius*12))return false;
     const near=.035,far=130;
     const fallingOnStar=hole&&Math.hypot(hole.x,hole.z)<s.life.starRadius+.16;

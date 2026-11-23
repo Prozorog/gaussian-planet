@@ -1,0 +1,125 @@
+#touch-flight, #touch-comb, #film-exit, #note-peek, #timeline-close { display: none }
+
+@media (max-width: 700px), (pointer: coarse) and (max-width: 1100px) {
+  #stage {
+    --left: max(10px, env(safe-area-inset-left));
+    --right: max(10px, env(safe-area-inset-right));
+    --top: max(8px, env(safe-area-inset-top));
+    --bottom: max(8px, env(safe-area-inset-bottom));
+    --dock: calc(var(--bottom) + 58px);
+    width: 100%; height: 100vh; height: 100dvh; aspect-ratio: auto;
+    -webkit-user-select: none; user-select: none;
+  }
+  #stage button, #stage summary, #postcard button { touch-action: manipulation }
+  #sky-tools { top: var(--top); right: var(--right); gap: 4px }
+  #sky-tools > button, #settings > summary { height: 44px; padding: 0 12px; font-size: 12px }
+  #stage kbd { display: none }
+  #mode-bar { bottom: var(--bottom); border-radius: 9px; padding: 2px }
+  #mode-bar button { min-width: 78px; min-height: 44px; border-radius: 6px; font-size: 17px }
+  #stage footer { bottom: var(--dock); max-width: calc(100% - var(--left) - var(--right)); gap: 0 }
+  .bench, #stage[data-mode=drift] .bench { flex-wrap: wrap; justify-content: center; gap: 2px 6px; border-radius: 12px; padding: 3px }
+  #stage .bench .legend, #stage #verbs { display: none }
+  #inks { justify-content: center; gap: 0 }
+  #inks .well { width: clamp(39px, 11vw, 44px); height: 44px; justify-content: center; padding: 0; border-radius: 7px }
+  #inks .well span, #inks .well kbd { display: none }
+  #inks .well i { width: 21px; height: 21px }
+  #inks .well[aria-pressed=true] { outline: 1px solid #e7c292; outline-offset: -3px }
+  #stage .control-chip { min-height: 44px; font-size: 12px; padding: 5px 10px; justify-content: center }
+  #stage .control-chip::before { display: none }
+  #stage[data-mode=bench] footer { width: max-content }
+  #stage[data-mode=bench] .bench { display: grid; grid-template-columns: repeat(3, 1fr) }
+  #stage[data-mode=bench] #inks { grid-column: 1 / -1 }
+  #stage[data-mode=bench] #touch-comb { display: inline-flex }
+  #stage #touch-comb[aria-pressed=true] { color: #ffe7c1; background: #49352e; border-color: #d3a87d }
+  #stage[data-mode=drift] #world-controls {
+    bottom: auto; top: calc(var(--top) + 51px); left: var(--left);
+    max-width: calc(100% - var(--left) - var(--right)); gap: 4px 8px; padding: 3px 6px;
+  }
+  #world-controls strong { font-size: 16px }
+  #world-controls small { max-width: 16em }
+  #voyage-list { bottom: var(--dock); max-width: calc(100% - var(--left) - var(--right)) }
+  #voyage-list > div { max-width: 100%; padding: 1px }
+  #voyage-list button {
+    position: relative; width: min(410px, calc(100vw - var(--left) - var(--right) - 4px));
+    grid-template-columns: 43% 1fr; border-radius: 8px;
+  }
+  #voyage-list button::after {
+    content: "▶"; position: absolute; left: 12px; bottom: 10px; display: grid; place-items: center;
+    width: 30px; height: 30px; border: 1px solid #e4c297; border-radius: 50%;
+    color: #ffebcd; background: #160e19d9; font: 12px system-ui, sans-serif;
+  }
+  .film-copy { padding: 11px 13px }
+  .film-title { font-size: 26px }
+  .film-description { font-size: 13px }
+  #mode-hint { width: max-content; max-width: calc(100% - 28px); bottom: calc(var(--dock) + 108px); font-size: 14px }
+  #stage[data-mode=voyage] #mode-hint { bottom: calc(var(--dock) + 121px) }
+  #stage[data-mode=drift] #mode-hint { bottom: calc(var(--dock) + 152px) }
+  #stage.voyaging #voyage-controls {
+    bottom: max(var(--bottom), 4.5%); display: grid; grid-template-columns: 44px auto 44px 1fr auto;
+    width: max-content; max-width: calc(100% - var(--left) - var(--right)); padding: 3px 5px; gap: 0 2px;
+  }
+  #film-progress { grid-area: 2 / 1 / 3 / 5; width: auto; margin: 3px 8px 5px }
+  #film-name { grid-area: 2 / 5; font-size: 11px; white-space: nowrap }
+  #voyage-helm { grid-area: 1 / 4 }
+  #stage #film-exit { display: inline-flex; grid-area: 1 / 5; }
+  #stage.voyaging #voyage-log { left: var(--left); bottom: calc(max(var(--bottom), 4.5%) + 76px); max-width: calc(100% - var(--left) - var(--right)); }
+  #stage.voyage-quiet #voyage-log { bottom: max(calc(var(--bottom) + 8px), 6%); }
+  #voyage-log strong { font-size: 27px }
+  #stage #timeline, #stage #atlas, #stage #discovery, #stage #mode-help {
+    top: calc(var(--top) + 51px); left: var(--left); right: auto;
+    width: min(425px, calc(100% - var(--left) - var(--right))); max-height: calc(100% - var(--top) - var(--dock) - 58px);
+    overflow: auto; overscroll-behavior: contain; padding: 12px;
+  }
+  #stage #discovery { max-width: 320px }
+  #stage #discovery.compact-note { width: max-content; padding: 0 2px 0 10px; border-radius: 8px }
+  #stage[data-mode=drift] #discovery.compact-note { top: calc(var(--top) + 112px) }
+  #discovery.compact-note > :not(.note-meta), #discovery.compact-note #note-meta { display: none }
+  #discovery.compact-note #note-peek { display: block; min-height: 44px; max-width: 245px; border: 0; background: transparent; color: #ffe6c7; text-align: left; font: italic 16px Georgia, serif }
+  #discovery.compact-note #note-peek::before { content: '✧ '; color: #d5aa83 }
+  #stage #atlas, #stage #mode-help { z-index: 8 }
+  #stage:has(#atlas:not([hidden])) #discovery:not([hidden]) { display: block; z-index: 9 }
+  #stage:has(#settings[open]) #sky-tools { z-index: 9 }
+  #settings section { width: min(310px, calc(100vw - var(--left) - var(--right))); max-height: calc(100dvh - var(--top) - var(--bottom) - 55px) }
+  #settings label { min-height: 36px; font-size: 14px }
+  #settings select, #postcard-name { font-size: 16px }
+  #help-close, #atlas-close, #note-close, #postcard-close { width: 44px; height: 44px }
+  #atlas-tabs button, #timeline button { min-height: 40px; font-size: 12px }
+  .life-header { flex-wrap: wrap }
+  #timeline #timeline-close { display: block; margin-left: auto; width: 44px; height: 44px; border: 0; font-size: 21px }
+  #stage:has(#timeline:not([hidden])) #discovery.compact-note { display: none }
+  #timeline input { height: 25px }
+  #life-chapters { grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)) }
+  #life-chapters button { white-space: normal }
+  #stage #plate { left: var(--left); bottom: calc(var(--dock) + 105px) }
+  #news { top: calc(var(--top) + 50px); left: var(--left) }
+  #postcard { max-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 16px); overflow: auto }
+  #postcard-formats button, #postcard-save, #postcard-clip { min-height: 44px }
+}
+
+@media (any-pointer: coarse) {
+  #stage[data-mode=drift]:not(.voyaging) #touch-flight { display: flex }
+  #touch-flight {
+    position: absolute; z-index: 3; pointer-events: none; left: var(--left, 16px); right: var(--right, 16px);
+    bottom: calc(var(--dock, 70px) + 57px); align-items: end; justify-content: space-between;
+  }
+  #flight-pad, #flight-lift button {
+    pointer-events: auto; touch-action: none; display: grid; place-items: center; padding: 0;
+    border: 1px solid #c9a781a8; background: #17101cdb; color: #ffe2ba; border-radius: 50%;
+  }
+  #flight-pad { width: 88px; height: 88px; background: radial-gradient(circle, #3f2c32c9 26%, #1b131dd9 29%, #281c24c9 66%, #130d19d9 68%) }
+  #flight-pad span { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 50%; background: #553d3c; border: 1px solid #b89477; font-size: 21px; line-height: 1 }
+  #flight-lift { display: flex; flex-direction: column; gap: 3px }
+  #flight-lift button { width: 44px; height: 44px; font-size: 21px }
+  #flight-lift button:active { background: #533c39 }
+}
+
+@media (max-height: 520px) and (orientation: landscape) and (max-width: 1100px) {
+  #stage[data-mode=bench] .bench { display: flex }
+  #stage[data-mode=bench] #mode-hint { bottom: calc(var(--dock) + 54px) }
+  #stage #touch-flight { bottom: var(--bottom) }
+  #stage[data-mode=drift] #mode-hint { bottom: calc(var(--dock) + 54px) }
+  #stage[data-mode=drift] #world-controls { top: var(--top); max-width: calc(100% - 255px) }
+  #voyage-list button { width: 330px }
+  #stage #timeline, #stage #mode-help, #stage #atlas, #stage #discovery { max-height: calc(100% - var(--top) - var(--bottom) - 55px) }
+  #stage #timeline { z-index: 5 }
+}
